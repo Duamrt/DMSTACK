@@ -153,28 +153,45 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 
 @media(max-width:1200px){.grid-4{grid-template-columns:1fr 1fr;}}
 @media(max-width:768px){
-  .sidebar{display:none;}
-  .main{margin-left:0;padding:16px 14px;}
-  .header{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:20px;}
-  .header-right{width:100%;justify-content:space-between;}
-  .header-time{font-size:22px;}
-  .header-title{font-size:18px;}
-  .tabs{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .tab{padding:8px 16px;font-size:11px;white-space:nowrap;}
+  .sidebar{width:48px;}
+  .sidebar-logo{width:30px;height:30px;font-size:9px;border-radius:8px;margin-bottom:20px;}
+  .sidebar-item{width:32px;height:32px;font-size:14px;border-radius:8px;}
+  .main{margin-left:48px;padding:14px 12px;}
+  .header{margin-bottom:16px;}
+  .header-title{font-size:16px;}
+  .header-sub{font-size:9px;}
+  .header-time{font-size:18px;}
+  .header-date{font-size:9px;}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tab{padding:7px 14px;font-size:11px;white-space:nowrap;}
   .grid-2{grid-template-columns:1fr;gap:12px;}
   .grid-4{grid-template-columns:1fr 1fr;gap:10px;}
   .card{padding:14px;border-radius:12px;}
-  .card-value{font-size:24px;}
-  .sec-title{font-size:11px;}
+  .card-value{font-size:22px;}
+  .card-label{font-size:9px;margin-bottom:8px;}
+  .card-sub{font-size:10px;}
+  .sec-title{font-size:11px;margin-bottom:10px;}
   .acao-item{padding:12px;gap:10px;}
   .acao-titulo{font-size:12px;}
-  .obra-r{grid-template-columns:1fr 70px 36px 60px;gap:8px;}
+  .acao-detalhe{font-size:10px;}
+  .acao-check{width:18px;height:18px;}
+  .obra-r{gap:8px;}
+  .obra-r-name{font-size:11px;}
+  .obra-r-bar{width:60px;}
+  .obra-r-val{font-size:10px;width:55px;}
   .obra-det-grid{grid-template-columns:1fr 1fr;gap:6px;}
-  .rpm-met .v{font-size:22px;}
-  .rpm-met .l{font-size:9px;}
+  .obra-det-metric .val{font-size:13px;}
+  .rpm-met{padding:10px;}
+  .rpm-met .v{font-size:20px;}
+  .rpm-met .l{font-size:8px;}
+  .act-r{padding:8px 0;}
+  .act-r-text{font-size:10px;}
+  .act-r-val{font-size:11px;}
+  .alert-r-text{font-size:10px;}
   .graf-wrap{height:80px;}
   .graf-bars{height:60px;}
-  .scroll-y{max-height:280px;}
+  .scroll-y{max-height:260px;}
+  .status-live{font-size:9px;}
 }
 </style>
 </head>
