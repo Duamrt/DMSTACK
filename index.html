@@ -930,20 +930,15 @@ function renderDiagCard(d){
 async function rodarDiagnostico(){
   const el=document.getElementById('cc-diag-hoje');
   el.innerHTML='<div class="loading">Gerando diagnostico com IA... (30s)</div>';
-  // Garantir token válido antes de chamar
-  if(!_authToken||_authToken===DMS_KEY){
-    const ok=await refreshToken();
-    if(!ok){el.innerHTML='<div class="diag-card" style="color:var(--t3);font-size:11px;">Sessao expirada — faca login novamente</div>';return;}
-  }
   try{
     const r=await fetch(DMS_URL+'/functions/v1/diagnostico-diario',{
       method:'POST',
-      headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+_authToken,'Content-Type':'application/json'}
+      headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
     });
-    if(r.status===401){
-      // Token expirou, tenta refresh
-      if(await refreshToken()){return rodarDiagnostico();}
-      el.innerHTML='<div class="diag-card" style="color:var(--t3);font-size:11px;">Sessao expirada — faca login novamente</div>';return;
+    if(!r.ok){
+      const txt=await r.text().catch(()=>'');
+      el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro ${r.status}: Edge Function nao respondeu.<br><span style="font-size:10px;color:var(--t4);">Verifique se a funcao foi deployada no Supabase (bkfkzauhnlulrtttgcii)</span></div>`;
+      return;
     }
     const d=await r.json();
     if(d.ok){await loadDiagnosticos();}
