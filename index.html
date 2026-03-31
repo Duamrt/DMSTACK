@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DM.Stack — Command Center</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='white'/><text x='5' y='23' font-size='18' font-weight='900' font-family='sans-serif' fill='black'>DM</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg0:#000;--bg1:#08080c;--bg2:#0e0e14;--borda:rgba(255,255,255,0.05);--borda2:rgba(255,255,255,0.08);--t1:#fff;--t2:rgba(255,255,255,0.7);--t3:rgba(255,255,255,0.35);--t4:rgba(255,255,255,0.15);--t5:rgba(255,255,255,0.08);}
+body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overflow-x:hidden;}
+::selection{background:rgba(255,255,255,0.15);}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:64px;background:var(--bg1);border-right:1px solid var(--borda);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px;z-index:100;}
+.sidebar-logo{width:36px;height:36px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;margin-bottom:28px;cursor:pointer;letter-spacing:-0.5px;}
+.sidebar-item{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;color:var(--t4);position:relative;}
+.sidebar-item:hover{color:var(--t2);background:var(--t5);}
+.sidebar-item.active{color:#fff;background:rgba(255,255,255,0.06);}
+.sidebar-item.active::before{content:'';position:absolute;left:-12px;width:2px;height:18px;background:#fff;border-radius:0 2px 2px 0;}
+.sidebar-spacer{flex:1;}
+
+/* MAIN */
+.main{margin-left:64px;padding:24px 28px;min-height:100vh;}
+
+/* HEADER */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.header-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+.header-sub{font-size:11px;color:var(--t4);margin-top:2px;letter-spacing:1px;}
+.header-right{display:flex;gap:16px;align-items:center;}
+.header-time{font-size:28px;font-weight:300;color:var(--t3);letter-spacing:1px;font-variant-numeric:tabular-nums;}
+.header-date{font-size:11px;color:var(--t4);text-align:right;}
+.status-live{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t4);letter-spacing:2px;font-weight:600;}
+.status-live::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:28px;background:var(--t5);border-radius:10px;padding:3px;width:fit-content;}
+.tab{padding:8px 20px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--t3);}
+.tab:hover{color:var(--t2);}
+.tab.active{background:rgba(255,255,255,0.08);color:#fff;}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+
+/* CARD */
+.card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:18px;transition:border-color .3s;}
+.card:hover{border-color:var(--borda2);}
+.card-label{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.card-value{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.card-sub{font-size:11px;color:var(--t4);margin-top:6px;}
+.card-trend{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-top:6px;background:rgba(255,255,255,0.06);color:var(--t3);}
+
+/* MINI BARS */
+.mini-bars{display:flex;align-items:flex-end;gap:3px;height:32px;margin-top:10px;}
+.mini-b{flex:1;background:rgba(255,255,255,0.06);border-radius:2px 2px 0 0;min-width:5px;}
+.mini-b:last-child{background:rgba(255,255,255,0.3);}
+
+/* SECTION TITLE */
+.sec-title{font-size:12px;font-weight:600;color:var(--t3);letter-spacing:1px;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.sec-title::before{content:'';width:2px;height:12px;background:rgba(255,255,255,0.2);border-radius:1px;}
+
+/* OBRA ROW */
+.obra-r{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--borda);}
+.obra-r:last-child{border-bottom:none;}
+.obra-r-name{flex:1;font-size:12px;font-weight:600;color:var(--t2);}
+.obra-r-fase{font-size:10px;color:var(--t4);margin-top:1px;}
+.obra-r-bar{width:90px;height:4px;background:var(--t5);border-radius:2px;overflow:hidden;}
+.obra-r-fill{height:100%;background:#fff;border-radius:2px;}
+.obra-r-pct{font-size:12px;font-weight:700;width:36px;text-align:right;color:var(--t3);}
+.obra-r-val{font-size:11px;color:var(--t4);width:70px;text-align:right;}
+
+/* ALERT */
+.alert-r{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--borda);}
+.alert-r:last-child{border-bottom:none;}
+.alert-r-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.alert-r-text{font-size:11px;color:var(--t3);line-height:1.5;}
+.alert-r-text strong{color:var(--t2);}
+.alert-r-time{font-size:9px;color:var(--t4);margin-top:2px;}
+
+/* ACTIVITY */
+.act-r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--borda);}
+.act-r:last-child{border-bottom:none;}
+.act-r-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.act-r-text{font-size:11px;color:var(--t3);flex:1;}
+.act-r-text strong{color:var(--t2);}
+.act-r-val{font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap;}
+.act-r-time{font-size:9px;color:var(--t4);white-space:nowrap;}
+
+/* RANKING */
+.rank-num{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
+.rank-1{background:#fff;color:#000;}
+.rank-n{background:var(--t5);color:var(--t3);}
+
+/* RPM METRICS */
+.rpm-met{text-align:center;padding:14px;}
+.rpm-met .v{font-size:26px;font-weight:800;letter-spacing:-1px;}
+.rpm-met .l{font-size:10px;color:var(--t4);margin-top:4px;letter-spacing:1px;text-transform:uppercase;}
+
+/* GRAF */
+.graf-wrap{display:flex;align-items:flex-end;gap:8px;height:100px;}
+.graf-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.graf-bars{width:100%;display:flex;gap:2px;align-items:flex-end;height:80px;}
+.graf-b{flex:1;border-radius:3px 3px 0 0;}
+.graf-lbl{font-size:9px;color:var(--t4);}
+
+/* SCROLL */
+.scroll-y{max-height:340px;overflow-y:auto;}
+.scroll-y::-webkit-scrollbar{width:3px;}
+.scroll-y::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px;}
+
+/* VIEW */
+.view{display:none;}.view.active{display:block;}
+.loading{text-align:center;padding:40px;color:var(--t4);font-size:12px;letter-spacing:1px;}
+
+/* OBRA DETAIL CARD */
+.obra-det{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:18px;margin-bottom:12px;}
+.obra-det-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.obra-det-name{font-size:14px;font-weight:700;}
+.obra-det-pct{font-size:12px;font-weight:700;}
+.obra-det-bar{height:4px;background:var(--t5);border-radius:2px;overflow:hidden;margin-bottom:14px;}
+.obra-det-fill{height:100%;background:#fff;border-radius:2px;}
+.obra-det-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
+.obra-det-metric .lab{font-size:9px;color:var(--t4);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px;}
+.obra-det-metric .val{font-size:14px;font-weight:700;color:var(--t2);}
+
+/* PRODUCTS ECOSYSTEM */
+.eco-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.eco-chip{padding:6px 14px;border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:500;color:var(--t3);display:flex;align-items:center;gap:6px;}
+.eco-dot{width:6px;height:6px;border-radius:2px;}
+
+@media(max-width:1200px){.grid-4{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){.sidebar{width:52px;}.main{margin-left:52px;padding:16px;}.grid-2{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr 1fr;}.header-time{font-size:20px;}}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo" onclick="switchView('geral')">DM</div>
+  <div class="sidebar-item active" data-view="geral" onclick="switchView('geral')" title="Visao Geral">&#9678;</div>
+  <div class="sidebar-item" data-view="rpm" onclick="switchView('rpm')" title="RPM Pro">&#9881;</div>
+  <div class="sidebar-item" data-view="obras" onclick="switchView('obras')" title="Obras EDR">&#9874;</div>
+  <div class="sidebar-item" data-view="alertas" onclick="switchView('alertas')" title="Alertas">&#9888;</div>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-item" onclick="location.href='index.html'" title="EDR System">&#8592;</div>
+</nav>
+
+<div class="main">
+  <div class="header">
+    <div>
+      <div class="header-title">Command Center</div>
+      <div class="header-sub">DM.STACK</div>
+    </div>
+    <div class="header-right">
+      <div class="status-live">LIVE</div>
+      <div>
+        <div class="header-date" id="cc-date"></div>
+        <div class="header-time" id="cc-time"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="geral" onclick="switchView('geral')">Visao Geral</div>
+    <div class="tab" data-view="rpm" onclick="switchView('rpm')">RPM Pro</div>
+    <div class="tab" data-view="obras" onclick="switchView('obras')">Obras</div>
+    <div class="tab" data-view="alertas" onclick="switchView('alertas')">Alertas</div>
+  </div>
+
+  <div id="view-geral" class="view active">
+    <div class="grid-4" id="cc-kpis"><div class="loading">Carregando...</div></div>
+    <div class="grid-2">
+      <div>
+        <div class="sec-title">Progresso das Obras</div>
+        <div class="card"><div class="scroll-y" id="cc-obras-progress"><div class="loading">Carregando...</div></div></div>
+        <div style="margin-top:16px;">
+          <div class="sec-title">Entradas vs Saidas — 6 meses</div>
+          <div class="card" id="cc-graf-mensal"><div class="loading">Carregando...</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title">RPM Pro</div>
+        <div class="card" style="margin-bottom:16px;" id="cc-rpm-saude"><div class="loading">Carregando...</div></div>
+        <div class="sec-title">Insights</div>
+        <div class="card"><div class="scroll-y" id="cc-alertas"><div class="loading">Carregando...</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-rpm" class="view">
+    <div class="grid-4" id="cc-rpm-kpis"><div class="loading">Carregando...</div></div>
+    <div class="grid-2">
+      <div><div class="sec-title">OS Recentes</div><div class="card"><div class="scroll-y" id="cc-rpm-os"><div class="loading">Carregando...</div></div></div></div>
+      <div><div class="sec-title">Mecanicos</div><div class="card"><div class="scroll-y" id="cc-rpm-mecanicos"><div class="loading">Carregando...</div></div></div></div>
+    </div>
+  </div>
+
+  <div id="view-obras" class="view">
+    <div class="grid-4" id="cc-edr-kpis"><div class="loading">Carregando...</div></div>
+    <div class="sec-title">Detalhamento por Obra</div>
+    <div id="cc-edr-detalhe"><div class="loading">Carregando...</div></div>
+  </div>
+
+  <div id="view-alertas" class="view">
+    <div class="sec-title">Todos os Alertas</div>
+    <div class="card"><div class="scroll-y" style="max-height:600px;" id="cc-all-alertas"><div class="loading">Carregando...</div></div></div>
+  </div>
+</div>
+
+<script>
+const EDR_URL='https://mepzoxoahpwcvvlymlfh.supabase.co';
+const EDR_KEY='sb_publishable_Z9E8KLU8ZIMcWjD-bMG5gg_eM585qWq';
+const RPM_URL='https://roeeyypssutzfzzkypsq.supabase.co';
+const RPM_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZWV5eXBzc3V0emZ6emt5cHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTk0MTgsImV4cCI6MjA5MDM5NTQxOH0.9oCOmABUTXox3FaRViD2zcUaqv94VfOJFMQYz_fcJi4';
+const EDR_CO='3d040713-320f-4639-8a0e-35f62ef10ba7';
+const RPM_DEMO='0164e46c-fa2b-4bfb-99e3-ff17a19e015f';
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const alertas=[];
+
+function edrGet(t,q=''){return fetch(`${EDR_URL}/rest/v1/${t}${q}`,{headers:{'apikey':EDR_KEY,'Authorization':'Bearer '+EDR_KEY,'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
+function rpmGet(t,q=''){return fetch(`${RPM_URL}/rest/v1/${t}${q}`,{headers:{'apikey':RPM_KEY,'Authorization':'Bearer '+RPM_KEY,'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
+function fmtR(v){return(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function fmtK(v){const n=Number(v)||0;return Math.abs(n)>=1000?'R$ '+(n/1000).toFixed(1)+'k':fmtR(n);}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function ym(d){return d?d.substring(0,7):'';}
+function hoje(){return new Date().toISOString().split('T')[0];}
+
+function updateClock(){
+  const n=new Date();
+  document.getElementById('cc-time').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  const ds=['Domingo','Segunda','Terca','Quarta','Quinta','Sexta','Sabado'];
+  const ms=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cc-date').textContent=ds[n.getDay()]+', '+n.getDate()+' de '+ms[n.getMonth()];
+}
+
+function switchView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v)?.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
+  document.querySelectorAll('.sidebar-item[data-view]').forEach(s=>s.classList.toggle('active',s.dataset.view===v));
+}
+
+async function loadCC(){
+  const ma=hoje().substring(0,7);
+  alertas.length=0;
+
+  const [obras,lanc,rep,apg,oadd,rOS,rCli,rVei,rProf,rOfi]=await Promise.all([
+    edrGet('obras','?company_id=eq.'+EDR_CO+'&order=nome'),
+    edrGet('lancamentos','?company_id=eq.'+EDR_CO+'&select=id,obra_id,total,data,etapa,descricao&order=data.desc&limit=3000'),
+    edrGet('repasses_cef','?company_id=eq.'+EDR_CO+'&order=data_credito.desc'),
+    edrGet('adicional_pagamentos','?order=data.desc'),
+    edrGet('obra_adicionais','?company_id=eq.'+EDR_CO),
+    rpmGet('ordens_servico','?select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,oficina_id&oficina_id=neq.'+RPM_DEMO+'&order=data_entrada.desc&limit=300'),
+    rpmGet('clientes','?select=id,nome&oficina_id=neq.'+RPM_DEMO),
+    rpmGet('veiculos','?select=id&oficina_id=neq.'+RPM_DEMO),
+    rpmGet('profiles','?select=id,nome,role&oficina_id=neq.'+RPM_DEMO),
+    rpmGet('oficinas','?select=id,nome,trial_ate&id=neq.'+RPM_DEMO)
+  ]);
+
+  const oa=obras.filter(o=>!o.arquivada);
+  const lm=lanc.filter(l=>ym(l.data)===ma);
+  const tSai=lm.reduce((s,l)=>s+Number(l.total||0),0);
+  const lMao=lm.filter(l=>(l.etapa||'')==='28_mao');
+  const tMao=lMao.reduce((s,l)=>s+Number(l.total||0),0);
+  const rm=rep.filter(r=>ym(r.data_credito)===ma);
+  const tRep=rm.reduce((s,r)=>s+Number(r.valor||0),0);
+  const pm=apg.filter(p=>ym(p.data)===ma);
+  const tPg=pm.reduce((s,p)=>s+Number(p.valor||0),0);
+  const tEnt=tRep+tPg;
+  const saldo=tEnt-tSai;
+
+  // RPM
+  const roM=rOS.filter(o=>ym(o.data_entrada)===ma);
+  const roE=roM.filter(o=>o.status==='entregue');
+  const rFat=roE.reduce((s,o)=>s+Number(o.valor_total||0),0);
+  const roH=rOS.filter(o=>o.data_entrada===hoje()).length;
+  const roAnd=rOS.filter(o=>o.status==='em_andamento'||o.status==='aguardando').length;
+  const carbon=rOfi.find(o=>(o.nome||'').toLowerCase().includes('carbon'));
+  const dTrial=carbon?.trial_ate?Math.ceil((new Date(carbon.trial_ate)-new Date())/(864e5)):null;
+  // Ultimo acesso: pegar a OS mais recente como proxy de uso
+  const ultOS=rOS.length?rOS[0]:null;
+
+  // Mes anterior
+  const [ya,mm]=ma.split('-').map(Number);
+  const mp=(mm===1?12:mm-1);const ap=(mm===1?ya-1:ya);
+  const maAnt=ap+'-'+String(mp).padStart(2,'0');
+  const saiAnt=lanc.filter(l=>ym(l.data)===maAnt).reduce((s,l)=>s+Number(l.total||0),0);
+  const varS=saiAnt>0?((tSai/saiAnt-1)*100).toFixed(0):0;
+
+  // ═══ VISAO GERAL ═══
+  document.getElementById('cc-kpis').innerHTML=`
+    <div class="card"><div class="card-label">Faturamento RPM</div><div class="card-value">${fmtK(rFat)}</div><div class="card-sub">${roE.length} OS entregues</div>
+      <div class="mini-bars">${roM.slice(0,7).map((o,i)=>`<div class="mini-b" style="height:${20+Math.random()*80}%;${i===roM.slice(0,7).length-1?'background:rgba(255,255,255,0.3)':''}"></div>`).join('')}</div>
+    </div>
+    <div class="card"><div class="card-label">OS Hoje</div><div class="card-value">${roH}</div><div class="card-sub">${roAnd} em andamento</div></div>
+    <div class="card"><div class="card-label">Obras Ativas</div><div class="card-value">${oa.length}</div><div class="card-sub">${oa.slice(0,3).map(o=>(o.nome||'').split(' ')[0]).join(', ')}...</div></div>
+    <div class="card"><div class="card-label">Saidas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tSai)}</div><div class="card-sub">Mao de obra ${tSai>0?(tMao/tSai*100).toFixed(0):0}%</div>
+      ${varS!=0?`<div class="card-trend">${varS>0?'+':''}${varS}% vs ${MESES[mp-1]}</div>`:''}
+    </div>`;
+
+  // Obras progress
+  let oh='';
+  oa.forEach(o=>{
+    const gt=lanc.filter(l=>l.obra_id===o.id).reduce((s,l)=>s+Number(l.total||0),0);
+    const vv=Number(o.valor_venda||0);
+    const ta=oadd.filter(a=>a.obra_id===o.id).reduce((s,a)=>s+Number(a.valor||0),0);
+    const rc=vv+ta;const pct=rc>0?Math.min(gt/rc*100,100):0;
+    const op=pct>85?0.6:1;
+    if(pct>85)alertas.push({dot:0.6,texto:`<strong>${esc(o.nome)}</strong> — ${pct.toFixed(0)}% do orcamento consumido.`,time:'Auto'});
+    oh+=`<div class="obra-r"><div style="flex:1;"><div class="obra-r-name">${esc(o.nome)}</div></div><div class="obra-r-bar"><div class="obra-r-fill" style="width:${pct}%;opacity:${op};"></div></div><div class="obra-r-pct" ${pct>85?'style="color:var(--t2);"':''}>${pct.toFixed(0)}%</div><div class="obra-r-val">${fmtK(gt)}</div></div>`;
+  });
+  document.getElementById('cc-obras-progress').innerHTML=oh||'<div class="loading">Nenhuma obra</div>';
+
+  // Grafico 6 meses
+  let maxV=1;const mData=[];
+  for(let i=5;i>=0;i--){let m=mm-i,a=ya;while(m<=0){m+=12;a--;}const k=a+'-'+String(m).padStart(2,'0');
+    const e=rep.filter(r=>ym(r.data_credito)===k).reduce((s,r)=>s+Number(r.valor||0),0)+apg.filter(p=>ym(p.data)===k).reduce((s,p)=>s+Number(p.valor||0),0);
+    const s=lanc.filter(l=>ym(l.data)===k).reduce((s2,l)=>s2+Number(l.total||0),0);
+    maxV=Math.max(maxV,e,s);mData.push({m,e,s});}
+  let gh='<div style="display:flex;gap:16px;margin-bottom:12px;"><span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t4);"><span style="width:8px;height:8px;background:rgba(255,255,255,0.25);border-radius:2px;"></span>Entradas</span><span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t4);"><span style="width:8px;height:8px;background:rgba(255,255,255,0.08);border-radius:2px;"></span>Saidas</span></div><div class="graf-wrap">';
+  mData.forEach((d,i)=>{const ia=i===mData.length-1;
+    gh+=`<div class="graf-col"><div class="graf-bars"><div class="graf-b" style="height:${d.e/maxV*80}%;background:rgba(255,255,255,${ia?0.3:0.15});"></div><div class="graf-b" style="height:${d.s/maxV*80}%;background:rgba(255,255,255,${ia?0.1:0.05});"></div></div><span class="graf-lbl" ${ia?'style="color:var(--t2);font-weight:700;"':''}>${MESES[d.m-1]}</span></div>`;
+  });gh+='</div>';
+  document.getElementById('cc-graf-mensal').innerHTML=gh;
+
+  // RPM Saude
+  document.getElementById('cc-rpm-saude').innerHTML=`
+    <div class="grid-2" style="margin-bottom:0;gap:0;">
+      <div class="rpm-met"><div class="v">${roH}</div><div class="l">OS Hoje</div></div>
+      <div class="rpm-met"><div class="v">${rCli.length}</div><div class="l">Clientes</div></div>
+      <div class="rpm-met"><div class="v">${rVei.length}</div><div class="l">Veiculos</div></div>
+      <div class="rpm-met"><div class="v">${fmtK(rFat)}</div><div class="l">Faturado ${MESES[mm-1]}</div></div>
+    </div>
+    <div style="border-top:1px solid var(--borda);padding-top:12px;margin-top:8px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:var(--t4);">Carbon Auto Center</span><span style="font-size:11px;color:var(--t2);font-weight:600;">Ativo</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:11px;color:var(--t4);">Ultima OS</span><span style="font-size:11px;color:var(--t3);">${ultOS?.data_entrada?new Date(ultOS.data_entrada+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</span></div>
+      ${dTrial!==null?`<div style="display:flex;justify-content:space-between;"><span style="font-size:11px;color:var(--t4);">Trial</span><span style="font-size:11px;color:var(--t2);font-weight:600;">${dTrial>0?dTrial+' dias':'Expirado'}</span></div>`:''}
+    </div>`;
+
+  if(dTrial!==null&&dTrial<=10&&dTrial>0)alertas.push({dot:0.7,texto:`<strong>Trial Carbon</strong> vence em ${dTrial} dias.`,time:'Auto'});
+  if(saldo<0)alertas.push({dot:0.5,texto:`<strong>Saldo negativo</strong> em ${MESES[mm-1]}: ${fmtR(saldo)}`,time:'Auto'});
+  if(tSai>0&&tMao/tSai>0.40)alertas.push({dot:0.4,texto:`<strong>Mao de obra</strong> em ${(tMao/tSai*100).toFixed(0)}% das saidas.`,time:'Auto'});
+  const rUlt=rOS.length?rOS[0].data_entrada:null;
+  if(rUlt){const dd=Math.floor((new Date()-new Date(rUlt))/864e5);if(dd>3)alertas.push({dot:0.3,texto:`<strong>RPM Pro</strong> sem OS nova ha ${dd} dias.`,time:'Auto'});}
+  const semCod=lm.filter(l=>l.descricao&&!/^00/.test(l.descricao)).length;
+  if(semCod>5)alertas.push({dot:0.2,texto:`<strong>${semCod} lancamentos</strong> sem codigo do catalogo.`,time:'Auto'});
+
+  const aHtml=alertas.map(a=>`<div class="alert-r"><div class="alert-r-dot" style="background:rgba(255,255,255,${a.dot});"></div><div><div class="alert-r-text">${a.texto}</div><div class="alert-r-time">${a.time}</div></div></div>`).join('')||'<div class="loading">Nenhum alerta</div>';
+  document.getElementById('cc-alertas').innerHTML=aHtml;
+  document.getElementById('cc-all-alertas').innerHTML=aHtml;
+
+  // ═══ RPM TAB ═══
+  const roAll=rOS.filter(o=>o.status==='entregue');
+  const tMed=roAll.length?roAll.reduce((s,o)=>s+Number(o.valor_total||0),0)/roAll.length:0;
+  document.getElementById('cc-rpm-kpis').innerHTML=`
+    <div class="card"><div class="card-label">Total OS</div><div class="card-value">${rOS.length}</div><div class="card-sub">${roAll.length} entregues</div></div>
+    <div class="card"><div class="card-label">Clientes</div><div class="card-value">${rCli.length}</div></div>
+    <div class="card"><div class="card-label">Veiculos</div><div class="card-value">${rVei.length}</div></div>
+    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtR(tMed)}</div></div>`;
+
+  document.getElementById('cc-rpm-os').innerHTML=rOS.slice(0,25).map(o=>{
+    const op=o.status==='entregue'?0.5:o.status==='em_andamento'?0.3:0.15;
+    return `<div class="act-r"><div class="act-r-dot" style="background:rgba(255,255,255,${op});"></div><div class="act-r-text"><strong>OS #${o.numero||'—'}</strong> — ${o.status||'—'}</div><div class="act-r-val">${fmtR(o.valor_total)}</div></div>`;
+  }).join('')||'<div class="loading">Nenhuma OS</div>';
+
+  const porMec={};roAll.forEach(o=>{if(o.mecanico_id)porMec[o.mecanico_id]=(porMec[o.mecanico_id]||0)+1;});
+  const mecR=Object.entries(porMec).map(([id,q])=>({nome:rProf.find(x=>x.id===id)?.nome||'—',q})).sort((a,b)=>b.q-a.q);
+  document.getElementById('cc-rpm-mecanicos').innerHTML=mecR.map((m,i)=>`<div class="act-r"><div class="rank-num ${i===0?'rank-1':'rank-n'}">${i+1}</div><div class="act-r-text"><strong>${esc(m.nome)}</strong></div><div class="act-r-val">${m.q} OS</div></div>`).join('')||'<div class="loading">Sem dados</div>';
+
+  // ═══ OBRAS TAB ═══
+  document.getElementById('cc-edr-kpis').innerHTML=`
+    <div class="card"><div class="card-label">Entradas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tEnt)}</div></div>
+    <div class="card"><div class="card-label">Saidas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tSai)}</div></div>
+    <div class="card"><div class="card-label">Saldo</div><div class="card-value">${fmtK(saldo)}</div></div>
+    <div class="card"><div class="card-label">Mao de Obra</div><div class="card-value">${fmtK(tMao)}</div><div class="card-sub">${tSai>0?(tMao/tSai*100).toFixed(0):0}%</div></div>`;
+
+  let dh='<div class="grid-2">';
+  oa.forEach(o=>{
+    const lo=lanc.filter(l=>l.obra_id===o.id);
+    const gt=lo.reduce((s,l)=>s+Number(l.total||0),0);
+    const gm=lo.filter(l=>ym(l.data)===ma).reduce((s,l)=>s+Number(l.total||0),0);
+    const mm2=lo.filter(l=>ym(l.data)===ma&&(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
+    const vv=Number(o.valor_venda||0);
+    const ta=oadd.filter(a=>a.obra_id===o.id).reduce((s,a)=>s+Number(a.valor||0),0);
+    const rc=vv+ta;const pct=rc>0?Math.min(gt/rc*100,100):0;const op=pct>85?0.5:1;
+    dh+=`<div class="obra-det"><div class="obra-det-header"><div class="obra-det-name">${esc(o.nome)}</div><div class="obra-det-pct" style="opacity:${op};">${pct.toFixed(0)}%</div></div><div class="obra-det-bar"><div class="obra-det-fill" style="width:${pct}%;opacity:${op};"></div></div><div class="obra-det-grid"><div class="obra-det-metric"><div class="lab">Gasto Total</div><div class="val">${fmtK(gt)}</div></div><div class="obra-det-metric"><div class="lab">Saidas Mes</div><div class="val">${fmtK(gm)}</div></div><div class="obra-det-metric"><div class="lab">Mao Obra</div><div class="val">${fmtK(mm2)}</div></div><div class="obra-det-metric"><div class="lab">Receita</div><div class="val">${fmtK(rc)}</div></div></div></div>`;
+  });dh+='</div>';
+  document.getElementById('cc-edr-detalhe').innerHTML=dh;
+}
+
+updateClock();
+setInterval(updateClock,30000);
+loadCC();
+setInterval(loadCC,5*60*1000);
+</script>
+</body>
+</html>
