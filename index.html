@@ -842,6 +842,7 @@ async function rodarDiagnostico(){
   const el=document.getElementById('cc-diag-hoje');
   el.innerHTML='<div class="loading">Gerando diagnostico com IA... (30s)</div>';
   try{
+    await refreshToken();
     const r=await fetch(DMS_URL+'/functions/v1/diagnostico-diario',{
       method:'POST',
       headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
@@ -964,8 +965,8 @@ function iniciarApp(){
   loadHojeResumo();
   loadClienteAcompanhamento();
   loadDiagnosticos();
-  setInterval(loadCC,5*60*1000);
-  setInterval(()=>{loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
+  setInterval(async()=>{await refreshToken();loadCC();},5*60*1000);
+  setInterval(async()=>{loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
 }
 
 function fazerLogout(){
