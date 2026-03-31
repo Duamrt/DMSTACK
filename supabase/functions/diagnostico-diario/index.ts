@@ -98,6 +98,21 @@ async function coletarRPM() {
   // Peças com estoque baixo
   const estoqueBaixo = (pecas || []).filter((p: any) => Number(p.quantidade || 0) <= 2 && Number(p.quantidade || 0) >= 0)
 
+  // Mecânicos com contagem
+  const porMec: any = {}
+  entregues.forEach((o: any) => { if (o.mecanico_id) porMec[o.mecanico_id] = (porMec[o.mecanico_id] || 0) + 1 })
+  const mecanicos = Object.entries(porMec).map(([id, q]) => ({
+    nome: (prof || []).find((p: any) => p.id === id)?.nome || "—", qtd: q
+  })).sort((a: any, b: any) => b.qtd - a.qtd)
+
+  // OS recentes (top 25)
+  const osRecentes = (os || []).slice(0, 25).map((o: any) => ({
+    numero: o.numero, status: o.status, valor: Number(o.valor_total || 0), data: o.data_entrada
+  }))
+
+  // Clientes sem OS
+  const clientesSemOS = cliSemOS.slice(0, 20).map((c: any) => ({ nome: c.nome, whatsapp: c.whatsapp || null }))
+
   return {
     produto: "rpm",
     cliente: "Carbon Auto Center",
@@ -123,9 +138,14 @@ async function coletarRPM() {
       estoque_baixo: estoqueBaixo.length,
       itens_estoque_baixo: estoqueBaixo.slice(0, 10).map((p: any) => p.nome),
       trial_ate: (ofi || [])[0]?.trial_ate || null,
+      nome_oficina: (ofi || [])[0]?.nome || "Carbon Auto Center",
       // Fluxos
       os_sem_mecanico: (os || []).filter((o: any) => !o.mecanico_id && o.status !== "cancelado").length,
       os_sem_cliente: (os || []).filter((o: any) => !o.cliente_id).length,
+      // Detalhes pro front-end
+      mecanicos,
+      os_recentes: osRecentes,
+      clientes_sem_os_lista: clientesSemOS,
     },
   }
 }
@@ -154,16 +174,36 @@ async function coletarEDR() {
   const tPg = pm.reduce((s: number, p: any) => s + Number(p.valor || 0), 0)
   const tEnt = tRep + tPg
 
-  // Por obra
+  // Por obra (detalhado)
   const obrasResumo = (obras || []).map((o: any) => {
     const lo = (lanc || []).filter((l: any) => l.obra_id === o.id)
     const gt = lo.reduce((s: number, l: any) => s + Number(l.total || 0), 0)
     const gm = lo.filter((l: any) => (l.data || "").startsWith(ma)).reduce((s: number, l: any) => s + Number(l.total || 0), 0)
     const maoObra = lo.filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
+    const maoMes = lo.filter((l: any) => (l.data || "").startsWith(ma) && (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
     const ta = (oadd || []).filter((a: any) => a.obra_id === o.id).reduce((s: number, a: any) => s + Number(a.valor || 0), 0)
     const rc = Number(o.valor_venda || 0) + ta
     const pct = rc > 0 ? (gt / rc * 100) : 0
-    return { nome: o.nome, gasto_total: gt, gasto_mes: gm, mao_obra: maoObra, receita: rc, pct_consumido: Math.round(pct) }
+    // Entradas da obra
+    const repsObra = (rep || []).filter((r: any) => r.obra_id === o.id)
+    const entradasObra = repsObra.reduce((s: number, r: any) => s + Number(r.valor || 0), 0)
+    const pgObra = (oadd || []).filter((a: any) => a.obra_id === o.id)
+    const addIds = new Set(pgObra.map((a: any) => a.id))
+    const addReceb = (apg || []).filter((p: any) => addIds.has(p.adicional_id)).reduce((s: number, p: any) => s + Number(p.valor || 0), 0)
+    const totalEntradas = entradasObra + addReceb
+    const faltaReceber = rc - totalEntradas
+    const saldo = totalEntradas - gt
+    // Entradas do mês
+    const repsMes = repsObra.filter((r: any) => (r.data_credito || "").startsWith(ma))
+    const entMes = repsMes.reduce((s: number, r: any) => s + Number(r.valor || 0), 0)
+    const addMes = (apg || []).filter((p: any) => addIds.has(p.adicional_id) && (p.data || "").startsWith(ma)).reduce((s: number, p: any) => s + Number(p.valor || 0), 0)
+    return {
+      nome: o.nome, id: o.id,
+      gasto_total: gt, gasto_mes: gm, mao_obra: maoObra, mao_mes: maoMes,
+      receita: rc, pct_consumido: Math.round(pct),
+      entradas_total: totalEntradas, entradas_mes: entMes + addMes,
+      falta_receber: faltaReceber, saldo,
+    }
   })
 
   // Lançamentos sem código catálogo
@@ -178,11 +218,22 @@ async function coletarEDR() {
   const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
   const faltamDias = ultimoDiaMes - diaHoje
 
+  // Totais gerais acumulados
+  const tSaiTotal = (lanc || []).reduce((s: number, l: any) => s + Number(l.total || 0), 0)
+  const tMaoTotal = (lanc || []).filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
+  const tRepTotal = (rep || []).reduce((s: number, r: any) => s + Number(r.valor || 0), 0)
+  const tPgTotal = (apg || []).reduce((s: number, p: any) => s + Number(p.valor || 0), 0)
+  const tEntTotal = tRepTotal + tPgTotal
+  const receitaTotal = obrasResumo.reduce((s: number, o: any) => s + o.receita, 0)
+  const faltaReceberTotal = receitaTotal - tEntTotal
+  const lucroProjetado = receitaTotal - tSaiTotal
+
   return {
     produto: "edr",
     cliente: null,
     dados: {
       obras_ativas: (obras || []).length,
+      // Mês atual
       total_entrada_mes: tEnt,
       total_saida_mes: tSai,
       saldo_mes: tEnt - tSai,
@@ -190,9 +241,20 @@ async function coletarEDR() {
       pct_mao_obra: tSai > 0 ? Math.round(tMao / tSai * 100) : 0,
       repasses_mes: tRep,
       pagamentos_mes: tPg,
+      // Acumulado geral
+      total_entrada_geral: tEntTotal,
+      total_saida_geral: tSaiTotal,
+      saldo_geral: tEntTotal - tSaiTotal,
+      mao_obra_geral: tMaoTotal,
+      receita_total: receitaTotal,
+      falta_receber: faltaReceberTotal,
+      lucro_projetado: lucroProjetado,
+      margem: receitaTotal > 0 ? Math.round(lucroProjetado / receitaTotal * 100) : 0,
+      // Controle
       lanc_sem_codigo: semCod,
       dias_sem_lancamento: diasSemLanc,
       faltam_dias_inventario: faltamDias,
+      // Por obra
       obras: obrasResumo,
     },
   }
@@ -252,7 +314,7 @@ REGRAS:
 }
 
 // ═══ SALVAR DIAGNOSTICO ═══
-async function salvarDiagnostico(produto: string, cliente: string | null, analise: any) {
+async function salvarDiagnostico(produto: string, cliente: string | null, analise: any, dadosBrutos: any) {
   await sbUpsert(DMS_URL, DMS_KEY, "dmstack_diagnosticos", {
     data: hoje(),
     produto,
@@ -263,7 +325,7 @@ async function salvarDiagnostico(produto: string, cliente: string | null, analis
     fluxos_quebrados: analise.fluxos_quebrados || [],
     modulos_uso: analise.modulos_uso || {},
     recomendacoes: analise.recomendacoes || [],
-    raw_analysis: JSON.stringify(analise),
+    raw_analysis: JSON.stringify({ analise, dados: dadosBrutos }),
   })
 }
 
@@ -286,7 +348,7 @@ serve(async (req: Request) => {
     if (!filtro || filtro === "rpm") {
       const rpmData = await coletarRPM()
       const analiseRPM = await analisarComClaude(rpmData)
-      await salvarDiagnostico("rpm", "Carbon Auto Center", analiseRPM)
+      await salvarDiagnostico("rpm", "Carbon Auto Center", analiseRPM, rpmData.dados)
       resultados.push("RPM Pro (Carbon): OK")
     }
 
@@ -294,7 +356,7 @@ serve(async (req: Request) => {
     if (!filtro || filtro === "edr") {
       const edrData = await coletarEDR()
       const analiseEDR = await analisarComClaude(edrData)
-      await salvarDiagnostico("edr", null, analiseEDR)
+      await salvarDiagnostico("edr", null, analiseEDR, edrData.dados)
       resultados.push("EDR System: OK")
     }
 
