@@ -315,17 +315,32 @@ REGRAS:
 
 // ═══ SALVAR DIAGNOSTICO ═══
 async function salvarDiagnostico(produto: string, cliente: string | null, analise: any, dadosBrutos: any) {
-  await sbUpsert(DMS_URL, DMS_KEY, "dmstack_diagnosticos", {
-    data: hoje(),
-    produto,
-    cliente: cliente || "",
-    resumo: analise.resumo || "",
-    problemas: analise.problemas || [],
-    acertos: analise.acertos || [],
-    fluxos_quebrados: analise.fluxos_quebrados || [],
-    modulos_uso: analise.modulos_uso || {},
-    recomendacoes: analise.recomendacoes || [],
-    raw_analysis: JSON.stringify({ analise, dados: dadosBrutos }),
+  // Deletar registro existente de hoje pra esse produto
+  await fetch(`${DMS_URL}/rest/v1/dmstack_diagnosticos?data=eq.${hoje()}&produto=eq.${produto}`, {
+    method: "DELETE",
+    headers: { apikey: DMS_KEY, Authorization: `Bearer ${DMS_KEY}` },
+  })
+  // Inserir novo
+  await fetch(`${DMS_URL}/rest/v1/dmstack_diagnosticos`, {
+    method: "POST",
+    headers: {
+      apikey: DMS_KEY,
+      Authorization: `Bearer ${DMS_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({
+      data: hoje(),
+      produto,
+      cliente: cliente || "",
+      resumo: analise.resumo || "",
+      problemas: analise.problemas || [],
+      acertos: analise.acertos || [],
+      fluxos_quebrados: analise.fluxos_quebrados || [],
+      modulos_uso: analise.modulos_uso || {},
+      recomendacoes: analise.recomendacoes || [],
+      raw_analysis: JSON.stringify({ analise, dados: dadosBrutos }),
+    }),
   })
 }
 
