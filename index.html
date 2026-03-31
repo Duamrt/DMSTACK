@@ -197,6 +197,22 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 </head>
 <body>
 
+<!-- LOGIN -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="width:100%;max-width:340px;padding:24px;">
+    <div style="text-align:center;margin-bottom:40px;">
+      <div style="font-family:'Outfit',sans-serif;font-size:42px;font-weight:900;letter-spacing:-2px;">DM<span style="color:rgba(255,255,255,0.15);">.</span>Stack</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px;">COMMAND CENTER</div>
+    </div>
+    <input id="login-email" type="email" placeholder="Email" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:10px;outline:none;" autocomplete="email">
+    <input id="login-senha" type="password" placeholder="Senha" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:16px;outline:none;" autocomplete="current-password">
+    <button onclick="fazerLogin()" style="width:100%;padding:14px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Entrar</button>
+    <div id="login-erro" style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:12px;min-height:18px;"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-container" style="display:none;">
 <nav class="sidebar">
   <div class="sidebar-logo" onclick="switchView('geral')">DM</div>
   <div class="sidebar-item active" data-view="hoje" onclick="switchView('hoje')" title="Hoje">&#9733;</div>
@@ -292,6 +308,7 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
     <div class="card"><div class="scroll-y" style="max-height:600px;" id="cc-all-alertas"><div class="loading">Carregando...</div></div></div>
   </div>
 </div>
+</div><!-- /app-container -->
 
 <script>
 const EDR_URL='https://mepzoxoahpwcvvlymlfh.supabase.co';
@@ -537,9 +554,9 @@ async function loadCC(){
 }
 
 // ═══ AÇÕES DO DIA ═══
-function dmsGet(t,q=''){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+DMS_KEY,'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
-function dmsPatch(t,q='',b={}){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+DMS_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
-function dmsPost(t,b){return fetch(`${DMS_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+DMS_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
+function dmsGet(t,q=''){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
+function dmsPatch(t,q='',b={}){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
+function dmsPost(t,b){return fetch(`${DMS_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
 
 async function loadAcoes(){
   const hj=hoje();
@@ -647,13 +664,78 @@ async function loadHojeResumo(){
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-updateClock();
-setInterval(updateClock,30000);
-loadCC();
-loadAcoes();
-loadHojeResumo();
-setInterval(loadCC,5*60*1000);
-setInterval(()=>{loadAcoes();loadHojeResumo();},5*60*1000);
+
+// ═══ AUTH ═══
+let _authToken=null;
+function dmsHeaders(){return{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Accept':'application/json'};}
+
+async function fazerLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const senha=document.getElementById('login-senha').value;
+  const erroEl=document.getElementById('login-erro');
+  if(!email||!senha){erroEl.textContent='Preencha email e senha.';return;}
+  erroEl.textContent='Entrando...';
+  try{
+    const r=await fetch(DMS_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',headers:{'apikey':DMS_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:senha})
+    });
+    const d=await r.json();
+    if(!r.ok){erroEl.textContent=d.error_description||d.msg||'Email ou senha incorretos.';return;}
+    _authToken=d.access_token;
+    localStorage.setItem('dms_token',d.access_token);
+    localStorage.setItem('dms_refresh',d.refresh_token);
+    iniciarApp();
+  }catch(e){erroEl.textContent='Erro de conexao.';}
+}
+
+async function refreshToken(){
+  const rt=localStorage.getItem('dms_refresh');
+  if(!rt)return false;
+  try{
+    const r=await fetch(DMS_URL+'/auth/v1/token?grant_type=refresh_token',{
+      method:'POST',headers:{'apikey':DMS_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({refresh_token:rt})
+    });
+    const d=await r.json();
+    if(!r.ok)return false;
+    _authToken=d.access_token;
+    localStorage.setItem('dms_token',d.access_token);
+    localStorage.setItem('dms_refresh',d.refresh_token);
+    return true;
+  }catch(e){return false;}
+}
+
+function iniciarApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-container').style.display='block';
+  updateClock();
+  setInterval(updateClock,30000);
+  loadCC();
+  loadAcoes();
+  loadHojeResumo();
+  setInterval(loadCC,5*60*1000);
+  setInterval(()=>{loadAcoes();loadHojeResumo();},5*60*1000);
+}
+
+// Auto-login se tem token salvo
+(async()=>{
+  const saved=localStorage.getItem('dms_token');
+  if(saved){
+    _authToken=saved;
+    // Verificar se ainda é válido
+    const r=await fetch(DMS_URL+'/auth/v1/user',{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+saved}});
+    if(r.ok){iniciarApp();return;}
+    // Token expirou, tentar refresh
+    if(await refreshToken()){iniciarApp();return;}
+  }
+  // Mostrar login
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-container').style.display='none';
+  // Enter pra logar
+  document.getElementById('login-senha').addEventListener('keydown',e=>{if(e.key==='Enter')fazerLogin();});
+  document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-senha').focus();});
+})();
 </script>
 </body>
 </html>
