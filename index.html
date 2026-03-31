@@ -151,6 +151,25 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 .acao-prioridade-1 .acao-check{border-color:rgba(255,255,255,0.5);}
 .acao-prioridade-1 .acao-titulo{color:var(--t1);}
 
+/* DIAGNOSTICO IA */
+.diag-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;}
+.diag-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.diag-titulo{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.diag-titulo .ia-badge{font-size:9px;font-weight:600;letter-spacing:1px;color:var(--t4);padding:2px 8px;border:1px solid var(--borda);border-radius:4px;}
+.diag-hora{font-size:10px;color:var(--t4);}
+.diag-resumo{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:2px solid rgba(255,255,255,0.15);}
+.diag-section{margin-bottom:14px;}
+.diag-section-title{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.diag-item{display:flex;gap:8px;align-items:flex-start;padding:5px 0;}
+.diag-item .di-icon{font-size:10px;margin-top:2px;flex-shrink:0;width:14px;text-align:center;}
+.diag-item .di-text{font-size:11px;color:var(--t3);line-height:1.5;}
+.diag-modulos{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.diag-mod{padding:8px 10px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:8px;font-size:10px;}
+.diag-mod .dm-nome{color:var(--t3);font-weight:600;}
+.diag-mod .dm-status{color:var(--t4);margin-top:2px;}
+.diag-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.diag-btn:hover{background:rgba(255,255,255,0.1);color:var(--t2);}
+
 /* CLIENT TRACKING */
 .cli-track{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;}
 .cli-track-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
@@ -232,6 +251,9 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
   .graf-bars{height:60px;}
   .scroll-y{max-height:260px;}
   .status-live{font-size:9px;}
+  .diag-modulos{grid-template-columns:1fr;}
+  .diag-card{padding:14px;}
+  .diag-resumo{font-size:11px;padding:10px;}
   .cli-grid-3{grid-template-columns:1fr;gap:8px;}
   .cli-kanban{flex-wrap:wrap;gap:8px;}
   .cli-kanban-col{min-width:calc(50% - 4px);}
@@ -304,6 +326,10 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
       <div>
         <div class="sec-title">Resumo Rapido</div>
         <div class="grid-2" id="cc-hoje-resumo"><div class="loading">Carregando...</div></div>
+        <div style="margin-top:20px;">
+          <div class="sec-title">Diagnostico IA</div>
+          <div id="cc-diag-hoje"><div class="loading">Carregando diagnostico...</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -341,6 +367,10 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
     <div style="margin-top:20px;">
       <div class="sec-title">Adocao por Modulo</div>
       <div class="card" id="cc-rpm-adocao"><div class="loading">Carregando...</div></div>
+    </div>
+    <div style="margin-top:28px;">
+      <div class="sec-title">Diagnostico IA — Carbon</div>
+      <div id="cc-rpm-diag"><div class="loading">Carregando diagnostico...</div></div>
     </div>
     <div style="margin-top:28px;">
       <div class="sec-title">Acompanhamento por Cliente</div>
@@ -714,6 +744,96 @@ async function loadHojeResumo(){
     <div class="card"><div class="card-label">OS Hoje (RPM)</div><div class="card-value">${osHoje}</div><div class="card-sub">Carbon Auto Center</div></div>`;
 }
 
+// ═══ DIAGNOSTICO IA ═══
+async function loadDiagnosticos(){
+  const hj=hoje();
+  let diags=await dmsGet('dmstack_diagnosticos','?data=eq.'+hj+'&order=produto');
+  if(!Array.isArray(diags))diags=[];
+
+  // Render na aba Hoje (todos os produtos)
+  if(!diags.length){
+    document.getElementById('cc-diag-hoje').innerHTML=`<div class="diag-card" style="text-align:center;">
+      <div style="font-size:11px;color:var(--t4);margin-bottom:12px;">Nenhum diagnostico gerado hoje</div>
+      <button class="diag-btn" onclick="rodarDiagnostico()">&#9881; Gerar Diagnostico Agora</button>
+    </div>`;
+    document.getElementById('cc-rpm-diag').innerHTML='<div class="diag-card" style="text-align:center;"><div style="font-size:11px;color:var(--t4);">Sem diagnostico hoje</div></div>';
+    return;
+  }
+
+  let hojeHtml='';
+  diags.forEach(d=>{hojeHtml+=renderDiagCard(d);});
+  document.getElementById('cc-diag-hoje').innerHTML=hojeHtml;
+
+  // Render na aba RPM (só RPM)
+  const rpmDiag=diags.find(d=>d.produto==='rpm');
+  document.getElementById('cc-rpm-diag').innerHTML=rpmDiag?renderDiagCard(rpmDiag):'<div class="diag-card" style="text-align:center;font-size:11px;color:var(--t4);">Sem diagnostico RPM hoje</div>';
+}
+
+function renderDiagCard(d){
+  const problemas=(d.problemas||[]);
+  const acertos=(d.acertos||[]);
+  const fluxos=(d.fluxos_quebrados||[]);
+  const mods=d.modulos_uso||{};
+  const recs=(d.recomendacoes||[]);
+  const hora=d.created_at?new Date(d.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+  const label=d.produto==='rpm'?'RPM Pro'+(d.cliente?' — '+esc(d.cliente):''):'EDR System';
+
+  let h=`<div class="diag-card">
+    <div class="diag-header">
+      <div class="diag-titulo">${label} <span class="ia-badge">IA</span></div>
+      <div class="diag-hora">${hora}</div>
+    </div>
+    <div class="diag-resumo">${esc(d.resumo||'')}</div>`;
+
+  if(problemas.length){
+    h+=`<div class="diag-section"><div class="diag-section-title">Problemas</div>`;
+    problemas.forEach(p=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.5);">&#9679;</div><div class="di-text">${esc(p)}</div></div>`;});
+    h+=`</div>`;
+  }
+
+  if(fluxos.length){
+    h+=`<div class="diag-section"><div class="diag-section-title">Fluxos Quebrados</div>`;
+    fluxos.forEach(f=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.3);">&#9888;</div><div class="di-text">${esc(f)}</div></div>`;});
+    h+=`</div>`;
+  }
+
+  if(acertos.length){
+    h+=`<div class="diag-section"><div class="diag-section-title">Funcionando Bem</div>`;
+    acertos.forEach(a=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.4);">&#10003;</div><div class="di-text">${esc(a)}</div></div>`;});
+    h+=`</div>`;
+  }
+
+  const modKeys=Object.keys(mods);
+  if(modKeys.length){
+    h+=`<div class="diag-section"><div class="diag-section-title">Modulos</div><div class="diag-modulos">`;
+    modKeys.forEach(k=>{h+=`<div class="diag-mod"><div class="dm-nome">${esc(k)}</div><div class="dm-status">${esc(mods[k])}</div></div>`;});
+    h+=`</div></div>`;
+  }
+
+  if(recs.length){
+    h+=`<div class="diag-section"><div class="diag-section-title">Recomendacoes</div>`;
+    recs.forEach((r,i)=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.5);">${i+1}</div><div class="di-text" style="color:var(--t2);">${esc(r)}</div></div>`;});
+    h+=`</div>`;
+  }
+
+  h+=`</div>`;
+  return h;
+}
+
+async function rodarDiagnostico(){
+  const el=document.getElementById('cc-diag-hoje');
+  el.innerHTML='<div class="loading">Gerando diagnostico com IA... (30s)</div>';
+  try{
+    const r=await fetch(DMS_URL+'/functions/v1/diagnostico-diario',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
+    });
+    const d=await r.json();
+    if(d.ok){await loadDiagnosticos();}
+    else{el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro: ${esc(d.erro||'falha')}</div>`;}
+  }catch(e){el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro de conexao</div>`;}
+}
+
 // ═══ ACOMPANHAMENTO POR CLIENTE ═══
 const CARBON_ID='183424eb-f8f2-4502-875c-881182449143';
 
@@ -931,8 +1051,9 @@ function iniciarApp(){
   loadAcoes();
   loadHojeResumo();
   loadClienteAcompanhamento();
+  loadDiagnosticos();
   setInterval(loadCC,5*60*1000);
-  setInterval(()=>{loadAcoes();loadHojeResumo();loadClienteAcompanhamento();},5*60*1000);
+  setInterval(()=>{loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
 }
 
 // Auto-login se tem token salvo
