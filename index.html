@@ -287,7 +287,7 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
   <div class="sidebar-item active" data-view="hoje" onclick="switchView('hoje')" title="Hoje">&#9733;</div>
   <div class="sidebar-item" data-view="geral" onclick="switchView('geral')" title="Visao Geral">&#9678;</div>
   <div class="sidebar-item" data-view="rpm" onclick="switchView('rpm')" title="RPM Pro">&#9881;</div>
-  <div class="sidebar-item" data-view="obras" onclick="switchView('obras')" title="Obras EDR">&#9874;</div>
+  <div class="sidebar-item" data-view="obras" onclick="switchView('obras')" title="EDR System">&#9874;</div>
   <div class="sidebar-item" data-view="alertas" onclick="switchView('alertas')" title="Alertas">&#9888;</div>
   <div class="sidebar-spacer"></div>
   <div class="sidebar-item" onclick="location.href='index.html'" title="EDR System">&#8592;</div>
@@ -312,7 +312,7 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
     <div class="tab active" data-view="hoje" onclick="switchView('hoje')">Hoje</div>
     <div class="tab" data-view="geral" onclick="switchView('geral')">Visao Geral</div>
     <div class="tab" data-view="rpm" onclick="switchView('rpm')">RPM Pro</div>
-    <div class="tab" data-view="obras" onclick="switchView('obras')">Obras</div>
+    <div class="tab" data-view="obras" onclick="switchView('obras')">EDR System</div>
     <div class="tab" data-view="alertas" onclick="switchView('alertas')">Alertas</div>
   </div>
 
@@ -338,7 +338,7 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
     <div class="grid-4" id="cc-kpis"><div class="loading">Carregando...</div></div>
     <div class="grid-2">
       <div>
-        <div class="sec-title">Progresso das Obras</div>
+        <div class="sec-title">Progresso EDR</div>
         <div class="card"><div class="scroll-y" id="cc-obras-progress"><div class="loading">Carregando...</div></div></div>
         <div style="margin-top:16px;">
           <div class="sec-title">Entradas vs Saidas — 6 meses</div>
@@ -382,6 +382,10 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
     <div class="grid-4" id="cc-edr-kpis"><div class="loading">Carregando...</div></div>
     <div class="sec-title">Detalhamento por Obra</div>
     <div id="cc-edr-detalhe"><div class="loading">Carregando...</div></div>
+    <div style="margin-top:28px;">
+      <div class="sec-title">Diagnostico IA — EDR</div>
+      <div id="cc-edr-diag"><div class="loading">Carregando diagnostico...</div></div>
+    </div>
   </div>
 
   <div id="view-alertas" class="view">
@@ -479,7 +483,7 @@ async function loadCC(){
       <div class="mini-bars">${roM.slice(0,7).map((o,i)=>`<div class="mini-b" style="height:${20+Math.random()*80}%;${i===roM.slice(0,7).length-1?'background:rgba(255,255,255,0.3)':''}"></div>`).join('')}</div>
     </div>
     <div class="card"><div class="card-label">OS Hoje</div><div class="card-value">${roH}</div><div class="card-sub">${roAnd} em andamento</div></div>
-    <div class="card"><div class="card-label">Obras Ativas</div><div class="card-value">${oa.length}</div><div class="card-sub">${oa.slice(0,3).map(o=>(o.nome||'').split(' ')[0]).join(', ')}...</div></div>
+    <div class="card"><div class="card-label">EDR Obras</div><div class="card-value">${oa.length}</div><div class="card-sub">${oa.slice(0,3).map(o=>(o.nome||'').split(' ')[0]).join(', ')}...</div></div>
     <div class="card"><div class="card-label">Saidas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tSai)}</div><div class="card-sub">Mao de obra ${tSai>0?(tMao/tSai*100).toFixed(0):0}%</div>
       ${varS!=0?`<div class="card-trend">${varS>0?'+':''}${varS}% vs ${MESES[mp-1]}</div>`:''}
     </div>`;
@@ -767,6 +771,10 @@ async function loadDiagnosticos(){
   // Render na aba RPM (só RPM)
   const rpmDiag=diags.find(d=>d.produto==='rpm');
   document.getElementById('cc-rpm-diag').innerHTML=rpmDiag?renderDiagCard(rpmDiag):'<div class="diag-card" style="text-align:center;font-size:11px;color:var(--t4);">Sem diagnostico RPM hoje</div>';
+
+  // Render na aba EDR System
+  const edrDiag=diags.find(d=>d.produto==='edr');
+  document.getElementById('cc-edr-diag').innerHTML=edrDiag?renderDiagCard(edrDiag):'<div class="diag-card" style="text-align:center;font-size:11px;color:var(--t4);">Sem diagnostico EDR hoje</div>';
 }
 
 function renderDiagCard(d){

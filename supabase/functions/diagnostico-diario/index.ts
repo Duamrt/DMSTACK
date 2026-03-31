@@ -26,7 +26,8 @@ async function sbGet(url: string, key: string, table: string, query = "") {
     const r = await fetch(`${url}/rest/v1/${table}${query}`, {
       headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" },
     })
-    return await r.json()
+    const data = await r.json()
+    return Array.isArray(data) ? data : []
   } catch { return [] }
 }
 
@@ -48,7 +49,7 @@ async function coletarRPM() {
   const hj = hoje()
   const ma = mesAtual()
 
-  const [os, cli, vei, prof, pecas, ofi] = await Promise.all([
+  const [os, cli, vei, prof, ofi] = await Promise.all([
     sbGet(RPM_URL, RPM_KEY, "ordens_servico",
       `?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,cliente_id,forma_pagamento,created_at,updated_at&order=data_entrada.desc&limit=500`),
     sbGet(RPM_URL, RPM_KEY, "clientes",
@@ -57,11 +58,12 @@ async function coletarRPM() {
       `?oficina_id=eq.${CARBON_ID}&select=id,cliente_id,created_at`),
     sbGet(RPM_URL, RPM_KEY, "profiles",
       `?oficina_id=eq.${CARBON_ID}&select=id,nome,role,updated_at`),
-    sbGet(RPM_URL, RPM_KEY, "pecas",
-      `?oficina_id=eq.${CARBON_ID}&select=id,nome,quantidade,created_at,updated_at&order=updated_at.desc&limit=50`),
     sbGet(RPM_URL, RPM_KEY, "oficinas",
       `?id=eq.${CARBON_ID}&select=nome,trial_ate,created_at`),
   ])
+  // Pecas pode falhar (tabela pode ter estrutura diferente)
+  let pecas: any[] = []
+  try { const p = await sbGet(RPM_URL, RPM_KEY, "pecas", `?oficina_id=eq.${CARBON_ID}&select=id,nome,quantidade,updated_at&order=updated_at.desc&limit=50`); if(Array.isArray(p)) pecas = p; } catch {}
 
   // Calcular métricas
   const osHoje = (os || []).filter((o: any) => o.data_entrada === hj)
