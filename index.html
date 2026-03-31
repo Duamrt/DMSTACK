@@ -929,11 +929,21 @@ function renderDiagCard(d){
 async function rodarDiagnostico(){
   const el=document.getElementById('cc-diag-hoje');
   el.innerHTML='<div class="loading">Gerando diagnostico com IA... (30s)</div>';
+  // Garantir token válido antes de chamar
+  if(!_authToken||_authToken===DMS_KEY){
+    const ok=await refreshToken();
+    if(!ok){el.innerHTML='<div class="diag-card" style="color:var(--t3);font-size:11px;">Sessao expirada — faca login novamente</div>';return;}
+  }
   try{
     const r=await fetch(DMS_URL+'/functions/v1/diagnostico-diario',{
       method:'POST',
-      headers:{'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
+      headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+_authToken,'Content-Type':'application/json'}
     });
+    if(r.status===401){
+      // Token expirou, tenta refresh
+      if(await refreshToken()){return rodarDiagnostico();}
+      el.innerHTML='<div class="diag-card" style="color:var(--t3);font-size:11px;">Sessao expirada — faca login novamente</div>';return;
+    }
     const d=await r.json();
     if(d.ok){await loadDiagnosticos();}
     else{el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro: ${esc(d.erro||'falha')}</div>`;}
@@ -952,8 +962,8 @@ async function loadClienteAcompanhamento(){
     rpmGet('ordens_servico','?oficina_id=eq.'+CARBON_ID+'&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,cliente_id,forma_pagamento,created_at,updated_at&order=data_entrada.desc&limit=500'),
     rpmGet('clientes','?oficina_id=eq.'+CARBON_ID+'&select=id,nome,whatsapp,created_at&order=created_at.desc'),
     rpmGet('veiculos','?oficina_id=eq.'+CARBON_ID+'&select=id,created_at&order=created_at.desc'),
-    rpmGet('profiles','?oficina_id=eq.'+CARBON_ID+'&select=id,nome,role,updated_at'),
-    rpmGet('pecas','?oficina_id=eq.'+CARBON_ID+'&select=id,created_at,updated_at&order=updated_at.desc&limit=1'),
+    rpmGet('profiles','?oficina_id=eq.'+CARBON_ID+'&select=id,nome,role'),
+    rpmGet('pecas','?oficina_id=eq.'+CARBON_ID+'&select=id,nome,quantidade&order=nome&limit=1'),
     rpmGet('oficinas','?id=eq.'+CARBON_ID+'&select=nome,trial_ate,created_at')
   ]);
 
@@ -1166,12 +1176,12 @@ function iniciarApp(){
 (async()=>{
   const saved=localStorage.getItem('dms_token');
   if(saved){
-    _authToken=saved;
-    // Verificar se ainda é válido
-    const r=await fetch(DMS_URL+'/auth/v1/user',{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+saved}});
-    if(r.ok){iniciarApp();return;}
-    // Token expirou, tentar refresh
+    // Tentar refresh primeiro (mais confiável que checar token velho)
     if(await refreshToken()){iniciarApp();return;}
+    // Se refresh falhou, tenta o token salvo direto
+    _authToken=saved;
+    const r=await fetch(DMS_URL+'/auth/v1/user',{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+saved}}).catch(()=>({ok:false}));
+    if(r.ok){iniciarApp();return;}
   }
   // Mostrar login
   document.getElementById('login-screen').style.display='flex';
