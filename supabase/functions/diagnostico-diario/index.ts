@@ -165,7 +165,11 @@ async function coletarEDR() {
     sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `?company_id=eq.${EDR_CO}`),
   ])
 
-  const lm = (lanc || []).filter((l: any) => (l.data || "").startsWith(ma))
+  // Só lançamentos de obras ativas (igual ao relatório do EDR)
+  const idsAtivas = new Set((obras || []).map((o: any) => o.id))
+  const lancAtivas = (lanc || []).filter((l: any) => !l.obra_id || idsAtivas.has(l.obra_id))
+
+  const lm = lancAtivas.filter((l: any) => (l.data || "").startsWith(ma))
   const tSai = lm.reduce((s: number, l: any) => s + Number(l.total || 0), 0)
   const tMao = lm.filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
   const rm = (rep || []).filter((r: any) => (r.data_credito || "").startsWith(ma))
@@ -176,7 +180,7 @@ async function coletarEDR() {
 
   // Por obra (detalhado)
   const obrasResumo = (obras || []).map((o: any) => {
-    const lo = (lanc || []).filter((l: any) => l.obra_id === o.id)
+    const lo = lancAtivas.filter((l: any) => l.obra_id === o.id)
     const gt = lo.reduce((s: number, l: any) => s + Number(l.total || 0), 0)
     const gm = lo.filter((l: any) => (l.data || "").startsWith(ma)).reduce((s: number, l: any) => s + Number(l.total || 0), 0)
     const maoObra = lo.filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
@@ -203,6 +207,7 @@ async function coletarEDR() {
       receita: rc, pct_consumido: Math.round(pct),
       entradas_total: totalEntradas, entradas_mes: entMes + addMes,
       falta_receber: faltaReceber, saldo,
+      status: gt === 0 && totalEntradas === 0 ? "nao_iniciada" : "em_andamento",
     }
   })
 
@@ -210,7 +215,7 @@ async function coletarEDR() {
   const semCod = lm.filter((l: any) => l.descricao && !/^00/.test(l.descricao)).length
 
   // Último lançamento
-  const ultLanc = (lanc || []).length ? lanc[0].data : null
+  const ultLanc = lancAtivas.length ? lancAtivas[0].data : null
   const diasSemLanc = ultLanc ? Math.floor((Date.now() - new Date(ultLanc).getTime()) / 864e5) : 999
 
   // Inventário (dia do mês)
@@ -218,9 +223,9 @@ async function coletarEDR() {
   const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
   const faltamDias = ultimoDiaMes - diaHoje
 
-  // Totais gerais acumulados
-  const tSaiTotal = (lanc || []).reduce((s: number, l: any) => s + Number(l.total || 0), 0)
-  const tMaoTotal = (lanc || []).filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
+  // Totais gerais acumulados (só obras ativas)
+  const tSaiTotal = lancAtivas.reduce((s: number, l: any) => s + Number(l.total || 0), 0)
+  const tMaoTotal = lancAtivas.filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
   const tRepTotal = (rep || []).reduce((s: number, r: any) => s + Number(r.valor || 0), 0)
   const tPgTotal = (apg || []).reduce((s: number, p: any) => s + Number(p.valor || 0), 0)
   const tEntTotal = tRepTotal + tPgTotal
@@ -284,6 +289,8 @@ REGRAS:
 - Se RPM: analise frequencia de uso (dias_com_os_semana), se o cliente ta usando de verdade ou abandonou
 - Se EDR: analise saude financeira das obras, alerte se mao de obra ta alta, se orcamento ta estourando
 - Se final do mes (faltam_dias_inventario <= 3): PRIORIZE alerta de inventario
+- Obras com status "nao_iniciada" NAO sao problemas — ignorar falta_receber e saldo dessas obras, apenas mencionar que existem como pipeline futuro
+- Os valores de saida DEVEM bater com o relatorio do EDR System — se nao baterem, o dado ta errado
 - Nao invente dados que nao estao no JSON
 - Maximo 5 itens por lista`
 
