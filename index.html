@@ -131,6 +131,21 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 .eco-chip{padding:6px 14px;border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:500;color:var(--t3);display:flex;align-items:center;gap:6px;}
 .eco-dot{width:6px;height:6px;border-radius:2px;}
 
+/* ACAO */
+.acao-item{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;margin-bottom:8px;transition:all .2s;cursor:pointer;}
+.acao-item:hover{border-color:var(--borda2);background:rgba(255,255,255,0.04);}
+.acao-item.feito{opacity:0.3;}
+.acao-item.feito .acao-titulo{text-decoration:line-through;}
+.acao-check{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-radius:6px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.acao-item.feito .acao-check{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);}
+.acao-item.feito .acao-check::after{content:'✓';font-size:12px;color:var(--t2);}
+.acao-body{flex:1;}
+.acao-titulo{font-size:13px;font-weight:600;color:var(--t2);line-height:1.4;}
+.acao-detalhe{font-size:11px;color:var(--t3);margin-top:3px;}
+.acao-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t3);margin-top:6px;}
+.acao-prioridade-1 .acao-check{border-color:rgba(255,255,255,0.5);}
+.acao-prioridade-1 .acao-titulo{color:var(--t1);}
+
 @media(max-width:1200px){.grid-4{grid-template-columns:1fr 1fr;}}
 @media(max-width:900px){.sidebar{width:52px;}.main{margin-left:52px;padding:16px;}.grid-2{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr 1fr;}.header-time{font-size:20px;}}
 </style>
@@ -139,7 +154,8 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 
 <nav class="sidebar">
   <div class="sidebar-logo" onclick="switchView('geral')">DM</div>
-  <div class="sidebar-item active" data-view="geral" onclick="switchView('geral')" title="Visao Geral">&#9678;</div>
+  <div class="sidebar-item active" data-view="hoje" onclick="switchView('hoje')" title="Hoje">&#9733;</div>
+  <div class="sidebar-item" data-view="geral" onclick="switchView('geral')" title="Visao Geral">&#9678;</div>
   <div class="sidebar-item" data-view="rpm" onclick="switchView('rpm')" title="RPM Pro">&#9881;</div>
   <div class="sidebar-item" data-view="obras" onclick="switchView('obras')" title="Obras EDR">&#9874;</div>
   <div class="sidebar-item" data-view="alertas" onclick="switchView('alertas')" title="Alertas">&#9888;</div>
@@ -163,13 +179,28 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
   </div>
 
   <div class="tabs">
-    <div class="tab active" data-view="geral" onclick="switchView('geral')">Visao Geral</div>
+    <div class="tab active" data-view="hoje" onclick="switchView('hoje')">Hoje</div>
+    <div class="tab" data-view="geral" onclick="switchView('geral')">Visao Geral</div>
     <div class="tab" data-view="rpm" onclick="switchView('rpm')">RPM Pro</div>
     <div class="tab" data-view="obras" onclick="switchView('obras')">Obras</div>
     <div class="tab" data-view="alertas" onclick="switchView('alertas')">Alertas</div>
   </div>
 
-  <div id="view-geral" class="view active">
+  <!-- HOJE — AÇÕES DO DIA -->
+  <div id="view-hoje" class="view active">
+    <div class="grid-2">
+      <div>
+        <div class="sec-title">Acoes do Dia</div>
+        <div id="cc-acoes-lista"><div class="loading">Carregando...</div></div>
+      </div>
+      <div>
+        <div class="sec-title">Resumo Rapido</div>
+        <div class="grid-2" id="cc-hoje-resumo"><div class="loading">Carregando...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-geral" class="view">
     <div class="grid-4" id="cc-kpis"><div class="loading">Carregando...</div></div>
     <div class="grid-2">
       <div>
@@ -458,10 +489,88 @@ async function loadCC(){
   document.getElementById('cc-edr-detalhe').innerHTML=dh;
 }
 
+// ═══ AÇÕES DO DIA ═══
+function edrPatch(t,q='',b={}){return fetch(`${EDR_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':EDR_KEY,'Authorization':'Bearer '+EDR_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
+function edrPost(t,b){return fetch(`${EDR_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':EDR_KEY,'Authorization':'Bearer '+EDR_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
+
+async function loadAcoes(){
+  const hj=hoje();
+  // Buscar ações do banco
+  let acoes=await edrGet('dmstack_acoes','?data=eq.'+hj+'&order=prioridade,categoria');
+  if(!Array.isArray(acoes))acoes=[];
+
+  // Gerar ações do RPM Pro no front (RPM tá em outro Supabase)
+  // Verificar se já existem ações RPM hoje pra não duplicar
+  const temRpm=acoes.some(a=>a.fonte==='rpm');
+  if(!temRpm){
+    const rpmAcoes=[];
+    // OS abertas paradas
+    const osAll=await rpmGet('ordens_servico','?select=id,status,data_entrada,valor_total,forma_pagamento&oficina_id=neq.'+RPM_DEMO);
+    const osAbertas=osAll.filter(o=>o.status!=='entregue'&&o.status!=='cancelado');
+    if(osAbertas.length>0)rpmAcoes.push({data:hj,prioridade:2,categoria:'rpm',titulo:osAbertas.length+' OS abertas na Carbon — '+fmtR(osAbertas.reduce((s,o)=>s+Number(o.valor_total||0),0))+' parado',detalhe:'Carro parado = vaga ocupada = dinheiro travado',fonte:'rpm'});
+
+    // Sem OS há mais de 3 dias
+    const ultOS=osAll.length?osAll.sort((a,b)=>(b.data_entrada||'').localeCompare(a.data_entrada||''))[0]:null;
+    if(ultOS){const dd=Math.floor((new Date()-new Date(ultOS.data_entrada))/864e5);if(dd>3)rpmAcoes.push({data:hj,prioridade:1,categoria:'rpm',titulo:'Carbon sem OS nova ha '+dd+' dias',detalhe:'Mandar mensagem pro Marcondes — verificar se ta tudo ok',fonte:'rpm'});}
+
+    // OS sem pagamento
+    const semPgto=osAll.filter(o=>o.status==='entregue'&&!o.forma_pagamento);
+    if(semPgto.length>2)rpmAcoes.push({data:hj,prioridade:3,categoria:'rpm',titulo:semPgto.length+' OS entregues sem pagamento registrado',detalhe:'Controle financeiro cego — Marcondes nao sabe como recebeu',fonte:'rpm'});
+
+    // Inserir no banco
+    for(const a of rpmAcoes){await edrPost('dmstack_acoes',a);}
+    acoes=acoes.concat(rpmAcoes);
+  }
+
+  // Ordenar: não feitos primeiro, depois por prioridade
+  acoes.sort((a,b)=>(a.feito?1:0)-(b.feito?1:0)||a.prioridade-b.prioridade);
+
+  // Render
+  const pendentes=acoes.filter(a=>!a.feito).length;
+  if(!acoes.length){
+    document.getElementById('cc-acoes-lista').innerHTML='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:24px;margin-bottom:12px;">&#10003;</div><div style="font-size:13px;color:var(--t3);">Nenhuma acao pendente hoje.</div></div>';
+  } else {
+    document.getElementById('cc-acoes-lista').innerHTML=
+      `<div style="margin-bottom:12px;font-size:12px;color:var(--t3);">${pendentes} pendente${pendentes!==1?'s':''} de ${acoes.length}</div>`+
+      acoes.map(a=>`<div class="acao-item acao-prioridade-${a.prioridade} ${a.feito?'feito':''}" onclick="toggleAcao('${a.id}',this)">
+        <div class="acao-check"></div>
+        <div class="acao-body">
+          <div class="acao-titulo">${esc(a.titulo)}</div>
+          ${a.detalhe?`<div class="acao-detalhe">${esc(a.detalhe)}</div>`:''}
+          <div class="acao-tag">${a.categoria||'geral'}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+async function toggleAcao(id,el){
+  const feito=!el.classList.contains('feito');
+  el.classList.toggle('feito',feito);
+  await edrPatch('dmstack_acoes','?id=eq.'+id,{feito});
+}
+
+async function loadHojeResumo(){
+  // Mini resumo ao lado das ações
+  const ma=hoje().substring(0,7);
+  const [lanc,rOS]=await Promise.all([
+    edrGet('lancamentos','?company_id=eq.'+EDR_CO+'&select=total,data&data=gte.'+hoje()+'&order=data.desc&limit=50'),
+    rpmGet('ordens_servico','?select=id,status,data_entrada&oficina_id=neq.'+RPM_DEMO+'&data_entrada=gte.'+hoje())
+  ]);
+  const gastosHoje=lanc.reduce((s,l)=>s+Number(l.total||0),0);
+  const osHoje=Array.isArray(rOS)?rOS.length:0;
+
+  document.getElementById('cc-hoje-resumo').innerHTML=`
+    <div class="card"><div class="card-label">Gastos Hoje</div><div class="card-value">${fmtK(gastosHoje)}</div><div class="card-sub">lancamentos do dia</div></div>
+    <div class="card"><div class="card-label">OS Hoje (RPM)</div><div class="card-value">${osHoje}</div><div class="card-sub">Carbon Auto Center</div></div>`;
+}
+
 updateClock();
 setInterval(updateClock,30000);
 loadCC();
+loadAcoes();
+loadHojeResumo();
 setInterval(loadCC,5*60*1000);
+setInterval(()=>{loadAcoes();loadHojeResumo();},5*60*1000);
 </script>
 </body>
 </html>
