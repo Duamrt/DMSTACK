@@ -195,6 +195,14 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
       <div><div class="sec-title">OS Recentes</div><div class="card"><div class="scroll-y" id="cc-rpm-os"><div class="loading">Carregando...</div></div></div></div>
       <div><div class="sec-title">Mecanicos</div><div class="card"><div class="scroll-y" id="cc-rpm-mecanicos"><div class="loading">Carregando...</div></div></div></div>
     </div>
+    <div style="margin-top:20px;">
+      <div class="sec-title">Saude da Oficina — Dinheiro na Mesa</div>
+      <div class="grid-2" id="cc-rpm-insights"><div class="loading">Carregando...</div></div>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="sec-title">Adocao por Modulo</div>
+      <div class="card" id="cc-rpm-adocao"><div class="loading">Carregando...</div></div>
+    </div>
   </div>
 
   <div id="view-obras" class="view">
@@ -252,8 +260,8 @@ async function loadCC(){
     edrGet('repasses_cef','?company_id=eq.'+EDR_CO+'&order=data_credito.desc'),
     edrGet('adicional_pagamentos','?order=data.desc'),
     edrGet('obra_adicionais','?company_id=eq.'+EDR_CO),
-    rpmGet('ordens_servico','?select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,oficina_id&oficina_id=neq.'+RPM_DEMO+'&order=data_entrada.desc&limit=300'),
-    rpmGet('clientes','?select=id,nome&oficina_id=neq.'+RPM_DEMO),
+    rpmGet('ordens_servico','?select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,oficina_id,cliente_id,forma_pagamento&oficina_id=neq.'+RPM_DEMO+'&order=data_entrada.desc&limit=300'),
+    rpmGet('clientes','?select=id,nome,whatsapp,created_at&oficina_id=neq.'+RPM_DEMO),
     rpmGet('veiculos','?select=id&oficina_id=neq.'+RPM_DEMO),
     rpmGet('profiles','?select=id,nome,role&oficina_id=neq.'+RPM_DEMO),
     rpmGet('oficinas','?select=id,nome,trial_ate&id=neq.'+RPM_DEMO)
@@ -368,6 +376,66 @@ async function loadCC(){
   const porMec={};roAll.forEach(o=>{if(o.mecanico_id)porMec[o.mecanico_id]=(porMec[o.mecanico_id]||0)+1;});
   const mecR=Object.entries(porMec).map(([id,q])=>({nome:rProf.find(x=>x.id===id)?.nome||'—',q})).sort((a,b)=>b.q-a.q);
   document.getElementById('cc-rpm-mecanicos').innerHTML=mecR.map((m,i)=>`<div class="act-r"><div class="rank-num ${i===0?'rank-1':'rank-n'}">${i+1}</div><div class="act-r-text"><strong>${esc(m.nome)}</strong></div><div class="act-r-val">${m.q} OS</div></div>`).join('')||'<div class="loading">Sem dados</div>';
+
+  // ═══ RPM INSIGHTS — DINHEIRO NA MESA ═══
+  const clientesComOS=new Set(rOS.map(o=>o.cliente_id).filter(Boolean));
+  const clientesSemOS=rCli.filter(c=>!clientesComOS.has(c.id));
+  const clientesComWpp=rCli.filter(c=>c.whatsapp);
+  const osAbertas=rOS.filter(o=>o.status!=='entregue'&&o.status!=='cancelado');
+  const osSemPgto=rOS.filter(o=>o.status==='entregue'&&!o.forma_pagamento);
+  const osComEntrega=rOS.filter(o=>o.data_entrada&&o.data_entrega);
+  const tempoMedio=osComEntrega.length?osComEntrega.reduce((s,o)=>s+Math.max(0,(new Date(o.data_entrega)-new Date(o.data_entrada))),0)/osComEntrega.length/3600000:0;
+  const remarketing=clientesSemOS.length*tMed;
+
+  let insHtml='';
+  // Clientes sem retorno
+  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,${clientesSemOS.length>5?0.4:0.1});">
+    <div class="card-label">Clientes sem OS</div>
+    <div class="card-value">${clientesSemOS.length}</div>
+    <div class="card-sub">de ${rCli.length} cadastrados</div>
+    ${remarketing>0?`<div style="margin-top:8px;font-size:11px;color:var(--t3);">Potencial remarketing: <strong style="color:var(--t2);">${fmtR(remarketing)}</strong></div>`:''}
+  </div>`;
+  // OS abertas paradas
+  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,${osAbertas.length>2?0.4:0.1});">
+    <div class="card-label">OS Abertas</div>
+    <div class="card-value">${osAbertas.length}</div>
+    <div class="card-sub">${osAbertas.length>0?'Carro parado = vaga ocupada':'Tudo entregue'}</div>
+    ${osAbertas.length>0?`<div style="margin-top:8px;font-size:11px;color:var(--t3);">Valor parado: <strong style="color:var(--t2);">${fmtR(osAbertas.reduce((s,o)=>s+Number(o.valor_total||0),0))}</strong></div>`:''}
+  </div>`;
+  // Sem forma de pagamento
+  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,${osSemPgto.length>2?0.4:0.1});">
+    <div class="card-label">OS sem Pagamento Registrado</div>
+    <div class="card-value">${osSemPgto.length}</div>
+    <div class="card-sub">${rOS.length>0?((osSemPgto.length/roAll.length*100)||0).toFixed(0)+'% das entregues':'—'}</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--t3);">Controle financeiro cego</div>
+  </div>`;
+  // WhatsApp
+  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,0.1);">
+    <div class="card-label">Clientes com WhatsApp</div>
+    <div class="card-value">${clientesComWpp.length}</div>
+    <div class="card-sub">de ${rCli.length} (${rCli.length>0?(clientesComWpp.length/rCli.length*100).toFixed(0):0}%)</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--t3);">Base pronta pra remarketing</div>
+  </div>`;
+  document.getElementById('cc-rpm-insights').innerHTML=insHtml;
+
+  // ═══ RPM ADOCAO POR MODULO ═══
+  const modulos=[
+    {nome:'Ordens de Servico',usado:rOS.length>0,ultima:rOS.length?rOS[0].data_entrada:null,qtd:rOS.length},
+    {nome:'Clientes',usado:rCli.length>0,ultima:rCli.length?rCli.sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))[0]?.created_at:null,qtd:rCli.length},
+    {nome:'Financeiro (pgto)',usado:rOS.some(o=>o.forma_pagamento),ultima:null,qtd:rOS.filter(o=>o.forma_pagamento).length},
+    {nome:'Fila de Espera',usado:false,ultima:null,qtd:0},
+    {nome:'Comissao',usado:false,ultima:null,qtd:0},
+  ];
+  document.getElementById('cc-rpm-adocao').innerHTML=modulos.map(m=>{
+    const dtFmt=m.ultima?new Date(m.ultima).toLocaleDateString('pt-BR'):'—';
+    const op=m.usado?0.5:0.15;
+    return `<div class="act-r">
+      <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,${op});flex-shrink:0;"></div>
+      <div class="act-r-text"><strong>${m.nome}</strong></div>
+      <div style="font-size:11px;color:var(--t3);width:60px;text-align:right;">${m.qtd>0?m.qtd+'x':'Nunca'}</div>
+      <div class="act-r-time">${dtFmt}</div>
+    </div>`;
+  }).join('');
 
   // ═══ OBRAS TAB ═══
   document.getElementById('cc-edr-kpis').innerHTML=`
