@@ -253,6 +253,8 @@ const EDR_URL='https://mepzoxoahpwcvvlymlfh.supabase.co';
 const EDR_KEY='sb_publishable_Z9E8KLU8ZIMcWjD-bMG5gg_eM585qWq';
 const RPM_URL='https://roeeyypssutzfzzkypsq.supabase.co';
 const RPM_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZWV5eXBzc3V0emZ6emt5cHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTk0MTgsImV4cCI6MjA5MDM5NTQxOH0.9oCOmABUTXox3FaRViD2zcUaqv94VfOJFMQYz_fcJi4';
+const DMS_URL='https://bkfkzauhnlulrtttgcii.supabase.co';
+const DMS_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
 const EDR_CO='3d040713-320f-4639-8a0e-35f62ef10ba7';
 const RPM_DEMO='0164e46c-fa2b-4bfb-99e3-ff17a19e015f';
 const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -490,36 +492,71 @@ async function loadCC(){
 }
 
 // ═══ AÇÕES DO DIA ═══
-function edrPatch(t,q='',b={}){return fetch(`${EDR_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':EDR_KEY,'Authorization':'Bearer '+EDR_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
-function edrPost(t,b){return fetch(`${EDR_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':EDR_KEY,'Authorization':'Bearer '+EDR_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
+function dmsGet(t,q=''){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+DMS_KEY,'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
+function dmsPatch(t,q='',b={}){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+DMS_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
+function dmsPost(t,b){return fetch(`${DMS_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+DMS_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
 
 async function loadAcoes(){
   const hj=hoje();
   // Buscar ações do banco
-  let acoes=await edrGet('dmstack_acoes','?data=eq.'+hj+'&order=prioridade,categoria');
+  let acoes=await dmsGet('dmstack_acoes','?data=eq.'+hj+'&order=prioridade,categoria');
   if(!Array.isArray(acoes))acoes=[];
 
-  // Gerar ações do RPM Pro no front (RPM tá em outro Supabase)
-  // Verificar se já existem ações RPM hoje pra não duplicar
-  const temRpm=acoes.some(a=>a.fonte==='rpm');
-  if(!temRpm){
-    const rpmAcoes=[];
-    // OS abertas paradas
+  // Gerar ações se ainda não existem hoje
+  const temAcoes=acoes.length>0;
+  if(!temAcoes){
+    const novas=[];
+    const ma=hoje().substring(0,7);
+
+    // ═══ EDR ═══
+    const [obras,lanc,rep,oadd]=await Promise.all([
+      edrGet('obras','?company_id=eq.'+EDR_CO+'&arquivada=eq.false&order=nome'),
+      edrGet('lancamentos','?company_id=eq.'+EDR_CO+'&select=total,data,etapa,descricao,obra_id&order=data.desc&limit=3000'),
+      edrGet('repasses_cef','?company_id=eq.'+EDR_CO+'&order=data_credito.desc'),
+      edrGet('obra_adicionais','?company_id=eq.'+EDR_CO)
+    ]);
+    const lm=lanc.filter(l=>ym(l.data)===ma);
+    const tSai=lm.reduce((s,l)=>s+Number(l.total||0),0);
+    const tMao=lm.filter(l=>(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
+    const tEnt=rep.filter(r=>ym(r.data_credito)===ma).reduce((s,r)=>s+Number(r.valor||0),0);
+
+    // Obras acima de 85%
+    obras.forEach(o=>{
+      const gt=lanc.filter(l=>l.obra_id===o.id).reduce((s,l)=>s+Number(l.total||0),0);
+      const ta=oadd.filter(a=>a.obra_id===o.id).reduce((s,a)=>s+Number(a.valor||0),0);
+      const rc=Number(o.valor_venda||0)+ta;
+      const pct=rc>0?gt/rc*100:0;
+      if(pct>85)novas.push({data:hj,prioridade:1,categoria:'obra',titulo:o.nome+' em '+pct.toFixed(0)+'% do orcamento',detalhe:'Gasto: '+fmtK(gt)+' / Receita: '+fmtK(rc)+' — reduzir compras',fonte:'edr'});
+    });
+
+    // Saldo negativo
+    if(tEnt-tSai<0)novas.push({data:hj,prioridade:1,categoria:'financeiro',titulo:'Saldo negativo em '+MESES[parseInt(ma.split('-')[1])-1],detalhe:'Entradas: '+fmtK(tEnt)+' / Saidas: '+fmtK(tSai),fonte:'edr'});
+
+    // Mão de obra alta
+    if(tSai>0&&tMao/tSai>0.40)novas.push({data:hj,prioridade:2,categoria:'obra',titulo:'Mao de obra em '+(tMao/tSai*100).toFixed(0)+'% das saidas',detalhe:'Acima do ideal (35%) — revisar produtividade',fonte:'edr'});
+
+    // Lançamentos sem código
+    const semCod=lm.filter(l=>l.descricao&&!/^00/.test(l.descricao)).length;
+    if(semCod>3)novas.push({data:hj,prioridade:3,categoria:'sistema',titulo:semCod+' lancamentos sem codigo do catalogo',detalhe:'Materiais fora do padrao este mes',fonte:'edr'});
+
+    // Quinzena
+    const dia=new Date().getDate();
+    if(dia===14||dia===15||dia===30||dia===31)novas.push({data:hj,prioridade:1,categoria:'diarias',titulo:'Quinzena fecha — conferir diarias',detalhe:'Revisar faltas e valores antes do fechamento',fonte:'edr'});
+
+    // ═══ RPM PRO ═══
     const osAll=await rpmGet('ordens_servico','?select=id,status,data_entrada,valor_total,forma_pagamento&oficina_id=neq.'+RPM_DEMO);
     const osAbertas=osAll.filter(o=>o.status!=='entregue'&&o.status!=='cancelado');
-    if(osAbertas.length>0)rpmAcoes.push({data:hj,prioridade:2,categoria:'rpm',titulo:osAbertas.length+' OS abertas na Carbon — '+fmtR(osAbertas.reduce((s,o)=>s+Number(o.valor_total||0),0))+' parado',detalhe:'Carro parado = vaga ocupada = dinheiro travado',fonte:'rpm'});
+    if(osAbertas.length>0)novas.push({data:hj,prioridade:2,categoria:'rpm',titulo:osAbertas.length+' OS abertas na Carbon — '+fmtR(osAbertas.reduce((s,o)=>s+Number(o.valor_total||0),0))+' parado',detalhe:'Carro parado = vaga ocupada = dinheiro travado',fonte:'rpm'});
 
-    // Sem OS há mais de 3 dias
     const ultOS=osAll.length?osAll.sort((a,b)=>(b.data_entrada||'').localeCompare(a.data_entrada||''))[0]:null;
-    if(ultOS){const dd=Math.floor((new Date()-new Date(ultOS.data_entrada))/864e5);if(dd>3)rpmAcoes.push({data:hj,prioridade:1,categoria:'rpm',titulo:'Carbon sem OS nova ha '+dd+' dias',detalhe:'Mandar mensagem pro Marcondes — verificar se ta tudo ok',fonte:'rpm'});}
+    if(ultOS){const dd=Math.floor((new Date()-new Date(ultOS.data_entrada))/864e5);if(dd>3)novas.push({data:hj,prioridade:1,categoria:'rpm',titulo:'Carbon sem OS nova ha '+dd+' dias',detalhe:'Mandar mensagem pro Marcondes',fonte:'rpm'});}
 
-    // OS sem pagamento
     const semPgto=osAll.filter(o=>o.status==='entregue'&&!o.forma_pagamento);
-    if(semPgto.length>2)rpmAcoes.push({data:hj,prioridade:3,categoria:'rpm',titulo:semPgto.length+' OS entregues sem pagamento registrado',detalhe:'Controle financeiro cego — Marcondes nao sabe como recebeu',fonte:'rpm'});
+    if(semPgto.length>2)novas.push({data:hj,prioridade:3,categoria:'rpm',titulo:semPgto.length+' OS sem pagamento registrado',detalhe:'Controle financeiro cego',fonte:'rpm'});
 
-    // Inserir no banco
-    for(const a of rpmAcoes){await edrPost('dmstack_acoes',a);}
-    acoes=acoes.concat(rpmAcoes);
+    // Inserir tudo no DM.Stack Supabase
+    for(const a of novas){await dmsPost('dmstack_acoes',a);}
+    acoes=acoes.concat(novas);
   }
 
   // Ordenar: não feitos primeiro, depois por prioridade
@@ -546,7 +583,7 @@ async function loadAcoes(){
 async function toggleAcao(id,el){
   const feito=!el.classList.contains('feito');
   el.classList.toggle('feito',feito);
-  await edrPatch('dmstack_acoes','?id=eq.'+id,{feito});
+  await dmsPatch('dmstack_acoes','?id=eq.'+id,{feito});
 }
 
 async function loadHojeResumo(){
