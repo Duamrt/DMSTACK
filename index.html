@@ -311,7 +311,8 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
   <div class="sidebar-item" data-view="obras" onclick="switchView('obras')" title="EDR System">&#9874;</div>
   <div class="sidebar-item" data-view="alertas" onclick="switchView('alertas')" title="Alertas">&#9888;</div>
   <div class="sidebar-spacer"></div>
-  <div class="sidebar-item" onclick="location.href='index.html'" title="EDR System">&#8592;</div>
+  <div style="flex:1;"></div>
+  <div class="sidebar-item" onclick="fazerLogout()" title="Sair" style="color:#ef4444;opacity:0.6;">&#10140;</div>
 </nav>
 
 <div class="main">
@@ -1170,6 +1171,17 @@ function iniciarApp(){
   loadDiagnosticos();
   setInterval(loadCC,5*60*1000);
   setInterval(()=>{loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
+}
+
+function fazerLogout(){
+  _authToken=null;
+  localStorage.removeItem('dms_token');
+  localStorage.removeItem('dms_refresh');
+  document.getElementById('app-container').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-email').value='';
+  document.getElementById('login-senha').value='';
+  document.getElementById('login-erro').textContent='';
 }
 
 // Auto-login se tem token salvo
