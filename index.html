@@ -151,6 +151,27 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 .acao-prioridade-1 .acao-check{border-color:rgba(255,255,255,0.5);}
 .acao-prioridade-1 .acao-titulo{color:var(--t1);}
 
+/* CHATBOT AJUDA */
+.chat-fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:#fff;color:#000;border:none;border-radius:14px;font-size:20px;cursor:pointer;z-index:200;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:transform .2s;}
+.chat-fab:hover{transform:scale(1.08);}
+.chat-panel{position:fixed;bottom:80px;right:20px;width:360px;max-height:500px;background:var(--bg1);border:1px solid var(--borda2);border-radius:16px;z-index:200;display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.6);}
+.chat-panel.open{display:flex;}
+.chat-panel-header{padding:14px 16px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:center;}
+.chat-panel-title{font-size:13px;font-weight:700;}
+.chat-panel-close{background:none;border:none;color:var(--t4);font-size:18px;cursor:pointer;padding:0 4px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:360px;}
+.chat-msg{font-size:11px;line-height:1.6;padding:10px 14px;border-radius:12px;max-width:90%;}
+.chat-msg.bot{background:rgba(255,255,255,0.04);color:var(--t2);align-self:flex-start;border:1px solid var(--borda);}
+.chat-msg.user{background:rgba(255,255,255,0.1);color:var(--t1);align-self:flex-end;}
+.chat-input-wrap{padding:10px 14px;border-top:1px solid var(--borda);display:flex;gap:8px;}
+.chat-input{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-radius:10px;padding:10px 14px;color:#fff;font-family:'Outfit',sans-serif;font-size:12px;outline:none;}
+.chat-input::placeholder{color:var(--t4);}
+.chat-send{background:#fff;color:#000;border:none;border-radius:10px;padding:0 16px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;}
+.chat-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;}
+.chat-quick-btn{padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-radius:8px;font-size:10px;color:var(--t3);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.chat-quick-btn:hover{background:rgba(255,255,255,0.08);color:var(--t2);}
+@media(max-width:768px){.chat-panel{width:calc(100% - 24px);right:12px;bottom:74px;max-height:70vh;}.chat-fab{bottom:14px;right:14px;width:42px;height:42px;font-size:18px;border-radius:12px;}}
+
 /* DIAGNOSTICO IA */
 .diag-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;}
 .diag-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
@@ -393,6 +414,30 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
     <div class="card"><div class="scroll-y" style="max-height:600px;" id="cc-all-alertas"><div class="loading">Carregando...</div></div></div>
   </div>
 </div>
+<!-- CHATBOT AJUDA -->
+<button class="chat-fab" onclick="toggleChat()" title="Ajuda">?</button>
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-panel-header">
+    <div class="chat-panel-title">Ajuda DM.Stack</div>
+    <button class="chat-panel-close" onclick="toggleChat()">&#10005;</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs">
+    <div class="chat-msg bot">Oi Duam! Posso te ajudar a entender qualquer coisa no DM.Stack. Pergunta ai ou clica num atalho abaixo.</div>
+  </div>
+  <div class="chat-quick" id="chat-quick">
+    <button class="chat-quick-btn" onclick="chatPergunta('O que cada aba mostra?')">Abas</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('Como funciona o diagnostico IA?')">Diagnostico IA</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('O que sao os alertas?')">Alertas</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('Como ler o acompanhamento do cliente?')">Clientes</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('O que e o Kanban?')">Kanban</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('O que significa saldo negativo?')">Saldo</button>
+  </div>
+  <div class="chat-input-wrap">
+    <input class="chat-input" id="chat-input" placeholder="Pergunta..." onkeydown="if(event.key==='Enter')chatEnviar()">
+    <button class="chat-send" onclick="chatEnviar()">&#8594;</button>
+  </div>
+</div>
+
 </div><!-- /app-container -->
 
 <script>
@@ -496,7 +541,7 @@ async function loadCC(){
     const ta=oadd.filter(a=>a.obra_id===o.id).reduce((s,a)=>s+Number(a.valor||0),0);
     const rc=vv+ta;const pct=rc>0?Math.min(gt/rc*100,100):0;
     const op=pct>85?0.6:1;
-    if(pct>85)alertas.push({dot:0.6,texto:`<strong>${esc(o.nome)}</strong> — ${pct.toFixed(0)}% do orcamento consumido.`,time:'Auto'});
+    if(pct>85)alertas.push({dot:0.6,tag:'EDR',texto:`<strong>${esc(o.nome)}</strong> — ${pct.toFixed(0)}% do orcamento consumido.`,acao:'Reduzir compras ou registrar aditivo.',time:'Auto'});
     oh+=`<div class="obra-r"><div style="flex:1;"><div class="obra-r-name">${esc(o.nome)}</div></div><div class="obra-r-bar"><div class="obra-r-fill" style="width:${pct}%;opacity:${op};"></div></div><div class="obra-r-pct" ${pct>85?'style="color:var(--t2);"':''}>${pct.toFixed(0)}%</div><div class="obra-r-val">${fmtK(gt)}</div></div>`;
   });
   document.getElementById('cc-obras-progress').innerHTML=oh||'<div class="loading">Nenhuma obra</div>';
@@ -527,15 +572,15 @@ async function loadCC(){
       ${dTrial!==null?`<div style="display:flex;justify-content:space-between;"><span style="font-size:11px;color:var(--t4);">Trial</span><span style="font-size:11px;color:var(--t2);font-weight:600;">${dTrial>0?dTrial+' dias':'Expirado'}</span></div>`:''}
     </div>`;
 
-  if(dTrial!==null&&dTrial<=10&&dTrial>0)alertas.push({dot:0.7,texto:`<strong>Trial Carbon</strong> vence em ${dTrial} dias.`,time:'Auto'});
-  if(saldo<0)alertas.push({dot:0.5,texto:`<strong>Saldo negativo</strong> em ${MESES[mm-1]}: ${fmtR(saldo)}`,time:'Auto'});
-  if(tSai>0&&tMao/tSai>0.40)alertas.push({dot:0.4,texto:`<strong>Mao de obra</strong> em ${(tMao/tSai*100).toFixed(0)}% das saidas.`,time:'Auto'});
+  if(dTrial!==null&&dTrial<=10&&dTrial>0)alertas.push({dot:0.7,tag:'RPM',texto:`<strong>Trial Carbon</strong> vence em ${dTrial} dias.`,acao:'Falar com Marcondes sobre renovacao.',time:'Auto'});
+  if(saldo<0)alertas.push({dot:0.5,tag:'EDR',texto:`<strong>Saldo negativo</strong> em ${MESES[mm-1]}: ${fmtR(saldo)}`,acao:'Conferir repasses pendentes ou cortar gastos.',time:'Auto'});
+  if(tSai>0&&tMao/tSai>0.40)alertas.push({dot:0.4,tag:'EDR',texto:`<strong>Mao de obra</strong> em ${(tMao/tSai*100).toFixed(0)}% das saidas.`,acao:'Revisar produtividade e diarias.',time:'Auto'});
   const rUlt=rOS.length?rOS[0].data_entrada:null;
-  if(rUlt){const dd=Math.floor((new Date()-new Date(rUlt))/864e5);if(dd>3)alertas.push({dot:0.3,texto:`<strong>RPM Pro</strong> sem OS nova ha ${dd} dias.`,time:'Auto'});}
+  if(rUlt){const dd=Math.floor((new Date()-new Date(rUlt))/864e5);if(dd>3)alertas.push({dot:0.3,tag:'RPM',texto:`<strong>Carbon</strong> sem OS nova ha ${dd} dias.`,acao:'Mandar mensagem pro Marcondes.',time:'Auto'});}
   const semCod=lm.filter(l=>l.descricao&&!/^00/.test(l.descricao)).length;
-  if(semCod>5)alertas.push({dot:0.2,texto:`<strong>${semCod} lancamentos</strong> sem codigo do catalogo.`,time:'Auto'});
+  if(semCod>5)alertas.push({dot:0.2,tag:'EDR',texto:`<strong>${semCod} lancamentos</strong> sem codigo do catalogo.`,acao:'Abrir Lancamentos no EDR e classificar.',time:'Auto'});
 
-  const aHtml=alertas.map(a=>`<div class="alert-r"><div class="alert-r-dot" style="background:rgba(255,255,255,${a.dot});"></div><div><div class="alert-r-text">${a.texto}</div><div class="alert-r-time">${a.time}</div></div></div>`).join('')||'<div class="loading">Nenhum alerta</div>';
+  const aHtml=alertas.map(a=>`<div class="alert-r"><div class="alert-r-dot" style="background:rgba(255,255,255,${a.dot});"></div><div style="flex:1;"><div class="alert-r-text">${a.tag?`<span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;padding:1px 6px;border:1px solid rgba(255,255,255,0.1);border-radius:3px;margin-right:6px;color:var(--t4);">${a.tag}</span>`:''}${a.texto}</div>${a.acao?`<div style="font-size:10px;color:var(--t4);margin-top:3px;">&#8594; ${a.acao}</div>`:''}<div class="alert-r-time">${a.time}</div></div></div>`).join('')||'<div class="loading">Nenhum alerta</div>';
   document.getElementById('cc-alertas').innerHTML=aHtml;
   document.getElementById('cc-all-alertas').innerHTML=aHtml;
 
@@ -746,6 +791,59 @@ async function loadHojeResumo(){
   document.getElementById('cc-hoje-resumo').innerHTML=`
     <div class="card"><div class="card-label">Gastos Hoje</div><div class="card-value">${fmtK(gastosHoje)}</div><div class="card-sub">lancamentos do dia</div></div>
     <div class="card"><div class="card-label">OS Hoje (RPM)</div><div class="card-value">${osHoje}</div><div class="card-sub">Carbon Auto Center</div></div>`;
+}
+
+// ═══ CHATBOT AJUDA ═══
+function toggleChat(){document.getElementById('chat-panel').classList.toggle('open');}
+
+const chatBase={
+  'o que cada aba mostra':`<strong>Hoje:</strong> Acoes do dia + diagnostico IA. Abre de manha e age.<br><strong>Visao Geral:</strong> KPIs consolidados — obras + RPM juntos, grafico 6 meses.<br><strong>RPM Pro:</strong> Tudo da oficina Carbon — OS, mecanicos, insights, diagnostico IA, acompanhamento.<br><strong>EDR System:</strong> Financeiro das obras — entradas, saidas, mao de obra, detalhamento por obra.<br><strong>Alertas:</strong> Tudo que precisa de atencao, com tag de qual sistema e o que fazer.`,
+  'como funciona o diagnostico ia':`Todo dia as 6h (ou quando voce clica "Gerar Diagnostico"), o DM manda os dados de todos os seus sistemas pro Claude (IA). Ele analisa e devolve:<br>- <strong>Problemas:</strong> o que ta errado<br>- <strong>Fluxos quebrados:</strong> processos incompletos<br>- <strong>Acertos:</strong> o que ta funcionando<br>- <strong>Recomendacoes:</strong> acoes concretas pra voce tomar<br><br>Custa centavos por dia. Aparece na aba Hoje, RPM Pro e EDR System.`,
+  'o que sao os alertas':`Alertas sao gerados automaticamente com base nos dados. Cada um tem:<br>- <strong>Tag</strong> (EDR ou RPM) — pra voce saber de qual sistema<br>- <strong>Descricao</strong> do problema<br>- <strong>Acao sugerida</strong> — o que fazer<br><br>Exemplos: saldo negativo, obra estourando orcamento, OS paradas, lancamentos sem codigo.`,
+  'como ler o acompanhamento do cliente':`A secao "Acompanhamento por Cliente" na aba RPM Pro mostra a saude de cada oficina:<br>- <strong>KPIs:</strong> OS hoje, faturamento, ticket medio<br>- <strong>Kanban:</strong> quantas OS em cada etapa<br>- <strong>Timeline:</strong> ultimas acoes (OS criada, cliente cadastrado, pagamento)<br>- <strong>Adocao:</strong> quais modulos usam e quando usaram por ultimo<br>- <strong>Resumo semanal:</strong> comparativo semana a semana`,
+  'o que e o kanban':`Kanban mostra a distribuicao das OS por etapa:<br>- <strong>Aguardando:</strong> OS criada mas nao comecou<br>- <strong>Andamento:</strong> mecanico trabalhando<br>- <strong>Entregue:</strong> servico concluido<br>- <strong>Cancelado:</strong> OS cancelada<br><br>Se tem muita OS em "Aguardando" = oficina travada. Se tem pouco em "Entregue" = fluxo lento.`,
+  'o que significa saldo negativo':`Saldo negativo = suas obras gastaram mais do que receberam no mes.<br><strong>Entradas</strong> = repasses da CEF + pagamentos extras<br><strong>Saidas</strong> = lancamentos (material, mao de obra, etc)<br><br>Se ta negativo, ou falta repasse pendente ou precisa cortar gasto.`,
+  'o que e mao de obra':`Percentual de mao de obra sobre o total de saidas do mes. O ideal e ficar abaixo de 35-40%.<br>Se ta acima, pode ser:<br>- Obra com muita gente e pouco rendimento<br>- Diarias registradas a mais<br>- Material sendo comprado por fora (nao lanca no sistema)`,
+  'como funciona o resumo semanal':`Todo domingo o DM gera automaticamente um resumo da semana pra cada cliente:<br>- Quantas OS criadas e entregues<br>- Quanto faturou<br>- Quantos clientes novos<br>- Comparativo com semana anterior<br><br>Fica salvo e aparece no Acompanhamento por Cliente.`,
+  'o que e dinheiro na mesa':`"Dinheiro na Mesa" sao insights de oportunidade perdida:<br>- <strong>Clientes sem OS:</strong> cadastrou mas nunca trouxe carro = remarketing<br>- <strong>OS abertas:</strong> valor parado sem faturar<br>- <strong>OS sem pagamento:</strong> entregou mas nao cobrou<br>- <strong>WhatsApp:</strong> base pronta pra ativar`,
+};
+
+function chatResposta(pergunta){
+  const p=pergunta.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[?!.]/g,'').trim();
+  for(const[k,v]of Object.entries(chatBase)){if(p.includes(k)||k.split(' ').filter(w=>w.length>3).every(w=>p.includes(w)))return v;}
+  // Fallback inteligente
+  if(p.includes('aba')||p.includes('tela')||p.includes('menu'))return chatBase['o que cada aba mostra'];
+  if(p.includes('ia')||p.includes('claude')||p.includes('diagnos'))return chatBase['como funciona o diagnostico ia'];
+  if(p.includes('alert'))return chatBase['o que sao os alertas'];
+  if(p.includes('client')||p.includes('acompan')||p.includes('carbon'))return chatBase['como ler o acompanhamento do cliente'];
+  if(p.includes('kanban')||p.includes('status')||p.includes('etapa'))return chatBase['o que e o kanban'];
+  if(p.includes('saldo')||p.includes('negativ')||p.includes('financ'))return chatBase['o que significa saldo negativo'];
+  if(p.includes('mao')||p.includes('obra')||p.includes('diaria'))return chatBase['o que e mao de obra'];
+  if(p.includes('seman')||p.includes('resum'))return chatBase['como funciona o resumo semanal'];
+  if(p.includes('dinheir')||p.includes('mesa')||p.includes('remarketing'))return chatBase['o que e dinheiro na mesa'];
+  return 'Nao entendi essa pergunta. Tenta perguntar sobre: <strong>abas, alertas, diagnostico IA, kanban, saldo, mao de obra, clientes, resumo semanal</strong> ou <strong>dinheiro na mesa</strong>.';
+}
+
+function chatAddMsg(text,tipo){
+  const el=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='chat-msg '+tipo;
+  div.innerHTML=text;
+  el.appendChild(div);
+  el.scrollTop=el.scrollHeight;
+}
+
+function chatPergunta(texto){
+  chatAddMsg(esc(texto),'user');
+  setTimeout(()=>chatAddMsg(chatResposta(texto),'bot'),300);
+}
+
+function chatEnviar(){
+  const inp=document.getElementById('chat-input');
+  const txt=inp.value.trim();
+  if(!txt)return;
+  inp.value='';
+  chatPergunta(txt);
 }
 
 // ═══ DIAGNOSTICO IA ═══
