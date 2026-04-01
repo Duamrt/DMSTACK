@@ -290,7 +290,7 @@ REGRAS:
 - RPM: o Rafael (aux_admin) e quem opera. Se nao ta cadastrando, e problema. Marcondes e o dono.
 - EDR: mao de obra acima de 40% e alerta. Obra acima de 85% do orcamento e critico.
 - Obras "nao_iniciada" = pipeline futuro, nao problema
-- Obras com nome contendo "ESCRITORIO", "EDR -" ou "DUAM" sao CUSTO INTERNO — nao tem receita, nao tem cliente, nao tem falta_receber. Ignore-as nas analises de receita/pagamento.
+- Obras com nome contendo "ESCRITORIO" ou "EDR -" sao CUSTO INTERNO — nao tem receita, nao tem cliente. Ignore-as nas analises de receita/pagamento.
 - Nao invente dados que nao estao no JSON
 - Se e dia 14-16 ou 30-31: alerta quinzena fechando (diarias)
 - Portugues brasileiro sem acento (pra evitar encoding)`
