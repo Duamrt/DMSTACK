@@ -17,19 +17,15 @@
 body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overflow-x:hidden;}
 ::selection{background:rgba(255,255,255,0.15);}
 
-/* SIDEBAR */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:64px;background:var(--bg1);border-right:1px solid var(--borda);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px;z-index:100;}
 .sidebar-logo{width:36px;height:36px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;margin-bottom:28px;cursor:pointer;letter-spacing:-0.5px;}
 .sidebar-item{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;color:var(--t4);position:relative;}
 .sidebar-item:hover{color:var(--t2);background:var(--t5);}
 .sidebar-item.active{color:#fff;background:rgba(255,255,255,0.06);}
 .sidebar-item.active::before{content:'';position:absolute;left:-12px;width:2px;height:18px;background:#fff;border-radius:0 2px 2px 0;}
-.sidebar-spacer{flex:1;}
 
-/* MAIN */
 .main{margin-left:64px;padding:24px 28px;min-height:100vh;}
 
-/* HEADER */
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
 .header-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
 .header-sub{font-size:11px;color:var(--t4);margin-top:2px;letter-spacing:1px;}
@@ -40,103 +36,52 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 .status-live::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.2;}}
 
-/* TABS */
 .tabs{display:flex;gap:2px;margin-bottom:28px;background:var(--t5);border-radius:10px;padding:3px;width:fit-content;}
 .tab{padding:8px 20px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--t3);}
 .tab:hover{color:var(--t2);}
 .tab.active{background:rgba(255,255,255,0.08);color:#fff;}
 
-/* GRIDS */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
 
-/* CARD */
 .card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:18px;transition:border-color .3s;}
 .card:hover{border-color:var(--borda2);}
 .card-label{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
 .card-value{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1;}
 .card-sub{font-size:11px;color:var(--t4);margin-top:6px;}
-.card-trend{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-top:6px;background:rgba(255,255,255,0.06);color:var(--t3);}
+.card-warn{border-left:2px solid rgba(255,255,255,0.4);}
+.card-ok{border-left:2px solid rgba(255,255,255,0.1);}
 
-/* MINI BARS */
-.mini-bars{display:flex;align-items:flex-end;gap:3px;height:32px;margin-top:10px;}
-.mini-b{flex:1;background:rgba(255,255,255,0.06);border-radius:2px 2px 0 0;min-width:5px;}
-.mini-b:last-child{background:rgba(255,255,255,0.3);}
-
-/* SECTION TITLE */
 .sec-title{font-size:12px;font-weight:600;color:var(--t3);letter-spacing:1px;margin-bottom:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
 .sec-title::before{content:'';width:2px;height:12px;background:rgba(255,255,255,0.2);border-radius:1px;}
 
-/* OBRA ROW */
-.obra-r{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--borda);}
-.obra-r:last-child{border-bottom:none;}
-.obra-r-name{flex:1;font-size:12px;font-weight:600;color:var(--t2);}
-.obra-r-fase{font-size:10px;color:var(--t4);margin-top:1px;}
-.obra-r-bar{width:90px;height:4px;background:var(--t5);border-radius:2px;overflow:hidden;}
-.obra-r-fill{height:100%;background:#fff;border-radius:2px;}
-.obra-r-pct{font-size:12px;font-weight:700;width:36px;text-align:right;color:var(--t3);}
-.obra-r-val{font-size:11px;color:var(--t4);width:70px;text-align:right;}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--borda);}
+.row:last-child{border-bottom:none;}
+.row-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.row-text{flex:1;font-size:11px;color:var(--t3);line-height:1.5;}
+.row-text strong{color:var(--t2);}
+.row-val{font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap;}
+.row-sub{font-size:10px;color:var(--t4);white-space:nowrap;}
 
-/* ALERT */
-.alert-r{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--borda);}
-.alert-r:last-child{border-bottom:none;}
-.alert-r-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
-.alert-r-text{font-size:11px;color:var(--t3);line-height:1.5;}
-.alert-r-text strong{color:var(--t2);}
-.alert-r-time{font-size:9px;color:var(--t4);margin-top:2px;}
+.bar-wrap{width:90px;height:4px;background:var(--t5);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;background:#fff;border-radius:2px;}
 
-/* ACTIVITY */
-.act-r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--borda);}
-.act-r:last-child{border-bottom:none;}
-.act-r-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.act-r-text{font-size:11px;color:var(--t3);flex:1;}
-.act-r-text strong{color:var(--t2);}
-.act-r-val{font-size:12px;font-weight:700;color:var(--t2);white-space:nowrap;}
-.act-r-time{font-size:9px;color:var(--t4);white-space:nowrap;}
-
-/* RANKING */
-.rank-num{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
-.rank-1{background:#fff;color:#000;}
-.rank-n{background:var(--t5);color:var(--t3);}
-
-/* RPM METRICS */
-.rpm-met{text-align:center;padding:14px;}
-.rpm-met .v{font-size:26px;font-weight:800;letter-spacing:-1px;}
-.rpm-met .l{font-size:10px;color:var(--t4);margin-top:4px;letter-spacing:1px;text-transform:uppercase;}
-
-/* GRAF */
-.graf-wrap{display:flex;align-items:flex-end;gap:8px;height:100px;}
-.graf-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.graf-bars{width:100%;display:flex;gap:2px;align-items:flex-end;height:80px;}
-.graf-b{flex:1;border-radius:3px 3px 0 0;}
-.graf-lbl{font-size:9px;color:var(--t4);}
-
-/* SCROLL */
-.scroll-y{max-height:340px;overflow-y:auto;}
+.scroll-y{max-height:360px;overflow-y:auto;}
 .scroll-y::-webkit-scrollbar{width:3px;}
 .scroll-y::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px;}
 
-/* VIEW */
 .view{display:none;}.view.active{display:block;}
 .loading{text-align:center;padding:40px;color:var(--t4);font-size:12px;letter-spacing:1px;}
 
-/* OBRA DETAIL CARD */
-.obra-det{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:18px;margin-bottom:12px;}
-.obra-det-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.obra-det-name{font-size:14px;font-weight:700;}
-.obra-det-pct{font-size:12px;font-weight:700;}
-.obra-det-bar{height:4px;background:var(--t5);border-radius:2px;overflow:hidden;margin-bottom:14px;}
-.obra-det-fill{height:100%;background:#fff;border-radius:2px;}
-.obra-det-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
-.obra-det-metric .lab{font-size:9px;color:var(--t4);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px;}
-.obra-det-metric .val{font-size:14px;font-weight:700;color:var(--t2);}
+.kanban-row{display:flex;gap:6px;margin-bottom:20px;}
+.kanban-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:10px;padding:10px;text-align:center;}
+.kanban-col .kv{font-size:20px;font-weight:800;}
+.kanban-col .kl{font-size:9px;color:var(--t4);margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
+.kanban-col .kb{height:3px;background:var(--t5);border-radius:2px;margin-top:8px;overflow:hidden;}
+.kanban-col .kf{height:100%;background:rgba(255,255,255,0.3);border-radius:2px;}
 
-/* PRODUCTS ECOSYSTEM */
-.eco-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-.eco-chip{padding:6px 14px;border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:500;color:var(--t3);display:flex;align-items:center;gap:6px;}
-.eco-dot{width:6px;height:6px;border-radius:2px;}
-
-/* ACAO */
+/* AÇÕES */
 .acao-item{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;margin-bottom:8px;transition:all .2s;cursor:pointer;}
 .acao-item:hover{border-color:var(--borda2);background:rgba(255,255,255,0.04);}
 .acao-item.feito{opacity:0.3;}
@@ -148,10 +93,23 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 .acao-titulo{font-size:13px;font-weight:600;color:var(--t2);line-height:1.4;}
 .acao-detalhe{font-size:11px;color:var(--t3);margin-top:3px;}
 .acao-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t3);margin-top:6px;}
-.acao-prioridade-1 .acao-check{border-color:rgba(255,255,255,0.5);}
-.acao-prioridade-1 .acao-titulo{color:var(--t1);}
 
-/* CHATBOT AJUDA */
+/* DIAGNOSTICO IA */
+.diag-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;}
+.diag-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.diag-titulo{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.diag-titulo .ia-badge{font-size:9px;font-weight:600;letter-spacing:1px;color:var(--t4);padding:2px 8px;border:1px solid var(--borda);border-radius:4px;}
+.diag-hora{font-size:10px;color:var(--t4);}
+.diag-resumo{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:2px solid rgba(255,255,255,0.15);}
+.diag-section{margin-bottom:14px;}
+.diag-section-title{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.diag-item{display:flex;gap:8px;align-items:flex-start;padding:5px 0;}
+.diag-item .di-icon{font-size:10px;margin-top:2px;flex-shrink:0;width:14px;text-align:center;}
+.diag-item .di-text{font-size:11px;color:var(--t3);line-height:1.5;}
+.diag-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.diag-btn:hover{background:rgba(255,255,255,0.1);color:var(--t2);}
+
+/* CHATBOT */
 .chat-fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:#fff;color:#000;border:none;border-radius:14px;font-size:20px;cursor:pointer;z-index:200;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:transform .2s;}
 .chat-fab:hover{transform:scale(1.08);}
 .chat-panel{position:fixed;bottom:80px;right:20px;width:360px;max-height:500px;background:var(--bg1);border:1px solid var(--borda2);border-radius:16px;z-index:200;display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.6);}
@@ -170,118 +128,22 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 .chat-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;}
 .chat-quick-btn{padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-radius:8px;font-size:10px;color:var(--t3);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
 .chat-quick-btn:hover{background:rgba(255,255,255,0.08);color:var(--t2);}
-@media(max-width:768px){.chat-panel{width:calc(100% - 24px);right:12px;bottom:74px;max-height:70vh;}.chat-fab{bottom:14px;right:14px;width:42px;height:42px;font-size:18px;border-radius:12px;}}
 
-/* DIAGNOSTICO IA */
-.diag-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;}
-.diag-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.diag-titulo{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
-.diag-titulo .ia-badge{font-size:9px;font-weight:600;letter-spacing:1px;color:var(--t4);padding:2px 8px;border:1px solid var(--borda);border-radius:4px;}
-.diag-hora{font-size:10px;color:var(--t4);}
-.diag-resumo{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:2px solid rgba(255,255,255,0.15);}
-.diag-section{margin-bottom:14px;}
-.diag-section-title{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
-.diag-item{display:flex;gap:8px;align-items:flex-start;padding:5px 0;}
-.diag-item .di-icon{font-size:10px;margin-top:2px;flex-shrink:0;width:14px;text-align:center;}
-.diag-item .di-text{font-size:11px;color:var(--t3);line-height:1.5;}
-.diag-modulos{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.diag-mod{padding:8px 10px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:8px;font-size:10px;}
-.diag-mod .dm-nome{color:var(--t3);font-weight:600;}
-.diag-mod .dm-status{color:var(--t4);margin-top:2px;}
-.diag-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
-.diag-btn:hover{background:rgba(255,255,255,0.1);color:var(--t2);}
-
-/* CLIENT TRACKING */
-.cli-track{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;}
-.cli-track-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-.cli-track-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;}
-.cli-track-name .cli-status{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);}
-.cli-track-name .cli-status.ativo{background:#fff;}
-.cli-track-badge{font-size:10px;font-weight:600;letter-spacing:1px;color:var(--t4);padding:3px 10px;border:1px solid var(--borda);border-radius:6px;}
-.cli-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;}
-.cli-mini{text-align:center;padding:12px 8px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:10px;}
-.cli-mini .v{font-size:22px;font-weight:800;letter-spacing:-1px;}
-.cli-mini .l{font-size:9px;color:var(--t4);margin-top:3px;letter-spacing:1px;text-transform:uppercase;}
-.cli-mini .sub{font-size:10px;color:var(--t3);margin-top:2px;}
-.cli-kanban{display:flex;gap:6px;margin-bottom:18px;}
-.cli-kanban-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:10px;padding:10px;text-align:center;}
-.cli-kanban-col .k-val{font-size:20px;font-weight:800;}
-.cli-kanban-col .k-lbl{font-size:9px;color:var(--t4);margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
-.cli-kanban-col .k-bar{height:3px;background:var(--t5);border-radius:2px;margin-top:8px;overflow:hidden;}
-.cli-kanban-col .k-fill{height:100%;background:rgba(255,255,255,0.3);border-radius:2px;}
-.cli-timeline{margin-bottom:18px;}
-.cli-tl-item{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--borda);}
-.cli-tl-item:last-child{border-bottom:none;}
-.cli-tl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.cli-tl-text{font-size:11px;color:var(--t3);flex:1;}
-.cli-tl-text strong{color:var(--t2);}
-.cli-tl-date{font-size:10px;color:var(--t4);white-space:nowrap;}
-.cli-adocao-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borda);}
-.cli-adocao-row:last-child{border-bottom:none;}
-.cli-adocao-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.cli-adocao-nome{font-size:11px;font-weight:600;color:var(--t2);flex:1;}
-.cli-adocao-data{font-size:10px;color:var(--t4);width:80px;text-align:right;}
-.cli-adocao-uso{font-size:10px;color:var(--t3);width:50px;text-align:right;}
-.cli-resumo-sem{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-radius:10px;padding:16px;margin-top:14px;}
-.cli-resumo-sem .sem-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-.cli-resumo-sem .sem-titulo{font-size:11px;font-weight:600;color:var(--t2);letter-spacing:0.5px;}
-.cli-resumo-sem .sem-periodo{font-size:10px;color:var(--t4);}
-.cli-resumo-sem .sem-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
-.cli-resumo-sem .sem-item{text-align:center;}
-.cli-resumo-sem .sem-item .sv{font-size:16px;font-weight:800;color:var(--t2);}
-.cli-resumo-sem .sem-item .sl{font-size:9px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;}
-
-@media(max-width:1200px){.grid-4{grid-template-columns:1fr 1fr;}}
+@media(max-width:1200px){.grid-4{grid-template-columns:1fr 1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
 @media(max-width:768px){
   .sidebar{width:48px;}
   .sidebar-logo{width:30px;height:30px;font-size:9px;border-radius:8px;margin-bottom:20px;}
   .sidebar-item{width:32px;height:32px;font-size:14px;border-radius:8px;}
   .main{margin-left:48px;padding:14px 12px;}
-  .header{margin-bottom:16px;}
-  .header-title{font-size:16px;}
-  .header-sub{font-size:9px;}
-  .header-time{font-size:18px;}
-  .header-date{font-size:9px;}
+  .header{margin-bottom:16px;}.header-title{font-size:16px;}.header-time{font-size:18px;}
   .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .tab{padding:7px 14px;font-size:11px;white-space:nowrap;}
-  .grid-2{grid-template-columns:1fr;gap:12px;}
+  .grid-2,.grid-3{grid-template-columns:1fr;gap:12px;}
   .grid-4{grid-template-columns:1fr 1fr;gap:10px;}
-  .card{padding:14px;border-radius:12px;}
-  .card-value{font-size:22px;}
-  .card-label{font-size:9px;margin-bottom:8px;}
-  .card-sub{font-size:10px;}
-  .sec-title{font-size:11px;margin-bottom:10px;}
-  .acao-item{padding:12px;gap:10px;}
-  .acao-titulo{font-size:12px;}
-  .acao-detalhe{font-size:10px;}
-  .acao-check{width:18px;height:18px;}
-  .obra-r{gap:8px;}
-  .obra-r-name{font-size:11px;}
-  .obra-r-bar{width:60px;}
-  .obra-r-val{font-size:10px;width:55px;}
-  .obra-det-grid{grid-template-columns:1fr 1fr;gap:6px;}
-  .obra-det-metric .val{font-size:13px;}
-  .rpm-met{padding:10px;}
-  .rpm-met .v{font-size:20px;}
-  .rpm-met .l{font-size:8px;}
-  .act-r{padding:8px 0;}
-  .act-r-text{font-size:10px;}
-  .act-r-val{font-size:11px;}
-  .alert-r-text{font-size:10px;}
-  .graf-wrap{height:80px;}
-  .graf-bars{height:60px;}
-  .scroll-y{max-height:260px;}
-  .status-live{font-size:9px;}
-  .diag-modulos{grid-template-columns:1fr;}
-  .diag-card{padding:14px;}
-  .diag-resumo{font-size:11px;padding:10px;}
-  .cli-grid-3{grid-template-columns:1fr;gap:8px;}
-  .cli-kanban{flex-wrap:wrap;gap:8px;}
-  .cli-kanban-col{min-width:calc(50% - 4px);}
-  .cli-track{padding:14px;}
-  .cli-track-name{font-size:13px;}
-  .cli-mini .v{font-size:18px;}
-  .cli-resumo-sem .sem-grid{grid-template-columns:1fr 1fr;gap:6px;}
+  .card{padding:14px;border-radius:12px;}.card-value{font-size:22px;}
+  .kanban-row{flex-wrap:wrap;}.kanban-col{min-width:calc(50% - 4px);}
+  .chat-panel{width:calc(100% - 24px);right:12px;bottom:74px;max-height:70vh;}
+  .chat-fab{bottom:14px;right:14px;width:42px;height:42px;font-size:18px;border-radius:12px;}
 }
 </style>
 </head>
@@ -304,13 +166,10 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 <!-- APP -->
 <div id="app-container" style="display:none;">
 <nav class="sidebar">
-  <div class="sidebar-logo" onclick="switchView('geral')">DM</div>
+  <div class="sidebar-logo" onclick="switchView('hoje')">DM</div>
   <div class="sidebar-item active" data-view="hoje" onclick="switchView('hoje')" title="Hoje">&#9733;</div>
-  <div class="sidebar-item" data-view="geral" onclick="switchView('geral')" title="Visao Geral">&#9678;</div>
+  <div class="sidebar-item" data-view="edr" onclick="switchView('edr')" title="EDR System">&#9874;</div>
   <div class="sidebar-item" data-view="rpm" onclick="switchView('rpm')" title="RPM Pro">&#9881;</div>
-  <div class="sidebar-item" data-view="obras" onclick="switchView('obras')" title="EDR System">&#9874;</div>
-  <div class="sidebar-item" data-view="alertas" onclick="switchView('alertas')" title="Alertas">&#9888;</div>
-  <div class="sidebar-spacer"></div>
   <div style="flex:1;"></div>
   <div class="sidebar-item" onclick="fazerLogout()" title="Sair" style="color:#ef4444;opacity:0.6;">&#10140;</div>
 </nav>
@@ -322,7 +181,7 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
       <div class="header-sub">DM.STACK</div>
     </div>
     <div class="header-right">
-      <div class="status-live" id="cc-status">LIVE</div>
+      <div class="status-live" id="cc-status">CARREGANDO</div>
       <div>
         <div class="header-date" id="cc-date"></div>
         <div class="header-time" id="cc-time"></div>
@@ -332,90 +191,65 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 
   <div class="tabs">
     <div class="tab active" data-view="hoje" onclick="switchView('hoje')">Hoje</div>
-    <div class="tab" data-view="geral" onclick="switchView('geral')">Visao Geral</div>
+    <div class="tab" data-view="edr" onclick="switchView('edr')">EDR System</div>
     <div class="tab" data-view="rpm" onclick="switchView('rpm')">RPM Pro</div>
-    <div class="tab" data-view="obras" onclick="switchView('obras')">EDR System</div>
-    <div class="tab" data-view="alertas" onclick="switchView('alertas')">Alertas</div>
   </div>
 
-  <!-- HOJE — AÇÕES DO DIA -->
+  <!-- HOJE -->
   <div id="view-hoje" class="view active">
+    <div class="grid-4" id="cc-resumo"><div class="loading">Carregando...</div></div>
     <div class="grid-2">
       <div>
         <div class="sec-title">Acoes do Dia</div>
-        <div id="cc-acoes-lista"><div class="loading">Carregando...</div></div>
+        <div id="cc-acoes"><div class="loading">Carregando...</div></div>
       </div>
       <div>
-        <div class="sec-title">Resumo Rapido</div>
-        <div class="grid-2" id="cc-hoje-resumo"><div class="loading">Carregando...</div></div>
-        <div style="margin-top:20px;">
-          <div class="sec-title">Diagnostico IA</div>
-          <div id="cc-diag-hoje"><div class="loading">Carregando diagnostico...</div></div>
-        </div>
+        <div class="sec-title">Diagnostico IA</div>
+        <div id="cc-diag"><div class="loading">Carregando...</div></div>
       </div>
     </div>
   </div>
 
-  <div id="view-geral" class="view">
-    <div class="grid-4" id="cc-kpis"><div class="loading">Carregando...</div></div>
+  <!-- EDR SYSTEM -->
+  <div id="view-edr" class="view">
+    <div class="grid-4" id="edr-kpis"><div class="loading">Carregando...</div></div>
     <div class="grid-2">
       <div>
-        <div class="sec-title">Progresso EDR</div>
-        <div class="card"><div class="scroll-y" id="cc-obras-progress"><div class="loading">Carregando...</div></div></div>
-        <div style="margin-top:16px;">
-          <div class="sec-title">Entradas vs Saidas — 6 meses</div>
-          <div class="card" id="cc-graf-mensal"><div class="loading">Carregando...</div></div>
-        </div>
+        <div class="sec-title">Obras — Orcamento Consumido</div>
+        <div class="card"><div class="scroll-y" id="edr-obras"><div class="loading">Carregando...</div></div></div>
       </div>
       <div>
-        <div class="sec-title">RPM Pro</div>
-        <div class="card" style="margin-bottom:16px;" id="cc-rpm-saude"><div class="loading">Carregando...</div></div>
-        <div class="sec-title">Insights</div>
-        <div class="card"><div class="scroll-y" id="cc-alertas"><div class="loading">Carregando...</div></div></div>
+        <div class="sec-title">Alertas</div>
+        <div class="card"><div class="scroll-y" id="edr-alertas"><div class="loading">Carregando...</div></div></div>
       </div>
     </div>
   </div>
 
+  <!-- RPM PRO -->
   <div id="view-rpm" class="view">
-    <div class="grid-4" id="cc-rpm-kpis"><div class="loading">Carregando...</div></div>
+    <div class="grid-4" id="rpm-kpis"><div class="loading">Carregando...</div></div>
+    <div class="sec-title">Kanban — OS por Status</div>
+    <div class="kanban-row" id="rpm-kanban"><div class="loading">Carregando...</div></div>
     <div class="grid-2">
-      <div><div class="sec-title">OS Recentes</div><div class="card"><div class="scroll-y" id="cc-rpm-os"><div class="loading">Carregando...</div></div></div></div>
-      <div><div class="sec-title">Mecanicos</div><div class="card"><div class="scroll-y" id="cc-rpm-mecanicos"><div class="loading">Carregando...</div></div></div></div>
+      <div>
+        <div class="sec-title">Fluxos Travados</div>
+        <div class="card"><div class="scroll-y" id="rpm-fluxos"><div class="loading">Carregando...</div></div></div>
+      </div>
+      <div>
+        <div class="sec-title">Onde Ta Perdendo Dinheiro</div>
+        <div class="card"><div class="scroll-y" id="rpm-dinheiro"><div class="loading">Carregando...</div></div></div>
+      </div>
     </div>
-    <div style="margin-top:20px;">
-      <div class="sec-title">Saude da Oficina — Dinheiro na Mesa</div>
-      <div class="grid-2" id="cc-rpm-insights"><div class="loading">Carregando...</div></div>
-    </div>
-    <div style="margin-top:20px;">
-      <div class="sec-title">Adocao por Modulo</div>
-      <div class="card" id="cc-rpm-adocao"><div class="loading">Carregando...</div></div>
-    </div>
-    <div style="margin-top:28px;">
-      <div class="sec-title">Diagnostico IA — Carbon</div>
-      <div id="cc-rpm-diag"><div class="loading">Carregando diagnostico...</div></div>
-    </div>
-    <div style="margin-top:28px;">
-      <div class="sec-title">Acompanhamento por Cliente</div>
-      <div id="cc-rpm-clientes"><div class="loading">Carregando...</div></div>
+    <div style="margin-top:16px;">
+      <div class="sec-title">Modulos — Adocao</div>
+      <div class="card"><div class="scroll-y" id="rpm-modulos"><div class="loading">Carregando...</div></div></div>
     </div>
   </div>
 
-  <div id="view-obras" class="view">
-    <div class="grid-4" id="cc-edr-kpis"><div class="loading">Carregando...</div></div>
-    <div class="sec-title">Detalhamento por Obra</div>
-    <div id="cc-edr-detalhe"><div class="loading">Carregando...</div></div>
-    <div style="margin-top:28px;">
-      <div class="sec-title">Diagnostico IA — EDR</div>
-      <div id="cc-edr-diag"><div class="loading">Carregando diagnostico...</div></div>
-    </div>
-  </div>
-
-  <div id="view-alertas" class="view">
-    <div class="sec-title">Todos os Alertas</div>
-    <div class="card"><div class="scroll-y" style="max-height:600px;" id="cc-all-alertas"><div class="loading">Carregando...</div></div></div>
-  </div>
 </div>
-<!-- CHATBOT AJUDA -->
+</div>
+
+<!-- CHATBOT -->
 <button class="chat-fab" onclick="toggleChat()" title="Ajuda">?</button>
 <div class="chat-panel" id="chat-panel">
   <div class="chat-panel-header">
@@ -427,11 +261,10 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
   </div>
   <div class="chat-quick" id="chat-quick">
     <button class="chat-quick-btn" onclick="chatPergunta('O que cada aba mostra?')">Abas</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('Como funciona o diagnostico IA?')">Diagnostico IA</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('O que sao os alertas?')">Alertas</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('Como ler o acompanhamento do cliente?')">Clientes</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('O que e saldo negativo?')">Saldo</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('O que e mao de obra?')">Mao de Obra</button>
     <button class="chat-quick-btn" onclick="chatPergunta('O que e o Kanban?')">Kanban</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('O que significa saldo negativo?')">Saldo</button>
+    <button class="chat-quick-btn" onclick="chatPergunta('Como funciona o diagnostico IA?')">Diagnostico IA</button>
   </div>
   <div class="chat-input-wrap">
     <input class="chat-input" id="chat-input" placeholder="Pergunta..." onkeydown="if(event.key==='Enter')chatEnviar()">
@@ -439,10 +272,10 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
   </div>
 </div>
 
-</div><!-- /app-container -->
-
 <script>
-// ═══ CONEXÕES SUPABASE ═══
+// ══════════════════════════════════════
+// CONEXÕES SUPABASE
+// ══════════════════════════════════════
 const DMS_URL='https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
 const EDR_URL='https://mepzoxoahpwcvvlymlfh.supabase.co';
@@ -452,19 +285,24 @@ const RPM_URL='https://roeeyypssutzfzzkypsq.supabase.co';
 const RPM_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZWV5eXBzc3V0emZ6emt5cHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTk0MTgsImV4cCI6MjA5MDM5NTQxOH0.9oCOmABUTXox3FaRViD2zcUaqv94VfOJFMQYz_fcJi4';
 const CARBON_ID='183424eb-f8f2-4502-875c-881182449143';
 const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const alertas=[];
 
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
 function fmtR(v){return(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function fmtK(v){const n=Number(v)||0;return Math.abs(n)>=1000?'R$ '+(n/1000).toFixed(1)+'k':fmtR(n);}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function hoje(){return new Date().toISOString().split('T')[0];}
 function mesAtual(){return hoje().substring(0,7);}
+function dt(v){return v?(v.length>10?v.substring(0,10):v):'';}
+function fmtData(v){if(!v)return '—';const d=dt(v);return d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';}
+
 let _authToken=null;
 
-// ═══ HELPERS SUPABASE ═══
-function _sbFetch(url,key,table,query=''){
-  return fetch(`${url}/rest/v1/${table}${query}`,{headers:{'apikey':key,'Authorization':'Bearer '+key,'Accept':'application/json'}})
-    .then(r=>r.json()).then(d=>Array.isArray(d)?d:[]).catch(()=>[]);
+function sbFetch(url,key,table,query=''){
+  return fetch(`${url}/rest/v1/${table}${query}`,{
+    headers:{'apikey':key,'Authorization':'Bearer '+key,'Accept':'application/json'}
+  }).then(r=>r.json()).then(d=>Array.isArray(d)?d:[]).catch(()=>[]);
 }
 function dmsGet(t,q=''){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
 function dmsPatch(t,q='',b={}){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
@@ -485,18 +323,18 @@ function switchView(v){
   document.querySelectorAll('.sidebar-item[data-view]').forEach(s=>s.classList.toggle('active',s.dataset.view===v));
 }
 
-// Cache dos dados — agora em tempo real
-let _dmsEdr=null, _dmsRpm=null, _dataFrescura={edr:null,rpm:null};
-
-// ═══ COLETA DIRETA EDR (TEMPO REAL) ═══
-async function coletarEDRDireto(){
+// ══════════════════════════════════════
+// COLETA EDR (TEMPO REAL)
+// ══════════════════════════════════════
+let _edr=null;
+async function coletarEDR(){
   const ma=mesAtual();
   const [obras,lanc,rep,apg,oadd]=await Promise.all([
-    _sbFetch(EDR_URL,EDR_KEY,'obras',`?company_id=eq.${EDR_CO}&arquivada=eq.false&order=nome`),
-    _sbFetch(EDR_URL,EDR_KEY,'lancamentos',`?company_id=eq.${EDR_CO}&select=id,obra_id,total,data,etapa,descricao&order=data.desc&limit=3000`),
-    _sbFetch(EDR_URL,EDR_KEY,'repasses_cef',`?company_id=eq.${EDR_CO}&order=data_credito.desc`),
-    _sbFetch(EDR_URL,EDR_KEY,'adicional_pagamentos','?order=data.desc'),
-    _sbFetch(EDR_URL,EDR_KEY,'obra_adicionais',`?company_id=eq.${EDR_CO}`),
+    sbFetch(EDR_URL,EDR_KEY,'obras',`?company_id=eq.${EDR_CO}&arquivada=eq.false&order=nome`),
+    sbFetch(EDR_URL,EDR_KEY,'lancamentos',`?company_id=eq.${EDR_CO}&select=id,obra_id,total,data,etapa,descricao&order=data.desc&limit=3000`),
+    sbFetch(EDR_URL,EDR_KEY,'repasses_cef',`?company_id=eq.${EDR_CO}&order=data_credito.desc`),
+    sbFetch(EDR_URL,EDR_KEY,'adicional_pagamentos','?order=data.desc'),
+    sbFetch(EDR_URL,EDR_KEY,'obra_adicionais',`?company_id=eq.${EDR_CO}`),
   ]);
   const idsAtivas=new Set(obras.map(o=>o.id));
   const lancAtivas=lanc.filter(l=>!l.obra_id||idsAtivas.has(l.obra_id));
@@ -508,324 +346,263 @@ async function coletarEDRDireto(){
   const pm=apg.filter(p=>(p.data||'').startsWith(ma));
   const tPg=pm.reduce((s,p)=>s+Number(p.valor||0),0);
   const tEnt=tRep+tPg;
+
   const obrasResumo=obras.map(o=>{
     const lo=lancAtivas.filter(l=>l.obra_id===o.id);
     const gt=lo.reduce((s,l)=>s+Number(l.total||0),0);
     const gm=lo.filter(l=>(l.data||'').startsWith(ma)).reduce((s,l)=>s+Number(l.total||0),0);
-    const maoObra=lo.filter(l=>(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
     const maoMes=lo.filter(l=>(l.data||'').startsWith(ma)&&(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
     const ta=oadd.filter(a=>a.obra_id===o.id).reduce((s,a)=>s+Number(a.valor||0),0);
     const rc=Number(o.valor_venda||0)+ta;
-    const pct=rc>0?(gt/rc*100):0;
+    const pct=rc>0?Math.round(gt/rc*100):0;
     const repsObra=rep.filter(r=>r.obra_id===o.id);
     const entradasObra=repsObra.reduce((s,r)=>s+Number(r.valor||0),0);
-    const pgObra=oadd.filter(a=>a.obra_id===o.id);
-    const addIds=new Set(pgObra.map(a=>a.id));
+    const addIds=new Set(oadd.filter(a=>a.obra_id===o.id).map(a=>a.id));
     const addReceb=apg.filter(p=>addIds.has(p.adicional_id)).reduce((s,p)=>s+Number(p.valor||0),0);
     const totalEntradas=entradasObra+addReceb;
-    const repsMes=repsObra.filter(r=>(r.data_credito||'').startsWith(ma));
-    const entMes=repsMes.reduce((s,r)=>s+Number(r.valor||0),0);
-    const addMes=apg.filter(p=>addIds.has(p.adicional_id)&&(p.data||'').startsWith(ma)).reduce((s,p)=>s+Number(p.valor||0),0);
-    return {nome:o.nome,id:o.id,gasto_total:gt,gasto_mes:gm,mao_obra:maoObra,mao_mes:maoMes,receita:rc,pct_consumido:Math.round(pct),entradas_total:totalEntradas,entradas_mes:entMes+addMes,falta_receber:rc-totalEntradas,saldo:totalEntradas-gt,status:gt===0&&totalEntradas===0?'nao_iniciada':'em_andamento'};
+    return {nome:o.nome,gasto_total:gt,gasto_mes:gm,mao_mes:maoMes,receita:rc,pct,entradas:totalEntradas,saldo:totalEntradas-gt};
   });
+
   const semCod=lm.filter(l=>l.descricao&&!/^00/.test(l.descricao)).length;
   const ultLanc=lancAtivas.length?lancAtivas[0].data:null;
   const diasSemLanc=ultLanc?Math.floor((Date.now()-new Date(ultLanc).getTime())/864e5):999;
-  const diaHoje=new Date().getDate();
-  const ultimoDiaMes=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
-  const tSaiTotal=lancAtivas.reduce((s,l)=>s+Number(l.total||0),0);
-  const tMaoTotal=lancAtivas.filter(l=>(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
-  const tRepTotal=rep.reduce((s,r)=>s+Number(r.valor||0),0);
-  const tPgTotal=apg.reduce((s,p)=>s+Number(p.valor||0),0);
-  const tEntTotal=tRepTotal+tPgTotal;
-  const receitaTotal=obrasResumo.reduce((s,o)=>s+o.receita,0);
-  return {
-    obras_ativas:obras.length,total_entrada_mes:tEnt,total_saida_mes:tSai,saldo_mes:tEnt-tSai,
-    mao_obra_mes:tMao,pct_mao_obra:tSai>0?Math.round(tMao/tSai*100):0,repasses_mes:tRep,pagamentos_mes:tPg,
-    total_entrada_geral:tEntTotal,total_saida_geral:tSaiTotal,saldo_geral:tEntTotal-tSaiTotal,
-    mao_obra_geral:tMaoTotal,receita_total:receitaTotal,falta_receber:receitaTotal-tEntTotal,
-    lucro_projetado:receitaTotal-tSaiTotal,margem:receitaTotal>0?Math.round((receitaTotal-tSaiTotal)/receitaTotal*100):0,
-    lanc_sem_codigo:semCod,dias_sem_lancamento:diasSemLanc,faltam_dias_inventario:ultimoDiaMes-diaHoje,
+
+  _edr={
+    obras_ativas:obras.length,total_entrada:tEnt,total_saida:tSai,saldo:tEnt-tSai,
+    mao_obra:tMao,pct_mao:tSai>0?Math.round(tMao/tSai*100):0,
+    lanc_sem_codigo:semCod,dias_sem_lanc:diasSemLanc,
     obras:obrasResumo,
   };
 }
 
-// ═══ COLETA DIRETA RPM PRO (TEMPO REAL) ═══
-async function coletarRPMDireto(){
-  const hj=hoje(), ma=mesAtual();
-  const [os,cli,vei,prof,ofi]=await Promise.all([
-    _sbFetch(RPM_URL,RPM_KEY,'ordens_servico',`?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,cliente_id,forma_pagamento,created_at,updated_at&order=data_entrada.desc&limit=500`),
-    _sbFetch(RPM_URL,RPM_KEY,'clientes',`?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp,created_at&order=created_at.desc`),
-    _sbFetch(RPM_URL,RPM_KEY,'veiculos',`?oficina_id=eq.${CARBON_ID}&select=id,cliente_id,created_at`),
-    _sbFetch(RPM_URL,RPM_KEY,'profiles',`?oficina_id=eq.${CARBON_ID}&select=id,nome,role,updated_at`),
-    _sbFetch(RPM_URL,RPM_KEY,'oficinas',`?id=eq.${CARBON_ID}&select=nome,trial_ate,created_at`),
+// ══════════════════════════════════════
+// COLETA RPM PRO (TEMPO REAL)
+// ══════════════════════════════════════
+let _rpm=null;
+async function coletarRPM(){
+  const hj=hoje(),ma=mesAtual();
+  const [os,cli,vei,prof,ofi,pecas]=await Promise.all([
+    sbFetch(RPM_URL,RPM_KEY,'ordens_servico',`?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,cliente_id,forma_pagamento,created_at&order=created_at.desc&limit=500`),
+    sbFetch(RPM_URL,RPM_KEY,'clientes',`?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp,created_at`),
+    sbFetch(RPM_URL,RPM_KEY,'veiculos',`?oficina_id=eq.${CARBON_ID}&select=id,cliente_id`),
+    sbFetch(RPM_URL,RPM_KEY,'profiles',`?oficina_id=eq.${CARBON_ID}&select=id,nome,role`),
+    sbFetch(RPM_URL,RPM_KEY,'oficinas',`?id=eq.${CARBON_ID}&select=nome,trial_ate`),
+    sbFetch(RPM_URL,RPM_KEY,'pecas',`?oficina_id=eq.${CARBON_ID}&select=id,nome,quantidade,custo,preco_venda,created_at`),
   ]);
-  // Extrair só a data de timestamps ISO (RPM usa timestamp completo)
-  const _dt=v=>v?(v.length>10?v.substring(0,10):v):'';
-  const osHoje=os.filter(o=>_dt(o.data_entrada)===hj);
-  const osMes=os.filter(o=>_dt(o.data_entrada).startsWith(ma));
-  // Status RPM: entregue, pronto, execucao, aguardando_peca, cancelado
-  const statusFinal=['entregue','pronto'];
-  const statusCancelado=['cancelado'];
-  const entregues=os.filter(o=>statusFinal.includes(o.status));
-  const entresMes=osMes.filter(o=>statusFinal.includes(o.status));
-  const abertas=os.filter(o=>!statusFinal.includes(o.status)&&!statusCancelado.includes(o.status));
-  const semPgto=entregues.filter(o=>!o.forma_pagamento);
-  const cliComOS=new Set(os.map(o=>o.cliente_id).filter(Boolean));
-  const cliSemOS=cli.filter(c=>!cliComOS.has(c.id));
-  const cliSemVeiculo=cli.filter(c=>!vei.some(v=>v.cliente_id===c.id));
+
+  // Status groups
+  const FINAL=['entregue'];
+  const CANCELADO=['cancelada','cancelado'];
+  const ABERTAS=os.filter(o=>!FINAL.includes(o.status)&&!CANCELADO.includes(o.status));
+
+  const osHoje=os.filter(o=>dt(o.data_entrada)===hj);
+  const osMes=os.filter(o=>dt(o.data_entrada).startsWith(ma));
+  const entregues=os.filter(o=>FINAL.includes(o.status));
+  const entresMes=osMes.filter(o=>FINAL.includes(o.status));
+  const canceladas=os.filter(o=>CANCELADO.includes(o.status));
   const fatMes=entresMes.reduce((s,o)=>s+Number(o.valor_total||0),0);
   const ticketMed=entresMes.length?fatMes/entresMes.length:0;
-  const kanban={aguardando:os.filter(o=>o.status==='aguardando_peca').length,em_andamento:os.filter(o=>o.status==='execucao').length,pronto:os.filter(o=>o.status==='pronto').length,entregue:os.filter(o=>o.status==='entregue').length,cancelado:os.filter(o=>statusCancelado.includes(o.status)).length};
-  const semanaAtras=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
-  const osSemana=os.filter(o=>_dt(o.data_entrada)>=semanaAtras);
-  const diasComOS=new Set(osSemana.map(o=>_dt(o.data_entrada))).size;
-  const ultOS=os.length?os[0]:null;
-  const diasSemOS=ultOS?Math.floor((Date.now()-new Date(ultOS.data_entrada).getTime())/864e5):999;
+
+  // Frequência: dias com OS na última semana
+  const sem7=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
+  const diasComOS=new Set(os.filter(o=>dt(o.data_entrada)>=sem7).map(o=>dt(o.data_entrada))).size;
+
+  // Kanban
+  const kanban={};
+  const statusLabels={entrada:'Entrada',diagnostico:'Diagnostico',orcamento:'Orcamento',aprovada:'Aprovada',aguardando_peca:'Ag. Peca',execucao:'Execucao',pronto:'Pronto',entregue:'Entregue',cancelada:'Cancelada',cancelado:'Cancelado'};
+  os.forEach(o=>{kanban[o.status]=(kanban[o.status]||0)+1;});
+
+  // Fluxos travados
+  const semMecanico=ABERTAS.filter(o=>!o.mecanico_id);
+  const entregSemPgto=entregues.filter(o=>!o.forma_pagamento);
+  const pecaSemCusto=pecas.filter(p=>!p.custo||Number(p.custo)===0);
+
+  // Dinheiro perdido
+  const valorCanceladas=canceladas.reduce((s,o)=>s+Number(o.valor_total||0),0);
+  const valorSemPgto=entregSemPgto.reduce((s,o)=>s+Number(o.valor_total||0),0);
+  const pecasVendidaSemCusto=pecas.filter(p=>Number(p.preco_venda||0)>0&&(!p.custo||Number(p.custo)===0));
+
+  // Módulos
+  const modulos=[
+    {nome:'Ordens de Servico',qtd:os.length,usado:os.length>0},
+    {nome:'Clientes',qtd:cli.length,usado:cli.length>0},
+    {nome:'Veiculos',qtd:vei.length,usado:vei.length>0},
+    {nome:'Pecas/Estoque',qtd:pecas.length,usado:pecas.length>0},
+    {nome:'Financeiro (Caixa)',qtd:0,usado:false},
+  ];
+
+  // OS recentes
+  const osRecentes=os.slice(0,15).map(o=>({numero:o.numero,status:o.status,valor:Number(o.valor_total||0),data:dt(o.data_entrada)}));
+
+  // Mecânicos
   const porMec={};
   entregues.forEach(o=>{if(o.mecanico_id)porMec[o.mecanico_id]=(porMec[o.mecanico_id]||0)+1;});
   const mecanicos=Object.entries(porMec).map(([id,q])=>({nome:prof.find(p=>p.id===id)?.nome||'—',qtd:q})).sort((a,b)=>b.qtd-a.qtd);
-  const osRecentes=os.slice(0,25).map(o=>({numero:o.numero,status:o.status,valor:Number(o.valor_total||0),data:_dt(o.data_entrada)}));
-  const clientesSemOS=cliSemOS.slice(0,20).map(c=>({nome:c.nome,whatsapp:c.whatsapp||null}));
-  return {
-    total_os:os.length,os_hoje:osHoje.length,os_mes:osMes.length,os_abertas:abertas.length,
-    valor_abertas:abertas.reduce((s,o)=>s+Number(o.valor_total||0),0),
+
+  _rpm={
+    nome:ofi[0]?.nome||'Carbon Auto Center',
+    trial_ate:ofi[0]?.trial_ate||null,
+    total_os:os.length,os_hoje:osHoje.length,os_mes:osMes.length,
+    os_abertas:ABERTAS.length,valor_abertas:ABERTAS.reduce((s,o)=>s+Number(o.valor_total||0),0),
     entregues_mes:entresMes.length,faturamento_mes:fatMes,ticket_medio:ticketMed,
-    sem_pagamento:semPgto.length,total_clientes:cli.length,clientes_sem_os:cliSemOS.length,
-    clientes_sem_veiculo:cliSemVeiculo.length,clientes_com_whatsapp:cli.filter(c=>c.whatsapp).length,
-    total_veiculos:vei.length,total_mecanicos:prof.filter(p=>p.role==='mecanico').length,
-    kanban,dias_com_os_semana:diasComOS,dias_sem_os:diasSemOS,
-    trial_ate:ofi[0]?.trial_ate||null,nome_oficina:ofi[0]?.nome||'Carbon Auto Center',
-    os_sem_mecanico:os.filter(o=>!o.mecanico_id&&o.status!=='cancelado').length,
-    os_sem_cliente:os.filter(o=>!o.cliente_id).length,
-    mecanicos,os_recentes:osRecentes,clientes_sem_os_lista:clientesSemOS,
+    total_clientes:cli.length,total_veiculos:vei.length,total_pecas:pecas.length,
+    dias_com_os:diasComOS,kanban,statusLabels,
+    // Fluxos travados
+    sem_mecanico:semMecanico.length,
+    entregue_sem_pgto:entregSemPgto.length,valor_sem_pgto:valorSemPgto,
+    peca_sem_custo:pecaSemCusto.length,
+    // Dinheiro perdido
+    canceladas:canceladas.length,valor_canceladas:valorCanceladas,
+    peca_vendida_sem_custo:pecasVendidaSemCusto.length,
+    // Detalhes
+    modulos,osRecentes,mecanicos,
   };
 }
 
-// ═══ CARREGAR DADOS (TEMPO REAL) ═══
-async function loadLiveData(){
-  const t0=Date.now();
-  try{
-    const [edr,rpm]=await Promise.all([coletarEDRDireto(),coletarRPMDireto()]);
-    _dmsEdr=edr; _dataFrescura.edr=new Date();
-    if(rpm.total_os>0||rpm.total_clientes>0){_dmsRpm=rpm;_dataFrescura.rpm=new Date();}
-    else{await loadSnapshotData();}
-    const st=document.getElementById('cc-status');
-    if(st){st.textContent=_dataFrescura.rpm?'LIVE':'EDR LIVE · RPM CACHE';st.style.color=_dataFrescura.rpm?'':'rgba(255,255,255,0.3)';}
-  }catch(e){
-    console.warn('Erro coleta direta:',e);
-    await loadSnapshotData();
-    const st=document.getElementById('cc-status');
-    if(st){st.textContent='CACHE';st.style.color='rgba(255,255,255,0.3)';}
-  }
+// ══════════════════════════════════════
+// RENDER — HOJE
+// ══════════════════════════════════════
+function renderHoje(){
+  const edr=_edr||{},rpm=_rpm||{};
+  const mm=new Date().getMonth();
+
+  document.getElementById('cc-resumo').innerHTML=`
+    <div class="card"><div class="card-label">Saldo EDR ${MESES[mm]}</div><div class="card-value">${fmtK(edr.saldo||0)}</div><div class="card-sub">Entradas ${fmtK(edr.total_entrada||0)} · Saidas ${fmtK(edr.total_saida||0)}</div></div>
+    <div class="card"><div class="card-label">Mao de Obra</div><div class="card-value">${edr.pct_mao||0}%</div><div class="card-sub">${fmtK(edr.mao_obra||0)} de ${fmtK(edr.total_saida||0)}</div></div>
+    <div class="card"><div class="card-label">RPM — OS Hoje</div><div class="card-value">${rpm.os_hoje||0}</div><div class="card-sub">${rpm.os_abertas||0} abertas · ${rpm.dias_com_os||0}/7 dias ativos</div></div>
+    <div class="card"><div class="card-label">RPM — Faturado ${MESES[mm]}</div><div class="card-value">${fmtK(rpm.faturamento_mes||0)}</div><div class="card-sub">${rpm.entregues_mes||0} entregas · ticket ${fmtR(rpm.ticket_medio||0)}</div></div>`;
 }
 
-async function loadSnapshotData(){
-  const diags=await dmsGet('dmstack_diagnosticos','?order=data.desc&limit=10');
-  if(!Array.isArray(diags))return;
-  const edrDiag=diags.find(d=>d.produto==='edr');
-  const rpmDiag=diags.find(d=>d.produto==='rpm');
-  if(!_dmsEdr&&edrDiag&&edrDiag.raw_analysis){try{const raw=JSON.parse(edrDiag.raw_analysis);_dmsEdr=raw.dados||raw;_dataFrescura.edr=new Date(edrDiag.data+'T06:00:00');}catch(e){}}
-  if(!_dmsRpm&&rpmDiag&&rpmDiag.raw_analysis){try{const raw=JSON.parse(rpmDiag.raw_analysis);_dmsRpm=raw.dados||raw;_dataFrescura.rpm=new Date(rpmDiag.data+'T06:00:00');}catch(e){}}
-}
+// ══════════════════════════════════════
+// RENDER — EDR SYSTEM
+// ══════════════════════════════════════
+function renderEDR(){
+  const e=_edr||{},mm=new Date().getMonth();
+  const alertas=[];
 
-async function loadCC(){
-  alertas.length=0;
-  if(!_dmsEdr&&!_dmsRpm)await loadLiveData();
-  const edr=_dmsEdr||{};
-  const rpm=_dmsRpm||{};
-  const mm=new Date().getMonth()+1;
+  // KPIs
+  document.getElementById('edr-kpis').innerHTML=`
+    <div class="card ${(e.saldo||0)<0?'card-warn':'card-ok'}"><div class="card-label">Saldo ${MESES[mm]}</div><div class="card-value">${fmtK(e.saldo||0)}</div><div class="card-sub">Entradas ${fmtK(e.total_entrada||0)}</div></div>
+    <div class="card"><div class="card-label">Saidas ${MESES[mm]}</div><div class="card-value">${fmtK(e.total_saida||0)}</div></div>
+    <div class="card ${(e.pct_mao||0)>40?'card-warn':'card-ok'}"><div class="card-label">Mao de Obra</div><div class="card-value">${e.pct_mao||0}%</div><div class="card-sub">${fmtK(e.mao_obra||0)}</div></div>
+    <div class="card"><div class="card-label">Obras Ativas</div><div class="card-value">${e.obras_ativas||0}</div></div>`;
 
-  // EDR dados
-  const tEnt=edr.total_entrada_mes||0;
-  const tSai=edr.total_saida_mes||0;
-  const tMao=edr.mao_obra_mes||0;
-  const saldo=edr.saldo_mes||0;
-  const obras=edr.obras||[];
-
-  // RPM dados
-  const rFat=rpm.faturamento_mes||0;
-  const roH=rpm.os_hoje||0;
-  const roAnd=(rpm.kanban?.aguardando||0)+(rpm.kanban?.em_andamento||0)+(rpm.kanban?.pronto||0);
-  const dTrial=rpm.trial_ate?Math.ceil((new Date(rpm.trial_ate)-new Date())/(864e5)):null;
-  const osRecentes=rpm.os_recentes||[];
-  const ultOSData=osRecentes.length?osRecentes[0].data:null;
-
-  // ═══ VISAO GERAL ═══
-  document.getElementById('cc-kpis').innerHTML=`
-    <div class="card"><div class="card-label">Faturamento RPM</div><div class="card-value">${fmtK(rFat)}</div><div class="card-sub">${rpm.entregues_mes||0} OS entregues</div></div>
-    <div class="card"><div class="card-label">OS Hoje</div><div class="card-value">${roH}</div><div class="card-sub">${roAnd} em andamento</div></div>
-    <div class="card"><div class="card-label">EDR Obras</div><div class="card-value">${edr.obras_ativas||0}</div><div class="card-sub">${obras.slice(0,3).map(o=>(o.nome||'').split(' ')[0]).join(', ')}${obras.length>3?'...':''}</div></div>
-    <div class="card"><div class="card-label">Saidas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tSai)}</div><div class="card-sub">Mao de obra ${edr.pct_mao_obra||0}%</div></div>`;
-
-  // Obras progress
+  // Obras
+  const obras=e.obras||[];
   let oh='';
   obras.forEach(o=>{
-    const pct=o.pct_consumido||0;const op=pct>85?0.6:1;
-    if(pct>85)alertas.push({dot:0.6,tag:'EDR',texto:`<strong>${esc(o.nome)}</strong> — ${pct}% do orcamento consumido.`,acao:'Reduzir compras ou registrar aditivo.',time:'Auto'});
-    oh+=`<div class="obra-r"><div style="flex:1;"><div class="obra-r-name">${esc(o.nome)}</div></div><div class="obra-r-bar"><div class="obra-r-fill" style="width:${Math.min(pct,100)}%;opacity:${op};"></div></div><div class="obra-r-pct" ${pct>85?'style="color:var(--t2);"':''}>${pct}%</div><div class="obra-r-val">${fmtK(o.gasto_total)}</div></div>`;
-  });
-  document.getElementById('cc-obras-progress').innerHTML=oh||'<div class="loading">Nenhuma obra</div>';
-
-  // Grafico 6 meses (simplificado — só mês atual dos dados salvos)
-  document.getElementById('cc-graf-mensal').innerHTML=`<div style="display:flex;gap:12px;align-items:flex-end;height:120px;padding:0 8px;">
-    <div style="flex:1;text-align:center;"><div style="height:${tEnt>0?Math.max(20,Math.min(100,tEnt/Math.max(tEnt,tSai)*100)):5}px;background:rgba(255,255,255,0.2);border-radius:4px;margin-bottom:8px;"></div><div style="font-size:10px;color:var(--t4);">Entradas</div><div style="font-size:12px;color:var(--t2);font-weight:600;">${fmtK(tEnt)}</div></div>
-    <div style="flex:1;text-align:center;"><div style="height:${tSai>0?Math.max(20,Math.min(100,tSai/Math.max(tEnt,tSai)*100)):5}px;background:rgba(255,255,255,0.08);border-radius:4px;margin-bottom:8px;"></div><div style="font-size:10px;color:var(--t4);">Saidas</div><div style="font-size:12px;color:var(--t2);font-weight:600;">${fmtK(tSai)}</div></div>
-  </div>`;
-
-  // RPM Saude
-  document.getElementById('cc-rpm-saude').innerHTML=`
-    <div class="grid-2" style="margin-bottom:0;gap:0;">
-      <div class="rpm-met"><div class="v">${roH}</div><div class="l">OS Hoje</div></div>
-      <div class="rpm-met"><div class="v">${rpm.total_clientes||0}</div><div class="l">Clientes</div></div>
-      <div class="rpm-met"><div class="v">${rpm.total_veiculos||0}</div><div class="l">Veiculos</div></div>
-      <div class="rpm-met"><div class="v">${fmtK(rFat)}</div><div class="l">Faturado ${MESES[mm-1]}</div></div>
-    </div>
-    <div style="border-top:1px solid var(--borda);padding-top:12px;margin-top:8px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:var(--t4);">${rpm.nome_oficina||'Carbon Auto Center'}</span><span style="font-size:11px;color:var(--t2);font-weight:600;">Ativo</span></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:11px;color:var(--t4);">Ultima OS</span><span style="font-size:11px;color:var(--t3);">${ultOSData?new Date(ultOSData+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</span></div>
-      ${dTrial!==null?`<div style="display:flex;justify-content:space-between;"><span style="font-size:11px;color:var(--t4);">Trial</span><span style="font-size:11px;color:var(--t2);font-weight:600;">${dTrial>0?dTrial+' dias':'Expirado'}</span></div>`:''}
+    const pct=o.pct||0;
+    if(pct>85)alertas.push(`<strong>${esc(o.nome)}</strong> em ${pct}% do orcamento — gasto ${fmtK(o.gasto_total)} de ${fmtK(o.receita)}`);
+    oh+=`<div class="row">
+      <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--t2);">${esc(o.nome)}</div><div style="font-size:10px;color:var(--t4);margin-top:2px;">Mes: ${fmtK(o.gasto_mes)} · Total: ${fmtK(o.gasto_total)}</div></div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(pct,100)}%;opacity:${pct>85?0.6:1};"></div></div>
+      <div style="font-size:12px;font-weight:700;width:36px;text-align:right;${pct>85?'color:var(--t2);':'color:var(--t3);'}">${pct}%</div>
+      <div style="font-size:11px;color:var(--t4);width:70px;text-align:right;">${fmtK(o.receita)}</div>
     </div>`;
+  });
+  document.getElementById('edr-obras').innerHTML=oh||'<div class="loading">Nenhuma obra</div>';
 
   // Alertas
-  if(dTrial!==null&&dTrial<=10&&dTrial>0)alertas.push({dot:0.7,tag:'RPM',texto:`<strong>Trial Carbon</strong> vence em ${dTrial} dias.`,acao:'Falar com Marcondes sobre renovacao.',time:'Auto'});
-  if(saldo<0)alertas.push({dot:0.5,tag:'EDR',texto:`<strong>Saldo negativo</strong> em ${MESES[mm-1]}: ${fmtR(saldo)}`,acao:'Conferir repasses pendentes ou cortar gastos.',time:'Auto'});
-  if(tSai>0&&tMao/tSai>0.40)alertas.push({dot:0.4,tag:'EDR',texto:`<strong>Mao de obra</strong> em ${(tMao/tSai*100).toFixed(0)}% das saidas.`,acao:'Revisar produtividade e diarias.',time:'Auto'});
-  if(rpm.dias_sem_os>3)alertas.push({dot:0.3,tag:'RPM',texto:`<strong>Carbon</strong> sem OS nova ha ${rpm.dias_sem_os} dias.`,acao:'Mandar mensagem pro Marcondes.',time:'Auto'});
-  if((edr.lanc_sem_codigo||0)>5)alertas.push({dot:0.2,tag:'EDR',texto:`<strong>${edr.lanc_sem_codigo} lancamentos</strong> sem codigo do catalogo.`,acao:'Abrir Lancamentos no EDR e classificar.',time:'Auto'});
+  if((e.saldo||0)<0)alertas.push(`<strong>Saldo negativo</strong> em ${MESES[mm]}: ${fmtR(e.saldo)} — conferir repasses pendentes`);
+  if((e.pct_mao||0)>40)alertas.push(`<strong>Mao de obra</strong> em ${e.pct_mao}% das saidas — ideal abaixo de 35-40%`);
+  if((e.lanc_sem_codigo||0)>3)alertas.push(`<strong>${e.lanc_sem_codigo} lancamentos</strong> sem codigo do catalogo este mes`);
+  if((e.dias_sem_lanc||0)>3)alertas.push(`<strong>${e.dias_sem_lanc} dias</strong> sem lancamento — dados podem estar defasados`);
 
-  const aHtml=alertas.map(a=>`<div class="alert-r"><div class="alert-r-dot" style="background:rgba(255,255,255,${a.dot});"></div><div style="flex:1;"><div class="alert-r-text">${a.tag?`<span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;padding:1px 6px;border:1px solid rgba(255,255,255,0.1);border-radius:3px;margin-right:6px;color:var(--t4);">${a.tag}</span>`:''}${a.texto}</div>${a.acao?`<div style="font-size:10px;color:var(--t4);margin-top:3px;">&#8594; ${a.acao}</div>`:''}<div class="alert-r-time">${a.time}</div></div></div>`).join('')||'<div class="loading">Nenhum alerta</div>';
-  document.getElementById('cc-alertas').innerHTML=aHtml;
-  document.getElementById('cc-all-alertas').innerHTML=aHtml;
-
-  // ═══ RPM TAB ═══
-  document.getElementById('cc-rpm-kpis').innerHTML=`
-    <div class="card"><div class="card-label">Total OS</div><div class="card-value">${rpm.total_os||0}</div><div class="card-sub">${rpm.entregues_mes||0} entregues no mes</div></div>
-    <div class="card"><div class="card-label">Clientes</div><div class="card-value">${rpm.total_clientes||0}</div></div>
-    <div class="card"><div class="card-label">Veiculos</div><div class="card-value">${rpm.total_veiculos||0}</div></div>
-    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtR(rpm.ticket_medio||0)}</div></div>`;
-
-  document.getElementById('cc-rpm-os').innerHTML=osRecentes.map(o=>{
-    const op=o.status==='entregue'?0.5:o.status==='pronto'?0.45:o.status==='execucao'?0.3:0.15;
-    const lbl={entregue:'Entregue',pronto:'Pronto',execucao:'Execucao',aguardando_peca:'Ag. Peca',cancelado:'Cancelado'};
-    return `<div class="act-r"><div class="act-r-dot" style="background:rgba(255,255,255,${op});"></div><div class="act-r-text"><strong>OS #${o.numero||'—'}</strong> — ${lbl[o.status]||o.status||'—'}</div><div class="act-r-val">${fmtR(o.valor)}</div></div>`;
-  }).join('')||'<div class="loading">Nenhuma OS</div>';
-
-  const mecR=rpm.mecanicos||[];
-  document.getElementById('cc-rpm-mecanicos').innerHTML=mecR.map((m,i)=>`<div class="act-r"><div class="rank-num ${i===0?'rank-1':'rank-n'}">${i+1}</div><div class="act-r-text"><strong>${esc(m.nome)}</strong></div><div class="act-r-val">${m.qtd} OS</div></div>`).join('')||'<div class="loading">Sem dados</div>';
-
-  // ═══ RPM INSIGHTS — DINHEIRO NA MESA ═══
-  const remarketing=(rpm.clientes_sem_os||0)*(rpm.ticket_medio||0);
-  let insHtml='';
-  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,${(rpm.clientes_sem_os||0)>5?0.4:0.1});">
-    <div class="card-label">Clientes sem OS</div><div class="card-value">${rpm.clientes_sem_os||0}</div>
-    <div class="card-sub">de ${rpm.total_clientes||0} cadastrados</div>
-    ${remarketing>0?`<div style="margin-top:8px;font-size:11px;color:var(--t3);">Potencial remarketing: <strong style="color:var(--t2);">${fmtR(remarketing)}</strong></div>`:''}
-  </div>`;
-  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,${(rpm.os_abertas||0)>2?0.4:0.1});">
-    <div class="card-label">OS Abertas</div><div class="card-value">${rpm.os_abertas||0}</div>
-    <div class="card-sub">${(rpm.os_abertas||0)>0?'Carro parado = vaga ocupada':'Tudo entregue'}</div>
-    ${(rpm.valor_abertas||0)>0?`<div style="margin-top:8px;font-size:11px;color:var(--t3);">Valor parado: <strong style="color:var(--t2);">${fmtR(rpm.valor_abertas)}</strong></div>`:''}
-  </div>`;
-  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,${(rpm.sem_pagamento||0)>2?0.4:0.1});">
-    <div class="card-label">OS sem Pagamento</div><div class="card-value">${rpm.sem_pagamento||0}</div>
-    <div class="card-sub">Controle financeiro cego</div>
-  </div>`;
-  insHtml+=`<div class="card" style="border-left:2px solid rgba(255,255,255,0.1);">
-    <div class="card-label">Clientes com WhatsApp</div><div class="card-value">${rpm.clientes_com_whatsapp||0}</div>
-    <div class="card-sub">de ${rpm.total_clientes||0} (${rpm.total_clientes>0?Math.round((rpm.clientes_com_whatsapp||0)/(rpm.total_clientes)*100):0}%)</div>
-    <div style="margin-top:8px;font-size:11px;color:var(--t3);">Base pronta pra remarketing</div>
-  </div>`;
-  document.getElementById('cc-rpm-insights').innerHTML=insHtml;
-
-  // ═══ RPM ADOCAO ═══
-  const modulos=[
-    {nome:'Ordens de Servico',qtd:rpm.total_os||0},
-    {nome:'Clientes',qtd:rpm.total_clientes||0},
-    {nome:'Financeiro',qtd:rpm.total_os-(rpm.sem_pagamento||0)},
-    {nome:'Fila de Espera',qtd:0},
-    {nome:'Comissao',qtd:0},
-  ];
-  document.getElementById('cc-rpm-adocao').innerHTML=modulos.map(m=>{
-    const op=m.qtd>0?0.5:0.15;
-    return `<div class="act-r"><div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,${op});flex-shrink:0;"></div><div class="act-r-text"><strong>${m.nome}</strong></div><div style="font-size:11px;color:var(--t3);width:60px;text-align:right;">${m.qtd>0?m.qtd+'x':'Nunca'}</div></div>`;
-  }).join('');
-
-  // ═══ OBRAS TAB ═══
-  document.getElementById('cc-edr-kpis').innerHTML=`
-    <div class="card"><div class="card-label">Entradas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tEnt)}</div></div>
-    <div class="card"><div class="card-label">Saidas ${MESES[mm-1]}</div><div class="card-value">${fmtK(tSai)}</div></div>
-    <div class="card"><div class="card-label">Saldo Mes</div><div class="card-value">${fmtK(saldo)}</div></div>
-    <div class="card"><div class="card-label">Mao de Obra</div><div class="card-value">${fmtK(tMao)}</div><div class="card-sub">${edr.pct_mao_obra||0}%</div></div>`;
-
-  let dh='<div class="grid-2">';
-  obras.forEach(o=>{
-    const pct=o.pct_consumido||0;const op=pct>85?0.5:1;
-    dh+=`<div class="obra-det"><div class="obra-det-header"><div class="obra-det-name">${esc(o.nome)}</div><div class="obra-det-pct" style="opacity:${op};">${pct}%</div></div><div class="obra-det-bar"><div class="obra-det-fill" style="width:${Math.min(pct,100)}%;opacity:${op};"></div></div><div class="obra-det-grid"><div class="obra-det-metric"><div class="lab">Gasto Total</div><div class="val">${fmtK(o.gasto_total)}</div></div><div class="obra-det-metric"><div class="lab">Saidas Mes</div><div class="val">${fmtK(o.gasto_mes)}</div></div><div class="obra-det-metric"><div class="lab">Mao Obra</div><div class="val">${fmtK(o.mao_mes||o.mao_obra)}</div></div><div class="obra-det-metric"><div class="lab">Receita</div><div class="val">${fmtK(o.receita)}</div></div></div></div>`;
-  });dh+='</div>';
-  document.getElementById('cc-edr-detalhe').innerHTML=dh;
+  document.getElementById('edr-alertas').innerHTML=alertas.length?alertas.map(a=>`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.4);"></div><div class="row-text">${a}</div></div>`).join(''):'<div style="text-align:center;padding:20px;font-size:11px;color:var(--t4);">Nenhum alerta</div>';
 }
 
-// ═══ AÇÕES DO DIA ═══
+// ══════════════════════════════════════
+// RENDER — RPM PRO
+// ══════════════════════════════════════
+function renderRPM(){
+  const r=_rpm||{},mm=new Date().getMonth();
+
+  // KPIs
+  const dTrial=r.trial_ate?Math.ceil((new Date(r.trial_ate)-new Date())/(864e5)):null;
+  document.getElementById('rpm-kpis').innerHTML=`
+    <div class="card"><div class="card-label">${esc(r.nome||'Carbon')}</div><div class="card-value">${r.total_os||0} OS</div><div class="card-sub">${dTrial!==null?(dTrial>0?'Trial: '+dTrial+' dias':'Trial expirado'):'Ativo'}</div></div>
+    <div class="card ${(r.dias_com_os||0)<3?'card-warn':'card-ok'}"><div class="card-label">Frequencia</div><div class="card-value">${r.dias_com_os||0}/7</div><div class="card-sub">Dias com OS na semana</div></div>
+    <div class="card"><div class="card-label">Faturado ${MESES[mm]}</div><div class="card-value">${fmtK(r.faturamento_mes||0)}</div><div class="card-sub">${r.entregues_mes||0} entregas</div></div>
+    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtR(r.ticket_medio||0)}</div></div>`;
+
+  // Kanban
+  const kanban=r.kanban||{};
+  const labels=r.statusLabels||{};
+  const total=Math.max(Object.values(kanban).reduce((s,v)=>s+v,0),1);
+  // Ordem fixa dos status
+  const statusOrder=['entrada','diagnostico','orcamento','aprovada','aguardando_peca','execucao','pronto','entregue'];
+  let kh='';
+  statusOrder.forEach(st=>{
+    const v=kanban[st]||0;
+    if(v>0||['execucao','pronto','entregue'].includes(st)){
+      kh+=`<div class="kanban-col"><div class="kv">${v}</div><div class="kl">${labels[st]||st}</div><div class="kb"><div class="kf" style="width:${v/total*100}%;"></div></div></div>`;
+    }
+  });
+  document.getElementById('rpm-kanban').innerHTML=kh||'<div class="loading">Sem dados</div>';
+
+  // Fluxos travados
+  let fh='';
+  if(r.sem_mecanico>0)fh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.4);"></div><div class="row-text"><strong>${r.sem_mecanico} OS</strong> abertas sem mecanico atribuido</div></div>`;
+  if(r.entregue_sem_pgto>0)fh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.5);"></div><div class="row-text"><strong>${r.entregue_sem_pgto} OS</strong> entregues sem pagamento — ${fmtR(r.valor_sem_pgto)} no limbo</div></div>`;
+  if(r.peca_sem_custo>0)fh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.3);"></div><div class="row-text"><strong>${r.peca_sem_custo} pecas</strong> com custo zerado — margem impossivel de calcular</div></div>`;
+  document.getElementById('rpm-fluxos').innerHTML=fh||'<div style="text-align:center;padding:20px;font-size:11px;color:var(--t4);">Nenhum fluxo travado</div>';
+
+  // Dinheiro perdido
+  let dh='';
+  if(r.valor_sem_pgto>0)dh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.5);"></div><div class="row-text"><strong>${fmtR(r.valor_sem_pgto)}</strong> entregue sem cobrar (${r.entregue_sem_pgto} OS)</div></div>`;
+  if(r.canceladas>0)dh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.3);"></div><div class="row-text"><strong>${r.canceladas} OS canceladas</strong> — ${fmtR(r.valor_canceladas)} perdido</div></div>`;
+  if(r.peca_vendida_sem_custo>0)dh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.3);"></div><div class="row-text"><strong>${r.peca_vendida_sem_custo} pecas</strong> vendidas sem custo cadastrado — margem cega</div></div>`;
+  document.getElementById('rpm-dinheiro').innerHTML=dh||'<div style="text-align:center;padding:20px;font-size:11px;color:var(--t4);">Sem perdas detectadas</div>';
+
+  // Módulos
+  const mods=r.modulos||[];
+  document.getElementById('rpm-modulos').innerHTML=mods.map(m=>{
+    const op=m.usado?0.5:0.15;
+    return `<div class="row"><div class="row-dot" style="background:rgba(255,255,255,${op});"></div><div class="row-text"><strong>${m.nome}</strong></div><div class="row-val">${m.qtd>0?m.qtd+'x':'Nunca usado'}</div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// AÇÕES DO DIA
+// ══════════════════════════════════════
 async function loadAcoes(){
   const hj=hoje();
-  // Buscar ações do banco
   let acoes=await dmsGet('dmstack_acoes','?data=eq.'+hj+'&order=prioridade,categoria');
   if(!Array.isArray(acoes))acoes=[];
 
-  // Gerar ações se ainda não existem hoje
-  const temAcoes=acoes.length>0;
-  if(!temAcoes){
-    if(!_dmsEdr&&!_dmsRpm)await loadLiveData();
-    const edr=_dmsEdr||{};const rpm=_dmsRpm||{};
-    const novas=[];
-    const ma=hoje().substring(0,7);
-    const tSai=edr.total_saida_mes||0;
-    const tMao=edr.mao_obra_mes||0;
-    const tEnt=edr.total_entrada_mes||0;
+  if(!acoes.length){
+    const edr=_edr||{},rpm=_rpm||{},novas=[];
+    const mm=MESES[new Date().getMonth()];
 
-    // Obras acima de 85%
+    // EDR
     (edr.obras||[]).forEach(o=>{
-      const pct=o.pct_consumido||0;
-      if(pct>85)novas.push({data:hj,prioridade:1,categoria:'obra',titulo:o.nome+' em '+pct+'% do orcamento',detalhe:'Gasto: '+fmtK(o.gasto_total)+' / Receita: '+fmtK(o.receita)+' — reduzir compras',fonte:'edr'});
+      if(o.pct>85)novas.push({data:hj,prioridade:1,categoria:'edr',titulo:o.nome+' em '+o.pct+'% do orcamento',detalhe:'Gasto '+fmtK(o.gasto_total)+' / Receita '+fmtK(o.receita),fonte:'edr'});
     });
+    if((edr.saldo||0)<0)novas.push({data:hj,prioridade:1,categoria:'edr',titulo:'Saldo negativo em '+mm+': '+fmtR(edr.saldo),detalhe:'Entradas '+fmtK(edr.total_entrada)+' / Saidas '+fmtK(edr.total_saida),fonte:'edr'});
+    if((edr.pct_mao||0)>40)novas.push({data:hj,prioridade:2,categoria:'edr',titulo:'Mao de obra em '+edr.pct_mao+'% das saidas',detalhe:'Ideal abaixo de 35-40%',fonte:'edr'});
 
-    // Saldo negativo
-    if(tEnt-tSai<0)novas.push({data:hj,prioridade:1,categoria:'financeiro',titulo:'Saldo negativo em '+MESES[parseInt(ma.split('-')[1])-1],detalhe:'Entradas: '+fmtK(tEnt)+' / Saidas: '+fmtK(tSai),fonte:'edr'});
-
-    // Mão de obra alta
-    if(tSai>0&&tMao/tSai>0.40)novas.push({data:hj,prioridade:2,categoria:'obra',titulo:'Mao de obra em '+(tMao/tSai*100).toFixed(0)+'% das saidas',detalhe:'Acima do ideal (35%) — revisar produtividade',fonte:'edr'});
-
-    // Lançamentos sem código
-    if((edr.lanc_sem_codigo||0)>3)novas.push({data:hj,prioridade:3,categoria:'sistema',titulo:edr.lanc_sem_codigo+' lancamentos sem codigo do catalogo',detalhe:'Materiais fora do padrao este mes',fonte:'edr'});
+    // RPM
+    if((rpm.entregue_sem_pgto||0)>0)novas.push({data:hj,prioridade:1,categoria:'rpm',titulo:rpm.entregue_sem_pgto+' OS entregues sem pagamento — '+fmtR(rpm.valor_sem_pgto),detalhe:'Cobrar do Marcondes',fonte:'rpm'});
+    if((rpm.sem_mecanico||0)>0)novas.push({data:hj,prioridade:2,categoria:'rpm',titulo:rpm.sem_mecanico+' OS sem mecanico atribuido',detalhe:'Fluxo travado na Carbon',fonte:'rpm'});
+    if((rpm.dias_com_os||0)<3)novas.push({data:hj,prioridade:2,categoria:'rpm',titulo:'Carbon usou RPM so '+rpm.dias_com_os+'/7 dias',detalhe:'Frequencia baixa — ligar pro Marcondes',fonte:'rpm'});
 
     // Quinzena
     const dia=new Date().getDate();
-    if(dia===14||dia===15||dia===30||dia===31)novas.push({data:hj,prioridade:1,categoria:'diarias',titulo:'Quinzena fecha — conferir diarias',detalhe:'Revisar faltas e valores antes do fechamento',fonte:'edr'});
+    if([14,15,16,30,31].includes(dia))novas.push({data:hj,prioridade:1,categoria:'edr',titulo:'Quinzena fecha — conferir diarias',detalhe:'Revisar faltas e valores antes do fechamento',fonte:'edr'});
 
-    // ═══ RPM PRO ═══
-    if((rpm.os_abertas||0)>0)novas.push({data:hj,prioridade:2,categoria:'rpm',titulo:rpm.os_abertas+' OS abertas na Carbon — '+fmtR(rpm.valor_abertas||0)+' parado',detalhe:'Carro parado = vaga ocupada = dinheiro travado',fonte:'rpm'});
-
-    if((rpm.dias_sem_os||0)>3)novas.push({data:hj,prioridade:1,categoria:'rpm',titulo:'Carbon sem OS nova ha '+rpm.dias_sem_os+' dias',detalhe:'Mandar mensagem pro Marcondes',fonte:'rpm'});
-
-    if((rpm.sem_pagamento||0)>2)novas.push({data:hj,prioridade:3,categoria:'rpm',titulo:rpm.sem_pagamento+' OS sem pagamento registrado',detalhe:'Controle financeiro cego',fonte:'rpm'});
-
-    // Inserir tudo no DM.Stack Supabase
     for(const a of novas){await dmsPost('dmstack_acoes',a);}
     acoes=acoes.concat(novas);
   }
 
-  // Ordenar: não feitos primeiro, depois por prioridade
   acoes.sort((a,b)=>(a.feito?1:0)-(b.feito?1:0)||a.prioridade-b.prioridade);
-
-  // Render
   const pendentes=acoes.filter(a=>!a.feito).length;
+
   if(!acoes.length){
-    document.getElementById('cc-acoes-lista').innerHTML='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:24px;margin-bottom:12px;">&#10003;</div><div style="font-size:13px;color:var(--t3);">Nenhuma acao pendente hoje.</div></div>';
+    document.getElementById('cc-acoes').innerHTML='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:24px;margin-bottom:12px;">&#10003;</div><div style="font-size:13px;color:var(--t3);">Nenhuma acao pendente hoje.</div></div>';
   } else {
-    document.getElementById('cc-acoes-lista').innerHTML=
+    document.getElementById('cc-acoes').innerHTML=
       `<div style="margin-bottom:12px;font-size:12px;color:var(--t3);">${pendentes} pendente${pendentes!==1?'s':''} de ${acoes.length}</div>`+
-      acoes.map(a=>`<div class="acao-item acao-prioridade-${a.prioridade} ${a.feito?'feito':''}" onclick="toggleAcao('${a.id}',this)">
+      acoes.map(a=>`<div class="acao-item ${a.feito?'feito':''}" onclick="toggleAcao('${a.id}',this)">
         <div class="acao-check"></div>
         <div class="acao-body">
           <div class="acao-titulo">${esc(a.titulo)}</div>
@@ -842,149 +619,54 @@ async function toggleAcao(id,el){
   await dmsPatch('dmstack_acoes','?id=eq.'+id,{feito});
 }
 
-async function loadHojeResumo(){
-  if(!_dmsEdr&&!_dmsRpm)await loadLiveData();
-  const edr=_dmsEdr||{};const rpm=_dmsRpm||{};
-  document.getElementById('cc-hoje-resumo').innerHTML=`
-    <div class="card"><div class="card-label">Saldo Mes</div><div class="card-value">${fmtK(edr.saldo_mes||0)}</div><div class="card-sub">entradas - saidas</div></div>
-    <div class="card"><div class="card-label">OS Hoje (RPM)</div><div class="card-value">${rpm.os_hoje||0}</div><div class="card-sub">${rpm.nome_oficina||'Carbon Auto Center'}</div></div>`;
-}
-
-// ═══ CHATBOT AJUDA ═══
-function toggleChat(){document.getElementById('chat-panel').classList.toggle('open');}
-
-const chatBase={
-  'o que cada aba mostra':`<strong>Hoje:</strong> Acoes do dia + diagnostico IA. Abre de manha e age.<br><strong>Visao Geral:</strong> KPIs consolidados — obras + RPM juntos, grafico 6 meses.<br><strong>RPM Pro:</strong> Tudo da oficina Carbon — OS, mecanicos, insights, diagnostico IA, acompanhamento.<br><strong>EDR System:</strong> Financeiro das obras — entradas, saidas, mao de obra, detalhamento por obra.<br><strong>Alertas:</strong> Tudo que precisa de atencao, com tag de qual sistema e o que fazer.`,
-  'como funciona o diagnostico ia':`Todo dia as 6h (ou quando voce clica "Gerar Diagnostico"), o DM manda os dados de todos os seus sistemas pro Claude (IA). Ele analisa e devolve:<br>- <strong>Problemas:</strong> o que ta errado<br>- <strong>Fluxos quebrados:</strong> processos incompletos<br>- <strong>Acertos:</strong> o que ta funcionando<br>- <strong>Recomendacoes:</strong> acoes concretas pra voce tomar<br><br>Custa centavos por dia. Aparece na aba Hoje, RPM Pro e EDR System.`,
-  'o que sao os alertas':`Alertas sao gerados automaticamente com base nos dados. Cada um tem:<br>- <strong>Tag</strong> (EDR ou RPM) — pra voce saber de qual sistema<br>- <strong>Descricao</strong> do problema<br>- <strong>Acao sugerida</strong> — o que fazer<br><br>Exemplos: saldo negativo, obra estourando orcamento, OS paradas, lancamentos sem codigo.`,
-  'como ler o acompanhamento do cliente':`A secao "Acompanhamento por Cliente" na aba RPM Pro mostra a saude de cada oficina:<br>- <strong>KPIs:</strong> OS hoje, faturamento, ticket medio<br>- <strong>Kanban:</strong> quantas OS em cada etapa<br>- <strong>Timeline:</strong> ultimas acoes (OS criada, cliente cadastrado, pagamento)<br>- <strong>Adocao:</strong> quais modulos usam e quando usaram por ultimo<br>- <strong>Resumo semanal:</strong> comparativo semana a semana`,
-  'o que e o kanban':`Kanban mostra a distribuicao das OS por etapa:<br>- <strong>Aguardando:</strong> OS criada mas nao comecou<br>- <strong>Andamento:</strong> mecanico trabalhando<br>- <strong>Entregue:</strong> servico concluido<br>- <strong>Cancelado:</strong> OS cancelada<br><br>Se tem muita OS em "Aguardando" = oficina travada. Se tem pouco em "Entregue" = fluxo lento.`,
-  'o que significa saldo negativo':`Saldo negativo = suas obras gastaram mais do que receberam no mes.<br><strong>Entradas</strong> = repasses da CEF + pagamentos extras<br><strong>Saidas</strong> = lancamentos (material, mao de obra, etc)<br><br>Se ta negativo, ou falta repasse pendente ou precisa cortar gasto.`,
-  'o que e mao de obra':`Percentual de mao de obra sobre o total de saidas do mes. O ideal e ficar abaixo de 35-40%.<br>Se ta acima, pode ser:<br>- Obra com muita gente e pouco rendimento<br>- Diarias registradas a mais<br>- Material sendo comprado por fora (nao lanca no sistema)`,
-  'como funciona o resumo semanal':`Todo domingo o DM gera automaticamente um resumo da semana pra cada cliente:<br>- Quantas OS criadas e entregues<br>- Quanto faturou<br>- Quantos clientes novos<br>- Comparativo com semana anterior<br><br>Fica salvo e aparece no Acompanhamento por Cliente.`,
-  'o que e dinheiro na mesa':`"Dinheiro na Mesa" sao insights de oportunidade perdida:<br>- <strong>Clientes sem OS:</strong> cadastrou mas nunca trouxe carro = remarketing<br>- <strong>OS abertas:</strong> valor parado sem faturar<br>- <strong>OS sem pagamento:</strong> entregou mas nao cobrou<br>- <strong>WhatsApp:</strong> base pronta pra ativar`,
-};
-
-function chatResposta(pergunta){
-  const p=pergunta.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[?!.]/g,'').trim();
-  for(const[k,v]of Object.entries(chatBase)){if(p.includes(k)||k.split(' ').filter(w=>w.length>3).every(w=>p.includes(w)))return v;}
-  // Fallback inteligente
-  if(p.includes('aba')||p.includes('tela')||p.includes('menu'))return chatBase['o que cada aba mostra'];
-  if(p.includes('ia')||p.includes('claude')||p.includes('diagnos'))return chatBase['como funciona o diagnostico ia'];
-  if(p.includes('alert'))return chatBase['o que sao os alertas'];
-  if(p.includes('client')||p.includes('acompan')||p.includes('carbon'))return chatBase['como ler o acompanhamento do cliente'];
-  if(p.includes('kanban')||p.includes('status')||p.includes('etapa'))return chatBase['o que e o kanban'];
-  if(p.includes('saldo')||p.includes('negativ')||p.includes('financ'))return chatBase['o que significa saldo negativo'];
-  if(p.includes('mao')||p.includes('obra')||p.includes('diaria'))return chatBase['o que e mao de obra'];
-  if(p.includes('seman')||p.includes('resum'))return chatBase['como funciona o resumo semanal'];
-  if(p.includes('dinheir')||p.includes('mesa')||p.includes('remarketing'))return chatBase['o que e dinheiro na mesa'];
-  return 'Nao entendi essa pergunta. Tenta perguntar sobre: <strong>abas, alertas, diagnostico IA, kanban, saldo, mao de obra, clientes, resumo semanal</strong> ou <strong>dinheiro na mesa</strong>.';
-}
-
-function chatAddMsg(text,tipo){
-  const el=document.getElementById('chat-msgs');
-  const div=document.createElement('div');
-  div.className='chat-msg '+tipo;
-  div.innerHTML=text;
-  el.appendChild(div);
-  el.scrollTop=el.scrollHeight;
-}
-
-function chatPergunta(texto){
-  chatAddMsg(esc(texto),'user');
-  setTimeout(()=>chatAddMsg(chatResposta(texto),'bot'),300);
-}
-
-function chatEnviar(){
-  const inp=document.getElementById('chat-input');
-  const txt=inp.value.trim();
-  if(!txt)return;
-  inp.value='';
-  chatPergunta(txt);
-}
-
-// ═══ DIAGNOSTICO IA ═══
+// ══════════════════════════════════════
+// DIAGNOSTICO IA (OPCIONAL)
+// ══════════════════════════════════════
 async function loadDiagnosticos(){
   const hj=hoje();
-  let diags=await dmsGet('dmstack_diagnosticos','?data=eq.'+hj+'&order=produto');
+  let diags=await dmsGet('dmstack_diagnosticos','?order=data.desc&limit=10');
   if(!Array.isArray(diags))diags=[];
+  const ultimo=diags.find(d=>d.produto==='edr')||diags[0];
 
-  // Render na aba Hoje (todos os produtos)
-  if(!diags.length){
-    document.getElementById('cc-diag-hoje').innerHTML=`<div class="diag-card" style="text-align:center;">
-      <div style="font-size:11px;color:var(--t4);margin-bottom:12px;">Nenhum diagnostico gerado hoje</div>
-      <button class="diag-btn" onclick="rodarDiagnostico()">&#9881; Gerar Diagnostico Agora</button>
+  if(!ultimo){
+    document.getElementById('cc-diag').innerHTML=`<div class="diag-card" style="text-align:center;">
+      <div style="font-size:11px;color:var(--t4);margin-bottom:12px;">Nenhum diagnostico IA gerado</div>
+      <button class="diag-btn" onclick="rodarDiagnostico()">&#9881; Gerar Diagnostico</button>
+      <div style="font-size:9px;color:var(--t4);margin-top:8px;">Requer Edge Function deployada</div>
     </div>`;
-    document.getElementById('cc-rpm-diag').innerHTML='<div class="diag-card" style="text-align:center;"><div style="font-size:11px;color:var(--t4);">Sem diagnostico hoje</div></div>';
     return;
   }
 
-  let hojeHtml='';
-  diags.forEach(d=>{hojeHtml+=renderDiagCard(d);});
-  document.getElementById('cc-diag-hoje').innerHTML=hojeHtml;
-
-  // Render na aba RPM (só RPM)
-  const rpmDiag=diags.find(d=>d.produto==='rpm');
-  document.getElementById('cc-rpm-diag').innerHTML=rpmDiag?renderDiagCard(rpmDiag):'<div class="diag-card" style="text-align:center;font-size:11px;color:var(--t4);">Sem diagnostico RPM hoje</div>';
-
-  // Render na aba EDR System
-  const edrDiag=diags.find(d=>d.produto==='edr');
-  document.getElementById('cc-edr-diag').innerHTML=edrDiag?renderDiagCard(edrDiag):'<div class="diag-card" style="text-align:center;font-size:11px;color:var(--t4);">Sem diagnostico EDR hoje</div>';
+  // Mostrar o mais recente
+  let h='';
+  diags.slice(0,3).forEach(d=>{h+=renderDiagCard(d);});
+  h+=`<div style="text-align:center;margin-top:8px;"><button class="diag-btn" onclick="rodarDiagnostico()">&#9881; Atualizar Diagnostico</button></div>`;
+  document.getElementById('cc-diag').innerHTML=h;
 }
 
 function renderDiagCard(d){
-  const problemas=(d.problemas||[]);
-  const acertos=(d.acertos||[]);
-  const fluxos=(d.fluxos_quebrados||[]);
-  const mods=d.modulos_uso||{};
-  const recs=(d.recomendacoes||[]);
+  const problemas=d.problemas||[];
+  const acertos=d.acertos||[];
+  const recs=d.recomendacoes||[];
   const hora=d.created_at?new Date(d.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-  const label=d.produto==='rpm'?'RPM Pro'+(d.cliente?' — '+esc(d.cliente):''):'EDR System';
+  const diasAtras=Math.floor((Date.now()-new Date(d.data+'T12:00:00').getTime())/864e5);
+  const label=d.produto==='rpm'?'RPM Pro':'EDR System';
+  const freshLabel=diasAtras===0?'Hoje':diasAtras===1?'Ontem':diasAtras+' dias atras';
 
   let h=`<div class="diag-card">
     <div class="diag-header">
       <div class="diag-titulo">${label} <span class="ia-badge">IA</span></div>
-      <div class="diag-hora">${hora}</div>
-    </div>
-    <div class="diag-resumo">${esc(d.resumo||'')}</div>`;
-
-  if(problemas.length){
-    h+=`<div class="diag-section"><div class="diag-section-title">Problemas</div>`;
-    problemas.forEach(p=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.5);">&#9679;</div><div class="di-text">${esc(p)}</div></div>`;});
-    h+=`</div>`;
-  }
-
-  if(fluxos.length){
-    h+=`<div class="diag-section"><div class="diag-section-title">Fluxos Quebrados</div>`;
-    fluxos.forEach(f=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.3);">&#9888;</div><div class="di-text">${esc(f)}</div></div>`;});
-    h+=`</div>`;
-  }
-
-  if(acertos.length){
-    h+=`<div class="diag-section"><div class="diag-section-title">Funcionando Bem</div>`;
-    acertos.forEach(a=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.4);">&#10003;</div><div class="di-text">${esc(a)}</div></div>`;});
-    h+=`</div>`;
-  }
-
-  const modKeys=Object.keys(mods);
-  if(modKeys.length){
-    h+=`<div class="diag-section"><div class="diag-section-title">Modulos</div><div class="diag-modulos">`;
-    modKeys.forEach(k=>{h+=`<div class="diag-mod"><div class="dm-nome">${esc(k)}</div><div class="dm-status">${esc(mods[k])}</div></div>`;});
-    h+=`</div></div>`;
-  }
-
-  if(recs.length){
-    h+=`<div class="diag-section"><div class="diag-section-title">Recomendacoes</div>`;
-    recs.forEach((r,i)=>{h+=`<div class="diag-item"><div class="di-icon" style="color:rgba(255,255,255,0.5);">${i+1}</div><div class="di-text" style="color:var(--t2);">${esc(r)}</div></div>`;});
-    h+=`</div>`;
-  }
-
+      <div class="diag-hora">${freshLabel} ${hora}</div>
+    </div>`;
+  if(d.resumo)h+=`<div class="diag-resumo">${esc(d.resumo)}</div>`;
+  if(problemas.length){h+=`<div class="diag-section"><div class="diag-section-title">Problemas</div>`;problemas.forEach(p=>{h+=`<div class="diag-item"><div class="di-icon">&#9679;</div><div class="di-text">${esc(p)}</div></div>`;});h+=`</div>`;}
+  if(recs.length){h+=`<div class="diag-section"><div class="diag-section-title">Recomendacoes</div>`;recs.forEach((r,i)=>{h+=`<div class="diag-item"><div class="di-icon">${i+1}</div><div class="di-text" style="color:var(--t2);">${esc(r)}</div></div>`;});h+=`</div>`;}
   h+=`</div>`;
   return h;
 }
 
 async function rodarDiagnostico(){
-  const el=document.getElementById('cc-diag-hoje');
+  const el=document.getElementById('cc-diag');
   el.innerHTML='<div class="loading">Gerando diagnostico com IA... (30s)</div>';
   try{
     await refreshToken();
@@ -994,10 +676,9 @@ async function rodarDiagnostico(){
     });
     if(!r.ok){
       el.innerHTML=`<div class="diag-card" style="text-align:center;">
-        <div style="font-size:12px;color:var(--t3);margin-bottom:10px;">Diagnostico IA indisponivel</div>
-        <div style="font-size:10px;color:var(--t4);line-height:1.6;">A Edge Function precisa ser deployada no Supabase.<br>Os dados do dashboard ja estao atualizados em tempo real.</div>
-      </div>`;
-      return;
+        <div style="font-size:12px;color:var(--t3);margin-bottom:8px;">Diagnostico IA indisponivel</div>
+        <div style="font-size:10px;color:var(--t4);line-height:1.6;">A Edge Function precisa ser deployada no Supabase.<br>Os dados do dashboard estao atualizados em tempo real.</div>
+      </div>`;return;
     }
     const d=await r.json();
     if(d.ok){await loadDiagnosticos();}
@@ -1005,66 +686,37 @@ async function rodarDiagnostico(){
   }catch(e){el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro de conexao</div>`;}
 }
 
-// ═══ ACOMPANHAMENTO POR CLIENTE ═══
-async function loadClienteAcompanhamento(){
-  if(!_dmsRpm)await loadSnapshotData();
-  const rpm=_dmsRpm||{};
-  const ma=hoje().substring(0,7);
+// ══════════════════════════════════════
+// CHATBOT AJUDA
+// ══════════════════════════════════════
+function toggleChat(){document.getElementById('chat-panel').classList.toggle('open');}
 
-  const nomeOfi=rpm.nome_oficina||'Carbon Auto Center';
-  const dTrial=rpm.trial_ate?Math.ceil((new Date(rpm.trial_ate)-new Date())/(864e5)):null;
-  const kanban=rpm.kanban||{};
-  const kanbanTotal=Math.max((kanban.aguardando||0)+(kanban.em_andamento||0)+(kanban.pronto||0)+(kanban.entregue||0)+(kanban.cancelado||0),1);
-  const osRecentes=rpm.os_recentes||[];
-  const mecR=rpm.mecanicos||[];
+const chatBase={
+  'o que cada aba mostra':`<strong>Hoje:</strong> Resumo rapido + acoes do dia + diagnostico IA.<br><strong>EDR System:</strong> Saude financeira das obras — saldo, mao de obra, orcamento por obra.<br><strong>RPM Pro:</strong> Como a Carbon ta usando o sistema — frequencia, fluxos travados, dinheiro perdido, kanban.`,
+  'o que e saldo negativo':`Saldo negativo = as obras gastaram mais do que receberam no mes.<br><strong>Entradas</strong> = repasses CEF + pagamentos extras<br><strong>Saidas</strong> = lancamentos (material, mao de obra, etc)<br>Se ta negativo: falta repasse ou precisa cortar gasto.`,
+  'o que e mao de obra':`Percentual de mao de obra sobre o total de saidas. Ideal: 35-40%.<br>Se ta acima: obra com muita gente, diarias erradas, ou material nao lançado.`,
+  'o que e o kanban':`Kanban mostra quantas OS em cada etapa na oficina:<br><strong>Entrada/Diagnostico/Orcamento</strong> = inicio do fluxo<br><strong>Execucao</strong> = mecanico trabalhando<br><strong>Pronto</strong> = concluido, espera retirada<br><strong>Entregue</strong> = finalizado<br>Muita OS parada = fluxo lento.`,
+  'como funciona o diagnostico ia':`O diagnostico IA usa Claude pra analisar todos os dados e gerar insights. Roda via Edge Function no Supabase (botao "Gerar Diagnostico").<br>Se der erro, os dados reais continuam aparecendo normalmente — o IA e so um bonus.`,
+};
 
-  // === RENDER ===
-  let html=`<div class="cli-track">
-    <div class="cli-track-header">
-      <div class="cli-track-name"><span class="cli-status ${(rpm.os_hoje||0)>0||(kanban.em_andamento||0)>0?'ativo':''}"></span>${esc(nomeOfi)}</div>
-      <div class="cli-track-badge">${dTrial!==null?(dTrial>0?'TRIAL '+dTrial+'d':'EXPIRADO'):'ATIVO'}</div>
-    </div>
-
-    <div class="cli-grid-3">
-      <div class="cli-mini"><div class="v">${rpm.os_hoje||0}</div><div class="l">OS Hoje</div></div>
-      <div class="cli-mini"><div class="v">${fmtK(rpm.faturamento_mes||0)}</div><div class="l">Faturado ${MESES[parseInt(ma.split('-')[1])-1]}</div></div>
-      <div class="cli-mini"><div class="v">${fmtR(rpm.ticket_medio||0)}</div><div class="l">Ticket Medio</div><div class="sub">${rpm.entregues_mes||0} entregas</div></div>
-    </div>
-
-    <div class="sec-title" style="margin-top:4px;">Kanban</div>
-    <div class="cli-kanban">
-      <div class="cli-kanban-col"><div class="k-val">${kanban.aguardando||0}</div><div class="k-lbl">Ag. Peca</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.aguardando||0)/kanbanTotal*100}%;"></div></div></div>
-      <div class="cli-kanban-col"><div class="k-val">${kanban.em_andamento||0}</div><div class="k-lbl">Execucao</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.em_andamento||0)/kanbanTotal*100}%;"></div></div></div>
-      <div class="cli-kanban-col"><div class="k-val">${kanban.pronto||0}</div><div class="k-lbl">Pronto</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.pronto||0)/kanbanTotal*100}%;"></div></div></div>
-      <div class="cli-kanban-col"><div class="k-val">${kanban.entregue||0}</div><div class="k-lbl">Entregue</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.entregue||0)/kanbanTotal*100}%;"></div></div></div>
-    </div>
-
-    <div class="sec-title">OS Recentes</div>
-    <div class="cli-timeline">
-      ${osRecentes.slice(0,8).map(o=>{const op=o.status==='entregue'?0.5:o.status==='pronto'?0.45:o.status==='execucao'?0.3:0.15;const lbl={entregue:'Entregue',pronto:'Pronto',execucao:'Execucao',aguardando_peca:'Ag. Peca',cancelado:'Cancelado'};return `<div class="cli-tl-item"><div class="cli-tl-dot" style="background:rgba(255,255,255,${op});"></div><div class="cli-tl-text"><strong>OS #${o.numero||'—'}</strong> — ${lbl[o.status]||o.status||'—'} — ${fmtR(o.valor)}</div><div class="cli-tl-date">${o.data?new Date(o.data+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</div></div>`;}).join('')||'<div style="font-size:11px;color:var(--t4);">Nenhuma OS</div>'}
-    </div>
-
-    <div class="sec-title">Mecanicos</div>
-    <div style="margin-bottom:12px;">
-      ${mecR.map((m,i)=>`<div class="cli-adocao-row"><div class="cli-adocao-dot" style="background:rgba(255,255,255,${i===0?0.5:0.3});"></div><div class="cli-adocao-nome">${esc(m.nome)}</div><div class="cli-adocao-uso">${m.qtd} OS</div></div>`).join('')||'<div style="font-size:11px;color:var(--t4);">Nenhum mecanico</div>'}
-    </div>
-
-    <div class="sec-title">Resumo</div>
-    <div class="sem-grid">
-      <div class="sem-item"><div class="sv">${rpm.total_clientes||0}</div><div class="sl">Clientes</div></div>
-      <div class="sem-item"><div class="sv">${rpm.total_veiculos||0}</div><div class="sl">Veiculos</div></div>
-      <div class="sem-item"><div class="sv">${rpm.clientes_sem_os||0}</div><div class="sl">Sem OS</div></div>
-      <div class="sem-item"><div class="sv">${rpm.dias_com_os_semana||0}/7</div><div class="sl">Dias c/ OS</div></div>
-    </div>
-  </div>`;
-
-  document.getElementById('cc-rpm-clientes').innerHTML=html;
+function chatResposta(pergunta){
+  const p=pergunta.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[?!.]/g,'').trim();
+  for(const[k,v]of Object.entries(chatBase)){if(p.includes(k)||k.split(' ').filter(w=>w.length>3).every(w=>p.includes(w)))return v;}
+  if(p.includes('aba')||p.includes('tela'))return chatBase['o que cada aba mostra'];
+  if(p.includes('ia')||p.includes('diagnos'))return chatBase['como funciona o diagnostico ia'];
+  if(p.includes('saldo')||p.includes('negativ'))return chatBase['o que e saldo negativo'];
+  if(p.includes('mao')||p.includes('obra'))return chatBase['o que e mao de obra'];
+  if(p.includes('kanban')||p.includes('status'))return chatBase['o que e o kanban'];
+  return 'Tenta perguntar sobre: <strong>abas, saldo, mao de obra, kanban, diagnostico IA</strong>.';
 }
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+function chatAddMsg(text,tipo){const el=document.getElementById('chat-msgs');const div=document.createElement('div');div.className='chat-msg '+tipo;div.innerHTML=text;el.appendChild(div);el.scrollTop=el.scrollHeight;}
+function chatPergunta(texto){chatAddMsg(esc(texto),'user');setTimeout(()=>chatAddMsg(chatResposta(texto),'bot'),300);}
+function chatEnviar(){const inp=document.getElementById('chat-input');const txt=inp.value.trim();if(!txt)return;inp.value='';chatPergunta(txt);}
 
-// ═══ AUTH ═══
-
+// ══════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════
 async function fazerLogin(){
   const email=document.getElementById('login-email').value.trim();
   const senha=document.getElementById('login-senha').value;
@@ -1102,22 +754,6 @@ async function refreshToken(){
   }catch(e){return false;}
 }
 
-async function iniciarApp(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app-container').style.display='block';
-  updateClock();
-  setInterval(updateClock,30000);
-  // Carregar dados em tempo real direto do EDR e RPM
-  await loadLiveData();
-  loadCC();
-  loadAcoes();
-  loadHojeResumo();
-  loadClienteAcompanhamento();
-  loadDiagnosticos();
-  // Atualizar dados a cada 5 min
-  setInterval(async()=>{await refreshToken();await loadLiveData();loadCC();loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
-}
-
 function fazerLogout(){
   _authToken=null;
   localStorage.removeItem('dms_token');
@@ -1129,21 +765,48 @@ function fazerLogout(){
   document.getElementById('login-erro').textContent='';
 }
 
-// Auto-login se tem token salvo
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+async function carregarTudo(){
+  const st=document.getElementById('cc-status');
+  try{
+    await Promise.all([coletarEDR(),coletarRPM()]);
+    if(st){st.textContent='LIVE';st.style.color='';}
+  }catch(e){
+    console.warn('Erro coleta:',e);
+    if(st){st.textContent='ERRO';st.style.color='rgba(255,255,255,0.3)';}
+  }
+  renderHoje();
+  renderEDR();
+  renderRPM();
+  loadAcoes();
+  loadDiagnosticos();
+}
+
+async function iniciarApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-container').style.display='block';
+  updateClock();
+  setInterval(updateClock,30000);
+  await carregarTudo();
+  // Refresh a cada 5 min
+  setInterval(async()=>{await refreshToken();await carregarTudo();},5*60*1000);
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// Auto-login
 (async()=>{
   const saved=localStorage.getItem('dms_token');
   if(saved){
-    // Tentar refresh primeiro (mais confiável que checar token velho)
     if(await refreshToken()){iniciarApp();return;}
-    // Se refresh falhou, tenta o token salvo direto
     _authToken=saved;
     const r=await fetch(DMS_URL+'/auth/v1/user',{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+saved}}).catch(()=>({ok:false}));
     if(r.ok){iniciarApp();return;}
   }
-  // Mostrar login
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app-container').style.display='none';
-  // Enter pra logar
   document.getElementById('login-senha').addEventListener('keydown',e=>{if(e.key==='Enter')fazerLogin();});
   document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-senha').focus();});
 })();
