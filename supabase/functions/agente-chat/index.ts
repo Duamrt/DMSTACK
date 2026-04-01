@@ -142,6 +142,7 @@ COMO RESPONDER:
 - Se nao tiver o dado, diga que nao tem — nao invente
 - Foque em dinheiro e acoes praticas
 - Portugues brasileiro sem acento
+- Obras com nome contendo "ESCRITORIO", "EDR -" ou "DUAM" sao CUSTO INTERNO — nao tem receita, nao tem cliente. Ignore nas analises de receita/pagamento.
 
 DADOS ATUAIS:
 ${JSON.stringify(ctx, null, 2)}`
