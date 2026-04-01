@@ -322,7 +322,7 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
       <div class="header-sub">DM.STACK</div>
     </div>
     <div class="header-right">
-      <div class="status-live">LIVE</div>
+      <div class="status-live" id="cc-status">LIVE</div>
       <div>
         <div class="header-date" id="cc-date"></div>
         <div class="header-time" id="cc-time"></div>
@@ -442,8 +442,15 @@ body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overf
 </div><!-- /app-container -->
 
 <script>
+// ═══ CONEXÕES SUPABASE ═══
 const DMS_URL='https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
+const EDR_URL='https://mepzoxoahpwcvvlymlfh.supabase.co';
+const EDR_KEY='sb_publishable_Z9E8KLU8ZIMcWjD-bMG5gg_eM585qWq';
+const EDR_CO='3d040713-320f-4639-8a0e-35f62ef10ba7';
+const RPM_URL='https://roeeyypssutzfzzkypsq.supabase.co';
+const RPM_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZWV5eXBzc3V0emZ6emt5cHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTk0MTgsImV4cCI6MjA5MDM5NTQxOH0.9oCOmABUTXox3FaRViD2zcUaqv94VfOJFMQYz_fcJi4';
+const CARBON_ID='183424eb-f8f2-4502-875c-881182449143';
 const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const alertas=[];
 
@@ -451,11 +458,17 @@ function fmtR(v){return(Number(v)||0).toLocaleString('pt-BR',{style:'currency',c
 function fmtK(v){const n=Number(v)||0;return Math.abs(n)>=1000?'R$ '+(n/1000).toFixed(1)+'k':fmtR(n);}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function hoje(){return new Date().toISOString().split('T')[0];}
+function mesAtual(){return hoje().substring(0,7);}
 let _authToken=null;
+
+// ═══ HELPERS SUPABASE ═══
+function _sbFetch(url,key,table,query=''){
+  return fetch(`${url}/rest/v1/${table}${query}`,{headers:{'apikey':key,'Authorization':'Bearer '+key,'Accept':'application/json'}})
+    .then(r=>r.json()).then(d=>Array.isArray(d)?d:[]).catch(()=>[]);
+}
 function dmsGet(t,q=''){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
 function dmsPatch(t,q='',b={}){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
 function dmsPost(t,b){return fetch(`${DMS_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
-function dmsHeaders(){return{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Accept':'application/json'};}
 
 function updateClock(){
   const n=new Date();
@@ -472,22 +485,148 @@ function switchView(v){
   document.querySelectorAll('.sidebar-item[data-view]').forEach(s=>s.classList.toggle('active',s.dataset.view===v));
 }
 
-// Cache dos dados do diagnóstico
-let _dmsEdr=null, _dmsRpm=null;
+// Cache dos dados — agora em tempo real
+let _dmsEdr=null, _dmsRpm=null, _dataFrescura={edr:null,rpm:null};
+
+// ═══ COLETA DIRETA EDR (TEMPO REAL) ═══
+async function coletarEDRDireto(){
+  const ma=mesAtual();
+  const [obras,lanc,rep,apg,oadd]=await Promise.all([
+    _sbFetch(EDR_URL,EDR_KEY,'obras',`?company_id=eq.${EDR_CO}&arquivada=eq.false&order=nome`),
+    _sbFetch(EDR_URL,EDR_KEY,'lancamentos',`?company_id=eq.${EDR_CO}&select=id,obra_id,total,data,etapa,descricao&order=data.desc&limit=3000`),
+    _sbFetch(EDR_URL,EDR_KEY,'repasses_cef',`?company_id=eq.${EDR_CO}&order=data_credito.desc`),
+    _sbFetch(EDR_URL,EDR_KEY,'adicional_pagamentos','?order=data.desc'),
+    _sbFetch(EDR_URL,EDR_KEY,'obra_adicionais',`?company_id=eq.${EDR_CO}`),
+  ]);
+  const idsAtivas=new Set(obras.map(o=>o.id));
+  const lancAtivas=lanc.filter(l=>!l.obra_id||idsAtivas.has(l.obra_id));
+  const lm=lancAtivas.filter(l=>(l.data||'').startsWith(ma));
+  const tSai=lm.reduce((s,l)=>s+Number(l.total||0),0);
+  const tMao=lm.filter(l=>(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
+  const rm=rep.filter(r=>(r.data_credito||'').startsWith(ma));
+  const tRep=rm.reduce((s,r)=>s+Number(r.valor||0),0);
+  const pm=apg.filter(p=>(p.data||'').startsWith(ma));
+  const tPg=pm.reduce((s,p)=>s+Number(p.valor||0),0);
+  const tEnt=tRep+tPg;
+  const obrasResumo=obras.map(o=>{
+    const lo=lancAtivas.filter(l=>l.obra_id===o.id);
+    const gt=lo.reduce((s,l)=>s+Number(l.total||0),0);
+    const gm=lo.filter(l=>(l.data||'').startsWith(ma)).reduce((s,l)=>s+Number(l.total||0),0);
+    const maoObra=lo.filter(l=>(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
+    const maoMes=lo.filter(l=>(l.data||'').startsWith(ma)&&(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
+    const ta=oadd.filter(a=>a.obra_id===o.id).reduce((s,a)=>s+Number(a.valor||0),0);
+    const rc=Number(o.valor_venda||0)+ta;
+    const pct=rc>0?(gt/rc*100):0;
+    const repsObra=rep.filter(r=>r.obra_id===o.id);
+    const entradasObra=repsObra.reduce((s,r)=>s+Number(r.valor||0),0);
+    const pgObra=oadd.filter(a=>a.obra_id===o.id);
+    const addIds=new Set(pgObra.map(a=>a.id));
+    const addReceb=apg.filter(p=>addIds.has(p.adicional_id)).reduce((s,p)=>s+Number(p.valor||0),0);
+    const totalEntradas=entradasObra+addReceb;
+    const repsMes=repsObra.filter(r=>(r.data_credito||'').startsWith(ma));
+    const entMes=repsMes.reduce((s,r)=>s+Number(r.valor||0),0);
+    const addMes=apg.filter(p=>addIds.has(p.adicional_id)&&(p.data||'').startsWith(ma)).reduce((s,p)=>s+Number(p.valor||0),0);
+    return {nome:o.nome,id:o.id,gasto_total:gt,gasto_mes:gm,mao_obra:maoObra,mao_mes:maoMes,receita:rc,pct_consumido:Math.round(pct),entradas_total:totalEntradas,entradas_mes:entMes+addMes,falta_receber:rc-totalEntradas,saldo:totalEntradas-gt,status:gt===0&&totalEntradas===0?'nao_iniciada':'em_andamento'};
+  });
+  const semCod=lm.filter(l=>l.descricao&&!/^00/.test(l.descricao)).length;
+  const ultLanc=lancAtivas.length?lancAtivas[0].data:null;
+  const diasSemLanc=ultLanc?Math.floor((Date.now()-new Date(ultLanc).getTime())/864e5):999;
+  const diaHoje=new Date().getDate();
+  const ultimoDiaMes=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
+  const tSaiTotal=lancAtivas.reduce((s,l)=>s+Number(l.total||0),0);
+  const tMaoTotal=lancAtivas.filter(l=>(l.etapa||'')==='28_mao').reduce((s,l)=>s+Number(l.total||0),0);
+  const tRepTotal=rep.reduce((s,r)=>s+Number(r.valor||0),0);
+  const tPgTotal=apg.reduce((s,p)=>s+Number(p.valor||0),0);
+  const tEntTotal=tRepTotal+tPgTotal;
+  const receitaTotal=obrasResumo.reduce((s,o)=>s+o.receita,0);
+  return {
+    obras_ativas:obras.length,total_entrada_mes:tEnt,total_saida_mes:tSai,saldo_mes:tEnt-tSai,
+    mao_obra_mes:tMao,pct_mao_obra:tSai>0?Math.round(tMao/tSai*100):0,repasses_mes:tRep,pagamentos_mes:tPg,
+    total_entrada_geral:tEntTotal,total_saida_geral:tSaiTotal,saldo_geral:tEntTotal-tSaiTotal,
+    mao_obra_geral:tMaoTotal,receita_total:receitaTotal,falta_receber:receitaTotal-tEntTotal,
+    lucro_projetado:receitaTotal-tSaiTotal,margem:receitaTotal>0?Math.round((receitaTotal-tSaiTotal)/receitaTotal*100):0,
+    lanc_sem_codigo:semCod,dias_sem_lancamento:diasSemLanc,faltam_dias_inventario:ultimoDiaMes-diaHoje,
+    obras:obrasResumo,
+  };
+}
+
+// ═══ COLETA DIRETA RPM PRO (TEMPO REAL) ═══
+async function coletarRPMDireto(){
+  const hj=hoje(), ma=mesAtual();
+  const [os,cli,vei,prof,ofi]=await Promise.all([
+    _sbFetch(RPM_URL,RPM_KEY,'ordens_servico',`?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,cliente_id,forma_pagamento,created_at,updated_at&order=data_entrada.desc&limit=500`),
+    _sbFetch(RPM_URL,RPM_KEY,'clientes',`?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp,created_at&order=created_at.desc`),
+    _sbFetch(RPM_URL,RPM_KEY,'veiculos',`?oficina_id=eq.${CARBON_ID}&select=id,cliente_id,created_at`),
+    _sbFetch(RPM_URL,RPM_KEY,'profiles',`?oficina_id=eq.${CARBON_ID}&select=id,nome,role,updated_at`),
+    _sbFetch(RPM_URL,RPM_KEY,'oficinas',`?id=eq.${CARBON_ID}&select=nome,trial_ate,created_at`),
+  ]);
+  const osHoje=os.filter(o=>o.data_entrada===hj);
+  const osMes=os.filter(o=>(o.data_entrada||'').startsWith(ma));
+  const entregues=os.filter(o=>o.status==='entregue');
+  const entresMes=osMes.filter(o=>o.status==='entregue');
+  const abertas=os.filter(o=>o.status!=='entregue'&&o.status!=='cancelado');
+  const semPgto=entregues.filter(o=>!o.forma_pagamento);
+  const cliComOS=new Set(os.map(o=>o.cliente_id).filter(Boolean));
+  const cliSemOS=cli.filter(c=>!cliComOS.has(c.id));
+  const cliSemVeiculo=cli.filter(c=>!vei.some(v=>v.cliente_id===c.id));
+  const fatMes=entresMes.reduce((s,o)=>s+Number(o.valor_total||0),0);
+  const ticketMed=entresMes.length?fatMes/entresMes.length:0;
+  const kanban={aguardando:os.filter(o=>o.status==='aguardando').length,em_andamento:os.filter(o=>o.status==='em_andamento').length,entregue:entregues.length,cancelado:os.filter(o=>o.status==='cancelado').length};
+  const semanaAtras=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
+  const osSemana=os.filter(o=>(o.data_entrada||'')>=semanaAtras);
+  const diasComOS=new Set(osSemana.map(o=>o.data_entrada)).size;
+  const ultOS=os.length?os[0]:null;
+  const diasSemOS=ultOS?Math.floor((Date.now()-new Date(ultOS.data_entrada).getTime())/864e5):999;
+  const porMec={};
+  entregues.forEach(o=>{if(o.mecanico_id)porMec[o.mecanico_id]=(porMec[o.mecanico_id]||0)+1;});
+  const mecanicos=Object.entries(porMec).map(([id,q])=>({nome:prof.find(p=>p.id===id)?.nome||'—',qtd:q})).sort((a,b)=>b.qtd-a.qtd);
+  const osRecentes=os.slice(0,25).map(o=>({numero:o.numero,status:o.status,valor:Number(o.valor_total||0),data:o.data_entrada}));
+  const clientesSemOS=cliSemOS.slice(0,20).map(c=>({nome:c.nome,whatsapp:c.whatsapp||null}));
+  return {
+    total_os:os.length,os_hoje:osHoje.length,os_mes:osMes.length,os_abertas:abertas.length,
+    valor_abertas:abertas.reduce((s,o)=>s+Number(o.valor_total||0),0),
+    entregues_mes:entresMes.length,faturamento_mes:fatMes,ticket_medio:ticketMed,
+    sem_pagamento:semPgto.length,total_clientes:cli.length,clientes_sem_os:cliSemOS.length,
+    clientes_sem_veiculo:cliSemVeiculo.length,clientes_com_whatsapp:cli.filter(c=>c.whatsapp).length,
+    total_veiculos:vei.length,total_mecanicos:prof.filter(p=>p.role==='mecanico').length,
+    kanban,dias_com_os_semana:diasComOS,dias_sem_os:diasSemOS,
+    trial_ate:ofi[0]?.trial_ate||null,nome_oficina:ofi[0]?.nome||'Carbon Auto Center',
+    os_sem_mecanico:os.filter(o=>!o.mecanico_id&&o.status!=='cancelado').length,
+    os_sem_cliente:os.filter(o=>!o.cliente_id).length,
+    mecanicos,os_recentes:osRecentes,clientes_sem_os_lista:clientesSemOS,
+  };
+}
+
+// ═══ CARREGAR DADOS (TEMPO REAL) ═══
+async function loadLiveData(){
+  const t0=Date.now();
+  try{
+    const [edr,rpm]=await Promise.all([coletarEDRDireto(),coletarRPMDireto()]);
+    _dmsEdr=edr; _dataFrescura.edr=new Date();
+    if(rpm.total_os>0||rpm.total_clientes>0){_dmsRpm=rpm;_dataFrescura.rpm=new Date();}
+    else{await loadSnapshotData();}
+    const st=document.getElementById('cc-status');
+    if(st){st.textContent=_dataFrescura.rpm?'LIVE':'EDR LIVE · RPM CACHE';st.style.color=_dataFrescura.rpm?'':'rgba(255,255,255,0.3)';}
+  }catch(e){
+    console.warn('Erro coleta direta:',e);
+    await loadSnapshotData();
+    const st=document.getElementById('cc-status');
+    if(st){st.textContent='CACHE';st.style.color='rgba(255,255,255,0.3)';}
+  }
+}
 
 async function loadSnapshotData(){
-  // Busca os últimos diagnósticos (hoje ou o mais recente)
   const diags=await dmsGet('dmstack_diagnosticos','?order=data.desc&limit=10');
   if(!Array.isArray(diags))return;
   const edrDiag=diags.find(d=>d.produto==='edr');
   const rpmDiag=diags.find(d=>d.produto==='rpm');
-  if(edrDiag&&edrDiag.raw_analysis){try{const raw=JSON.parse(edrDiag.raw_analysis);_dmsEdr=raw.dados||raw;}catch(e){}}
-  if(rpmDiag&&rpmDiag.raw_analysis){try{const raw=JSON.parse(rpmDiag.raw_analysis);_dmsRpm=raw.dados||raw;}catch(e){}}
+  if(!_dmsEdr&&edrDiag&&edrDiag.raw_analysis){try{const raw=JSON.parse(edrDiag.raw_analysis);_dmsEdr=raw.dados||raw;_dataFrescura.edr=new Date(edrDiag.data+'T06:00:00');}catch(e){}}
+  if(!_dmsRpm&&rpmDiag&&rpmDiag.raw_analysis){try{const raw=JSON.parse(rpmDiag.raw_analysis);_dmsRpm=raw.dados||raw;_dataFrescura.rpm=new Date(rpmDiag.data+'T06:00:00');}catch(e){}}
 }
 
 async function loadCC(){
   alertas.length=0;
-  if(!_dmsEdr&&!_dmsRpm)await loadSnapshotData();
+  if(!_dmsEdr&&!_dmsRpm)await loadLiveData();
   const edr=_dmsEdr||{};
   const rpm=_dmsRpm||{};
   const mm=new Date().getMonth()+1;
@@ -631,7 +770,7 @@ async function loadAcoes(){
   // Gerar ações se ainda não existem hoje
   const temAcoes=acoes.length>0;
   if(!temAcoes){
-    if(!_dmsEdr&&!_dmsRpm)await loadSnapshotData();
+    if(!_dmsEdr&&!_dmsRpm)await loadLiveData();
     const edr=_dmsEdr||{};const rpm=_dmsRpm||{};
     const novas=[];
     const ma=hoje().substring(0,7);
@@ -698,7 +837,7 @@ async function toggleAcao(id,el){
 }
 
 async function loadHojeResumo(){
-  if(!_dmsEdr&&!_dmsRpm)await loadSnapshotData();
+  if(!_dmsEdr&&!_dmsRpm)await loadLiveData();
   const edr=_dmsEdr||{};const rpm=_dmsRpm||{};
   document.getElementById('cc-hoje-resumo').innerHTML=`
     <div class="card"><div class="card-label">Saldo Mes</div><div class="card-value">${fmtK(edr.saldo_mes||0)}</div><div class="card-sub">entradas - saidas</div></div>
@@ -848,8 +987,10 @@ async function rodarDiagnostico(){
       headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
     });
     if(!r.ok){
-      const txt=await r.text().catch(()=>'');
-      el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro ${r.status}: Edge Function nao respondeu.<br><span style="font-size:10px;color:var(--t4);">Verifique se a funcao foi deployada no Supabase (bkfkzauhnlulrtttgcii)</span></div>`;
+      el.innerHTML=`<div class="diag-card" style="text-align:center;">
+        <div style="font-size:12px;color:var(--t3);margin-bottom:10px;">Diagnostico IA indisponivel</div>
+        <div style="font-size:10px;color:var(--t4);line-height:1.6;">A Edge Function precisa ser deployada no Supabase.<br>Os dados do dashboard ja estao atualizados em tempo real.</div>
+      </div>`;
       return;
     }
     const d=await r.json();
@@ -955,18 +1096,20 @@ async function refreshToken(){
   }catch(e){return false;}
 }
 
-function iniciarApp(){
+async function iniciarApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-container').style.display='block';
   updateClock();
   setInterval(updateClock,30000);
+  // Carregar dados em tempo real direto do EDR e RPM
+  await loadLiveData();
   loadCC();
   loadAcoes();
   loadHojeResumo();
   loadClienteAcompanhamento();
   loadDiagnosticos();
-  setInterval(async()=>{await refreshToken();loadCC();},5*60*1000);
-  setInterval(async()=>{loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
+  // Atualizar dados a cada 5 min
+  setInterval(async()=>{await refreshToken();await loadLiveData();loadCC();loadAcoes();loadHojeResumo();loadClienteAcompanhamento();loadDiagnosticos();},5*60*1000);
 }
 
 function fazerLogout(){
