@@ -560,27 +560,32 @@ async function coletarRPMDireto(){
     _sbFetch(RPM_URL,RPM_KEY,'profiles',`?oficina_id=eq.${CARBON_ID}&select=id,nome,role,updated_at`),
     _sbFetch(RPM_URL,RPM_KEY,'oficinas',`?id=eq.${CARBON_ID}&select=nome,trial_ate,created_at`),
   ]);
-  const osHoje=os.filter(o=>o.data_entrada===hj);
-  const osMes=os.filter(o=>(o.data_entrada||'').startsWith(ma));
-  const entregues=os.filter(o=>o.status==='entregue');
-  const entresMes=osMes.filter(o=>o.status==='entregue');
-  const abertas=os.filter(o=>o.status!=='entregue'&&o.status!=='cancelado');
+  // Extrair só a data de timestamps ISO (RPM usa timestamp completo)
+  const _dt=v=>v?(v.length>10?v.substring(0,10):v):'';
+  const osHoje=os.filter(o=>_dt(o.data_entrada)===hj);
+  const osMes=os.filter(o=>_dt(o.data_entrada).startsWith(ma));
+  // Status RPM: entregue, pronto, execucao, aguardando_peca, cancelado
+  const statusFinal=['entregue','pronto'];
+  const statusCancelado=['cancelado'];
+  const entregues=os.filter(o=>statusFinal.includes(o.status));
+  const entresMes=osMes.filter(o=>statusFinal.includes(o.status));
+  const abertas=os.filter(o=>!statusFinal.includes(o.status)&&!statusCancelado.includes(o.status));
   const semPgto=entregues.filter(o=>!o.forma_pagamento);
   const cliComOS=new Set(os.map(o=>o.cliente_id).filter(Boolean));
   const cliSemOS=cli.filter(c=>!cliComOS.has(c.id));
   const cliSemVeiculo=cli.filter(c=>!vei.some(v=>v.cliente_id===c.id));
   const fatMes=entresMes.reduce((s,o)=>s+Number(o.valor_total||0),0);
   const ticketMed=entresMes.length?fatMes/entresMes.length:0;
-  const kanban={aguardando:os.filter(o=>o.status==='aguardando').length,em_andamento:os.filter(o=>o.status==='em_andamento').length,entregue:entregues.length,cancelado:os.filter(o=>o.status==='cancelado').length};
+  const kanban={aguardando:os.filter(o=>o.status==='aguardando_peca').length,em_andamento:os.filter(o=>o.status==='execucao').length,pronto:os.filter(o=>o.status==='pronto').length,entregue:os.filter(o=>o.status==='entregue').length,cancelado:os.filter(o=>statusCancelado.includes(o.status)).length};
   const semanaAtras=new Date(Date.now()-7*864e5).toISOString().split('T')[0];
-  const osSemana=os.filter(o=>(o.data_entrada||'')>=semanaAtras);
-  const diasComOS=new Set(osSemana.map(o=>o.data_entrada)).size;
+  const osSemana=os.filter(o=>_dt(o.data_entrada)>=semanaAtras);
+  const diasComOS=new Set(osSemana.map(o=>_dt(o.data_entrada))).size;
   const ultOS=os.length?os[0]:null;
   const diasSemOS=ultOS?Math.floor((Date.now()-new Date(ultOS.data_entrada).getTime())/864e5):999;
   const porMec={};
   entregues.forEach(o=>{if(o.mecanico_id)porMec[o.mecanico_id]=(porMec[o.mecanico_id]||0)+1;});
   const mecanicos=Object.entries(porMec).map(([id,q])=>({nome:prof.find(p=>p.id===id)?.nome||'—',qtd:q})).sort((a,b)=>b.qtd-a.qtd);
-  const osRecentes=os.slice(0,25).map(o=>({numero:o.numero,status:o.status,valor:Number(o.valor_total||0),data:o.data_entrada}));
+  const osRecentes=os.slice(0,25).map(o=>({numero:o.numero,status:o.status,valor:Number(o.valor_total||0),data:_dt(o.data_entrada)}));
   const clientesSemOS=cliSemOS.slice(0,20).map(c=>({nome:c.nome,whatsapp:c.whatsapp||null}));
   return {
     total_os:os.length,os_hoje:osHoje.length,os_mes:osMes.length,os_abertas:abertas.length,
@@ -641,7 +646,7 @@ async function loadCC(){
   // RPM dados
   const rFat=rpm.faturamento_mes||0;
   const roH=rpm.os_hoje||0;
-  const roAnd=(rpm.kanban?.aguardando||0)+(rpm.kanban?.em_andamento||0);
+  const roAnd=(rpm.kanban?.aguardando||0)+(rpm.kanban?.em_andamento||0)+(rpm.kanban?.pronto||0);
   const dTrial=rpm.trial_ate?Math.ceil((new Date(rpm.trial_ate)-new Date())/(864e5)):null;
   const osRecentes=rpm.os_recentes||[];
   const ultOSData=osRecentes.length?osRecentes[0].data:null;
@@ -701,8 +706,9 @@ async function loadCC(){
     <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtR(rpm.ticket_medio||0)}</div></div>`;
 
   document.getElementById('cc-rpm-os').innerHTML=osRecentes.map(o=>{
-    const op=o.status==='entregue'?0.5:o.status==='em_andamento'?0.3:0.15;
-    return `<div class="act-r"><div class="act-r-dot" style="background:rgba(255,255,255,${op});"></div><div class="act-r-text"><strong>OS #${o.numero||'—'}</strong> — ${o.status||'—'}</div><div class="act-r-val">${fmtR(o.valor)}</div></div>`;
+    const op=o.status==='entregue'?0.5:o.status==='pronto'?0.45:o.status==='execucao'?0.3:0.15;
+    const lbl={entregue:'Entregue',pronto:'Pronto',execucao:'Execucao',aguardando_peca:'Ag. Peca',cancelado:'Cancelado'};
+    return `<div class="act-r"><div class="act-r-dot" style="background:rgba(255,255,255,${op});"></div><div class="act-r-text"><strong>OS #${o.numero||'—'}</strong> — ${lbl[o.status]||o.status||'—'}</div><div class="act-r-val">${fmtR(o.valor)}</div></div>`;
   }).join('')||'<div class="loading">Nenhuma OS</div>';
 
   const mecR=rpm.mecanicos||[];
@@ -1008,7 +1014,7 @@ async function loadClienteAcompanhamento(){
   const nomeOfi=rpm.nome_oficina||'Carbon Auto Center';
   const dTrial=rpm.trial_ate?Math.ceil((new Date(rpm.trial_ate)-new Date())/(864e5)):null;
   const kanban=rpm.kanban||{};
-  const kanbanTotal=Math.max((kanban.aguardando||0)+(kanban.em_andamento||0)+(kanban.entregue||0)+(kanban.cancelado||0),1);
+  const kanbanTotal=Math.max((kanban.aguardando||0)+(kanban.em_andamento||0)+(kanban.pronto||0)+(kanban.entregue||0)+(kanban.cancelado||0),1);
   const osRecentes=rpm.os_recentes||[];
   const mecR=rpm.mecanicos||[];
 
@@ -1027,15 +1033,15 @@ async function loadClienteAcompanhamento(){
 
     <div class="sec-title" style="margin-top:4px;">Kanban</div>
     <div class="cli-kanban">
-      <div class="cli-kanban-col"><div class="k-val">${kanban.aguardando||0}</div><div class="k-lbl">Aguardando</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.aguardando||0)/kanbanTotal*100}%;"></div></div></div>
-      <div class="cli-kanban-col"><div class="k-val">${kanban.em_andamento||0}</div><div class="k-lbl">Andamento</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.em_andamento||0)/kanbanTotal*100}%;"></div></div></div>
+      <div class="cli-kanban-col"><div class="k-val">${kanban.aguardando||0}</div><div class="k-lbl">Ag. Peca</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.aguardando||0)/kanbanTotal*100}%;"></div></div></div>
+      <div class="cli-kanban-col"><div class="k-val">${kanban.em_andamento||0}</div><div class="k-lbl">Execucao</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.em_andamento||0)/kanbanTotal*100}%;"></div></div></div>
+      <div class="cli-kanban-col"><div class="k-val">${kanban.pronto||0}</div><div class="k-lbl">Pronto</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.pronto||0)/kanbanTotal*100}%;"></div></div></div>
       <div class="cli-kanban-col"><div class="k-val">${kanban.entregue||0}</div><div class="k-lbl">Entregue</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.entregue||0)/kanbanTotal*100}%;"></div></div></div>
-      <div class="cli-kanban-col"><div class="k-val">${kanban.cancelado||0}</div><div class="k-lbl">Cancelado</div><div class="k-bar"><div class="k-fill" style="width:${(kanban.cancelado||0)/kanbanTotal*100}%;"></div></div></div>
     </div>
 
     <div class="sec-title">OS Recentes</div>
     <div class="cli-timeline">
-      ${osRecentes.slice(0,8).map(o=>{const op=o.status==='entregue'?0.5:o.status==='em_andamento'?0.3:0.15;return `<div class="cli-tl-item"><div class="cli-tl-dot" style="background:rgba(255,255,255,${op});"></div><div class="cli-tl-text"><strong>OS #${o.numero||'—'}</strong> — ${o.status||'—'} — ${fmtR(o.valor)}</div><div class="cli-tl-date">${o.data?new Date(o.data+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</div></div>`;}).join('')||'<div style="font-size:11px;color:var(--t4);">Nenhuma OS</div>'}
+      ${osRecentes.slice(0,8).map(o=>{const op=o.status==='entregue'?0.5:o.status==='pronto'?0.45:o.status==='execucao'?0.3:0.15;const lbl={entregue:'Entregue',pronto:'Pronto',execucao:'Execucao',aguardando_peca:'Ag. Peca',cancelado:'Cancelado'};return `<div class="cli-tl-item"><div class="cli-tl-dot" style="background:rgba(255,255,255,${op});"></div><div class="cli-tl-text"><strong>OS #${o.numero||'—'}</strong> — ${lbl[o.status]||o.status||'—'} — ${fmtR(o.valor)}</div><div class="cli-tl-date">${o.data?new Date(o.data+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</div></div>`;}).join('')||'<div style="font-size:11px;color:var(--t4);">Nenhuma OS</div>'}
     </div>
 
     <div class="sec-title">Mecanicos</div>
