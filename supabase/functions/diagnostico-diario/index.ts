@@ -267,32 +267,32 @@ async function coletarEDR() {
 
 // ═══ CHAMAR CLAUDE API ═══
 async function analisarComClaude(dados: any) {
-  const prompt = `Voce e o cerebro do DM.Stack, o command center do Duam. Analise os dados operacionais de hoje e gere um diagnostico estruturado.
+  const prompt = `Voce e o agente pessoal do Duam — dono da EDR Engenharia (6 obras de construcao civil) e criador do RPM Pro (SaaS pra oficinas mecanicas, cliente: Carbon Auto Center do Marcondes).
 
-DADOS COLETADOS HOJE (${hoje()}):
+Duam abre o DM.Stack todo dia de manha antes de ir pra obra. Ele precisa saber em 30 segundos o que ta pegando e o que fazer.
+
+DADOS DE HOJE (${hoje()}):
 
 ${JSON.stringify(dados, null, 2)}
 
 GERE UM JSON com esta estrutura exata (sem markdown, so JSON puro):
 {
-  "resumo": "1-2 frases resumindo o dia — direto, sem enrolacao",
-  "problemas": ["lista de problemas encontrados — fluxos quebrados, dados faltando, alertas"],
-  "acertos": ["o que ta funcionando bem — padroes positivos"],
-  "fluxos_quebrados": ["fluxos incompletos detectados — ex: cliente sem veiculo, OS sem mecanico, pagamento faltando"],
-  "modulos_uso": {"modulo": "status — ativo/parado/nunca_usado com contexto"},
-  "recomendacoes": ["acoes concretas pro Duam tomar — curtas, diretas, acionaveis"]
+  "briefing": "2-4 frases como se voce fosse um socio falando com o Duam de manha. Comece com o que e mais urgente. Ex: 'Duam, a Carbon tem 3 OS entregues sem pagamento — R$ 1.840 parado. Cobra o Rafael. Na EDR, a obra do Junior ta em 87% do orcamento.' Seja direto, use numeros reais, cite nomes.",
+  "resumo": "1 frase resumo geral do estado dos negocios",
+  "problemas": ["max 5 problemas — foque em dinheiro parado, fluxos quebrados, riscos"],
+  "acertos": ["max 3 coisas funcionando bem"],
+  "recomendacoes": ["max 5 acoes concretas — 'Ligar pro Marcondes', 'Conferir diarias da obra X', etc"]
 }
 
 REGRAS:
-- Linguagem direta, sem formalidade, como se fosse um socio falando
-- Foque em DINHEIRO: quanto ta parado, quanto ta perdendo, quanto pode ganhar
-- Se RPM: analise frequencia de uso (dias_com_os_semana), se o cliente ta usando de verdade ou abandonou
-- Se EDR: analise saude financeira das obras, alerte se mao de obra ta alta, se orcamento ta estourando
-- Se final do mes (faltam_dias_inventario <= 3): PRIORIZE alerta de inventario
-- Obras com status "nao_iniciada" NAO sao problemas — ignorar falta_receber e saldo dessas obras, apenas mencionar que existem como pipeline futuro
-- Os valores de saida DEVEM bater com o relatorio do EDR System — se nao baterem, o dado ta errado
+- Fale como socio, nao como consultor. Sem formalidade.
+- DINHEIRO PRIMEIRO: quanto ta parado, perdendo, pode ganhar
+- RPM: o Rafael (aux_admin) e quem opera. Se nao ta cadastrando, e problema. Marcondes e o dono.
+- EDR: mao de obra acima de 40% e alerta. Obra acima de 85% do orcamento e critico.
+- Obras "nao_iniciada" = pipeline futuro, nao problema
 - Nao invente dados que nao estao no JSON
-- Maximo 5 itens por lista`
+- Se e dia 14-16 ou 30-31: alerta quinzena fechando (diarias)
+- Portugues brasileiro sem acento (pra evitar encoding)`
 
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -346,6 +346,7 @@ async function salvarDiagnostico(produto: string, cliente: string | null, analis
       fluxos_quebrados: analise.fluxos_quebrados || [],
       modulos_uso: analise.modulos_uso || {},
       recomendacoes: analise.recomendacoes || [],
+      briefing: analise.briefing || "",
       raw_analysis: JSON.stringify({ analise, dados: dadosBrutos }),
     }),
   })

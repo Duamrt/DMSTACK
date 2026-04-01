@@ -13,697 +13,519 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--bg0:#000;--bg1:#08080c;--bg2:#0e0e14;--borda:rgba(255,255,255,0.06);--borda2:rgba(255,255,255,0.1);--t1:#fff;--t2:rgba(255,255,255,0.85);--t3:rgba(255,255,255,0.55);--t4:rgba(255,255,255,0.3);--t5:rgba(255,255,255,0.08);}
-body{background:var(--bg0);color:var(--t1);font-family:'Outfit',sans-serif;overflow-x:hidden;}
+:root{--bg:#000;--bg1:#08080c;--bg2:#0e0e14;--borda:rgba(255,255,255,0.06);--borda2:rgba(255,255,255,0.1);--t1:#fff;--t2:rgba(255,255,255,0.85);--t3:rgba(255,255,255,0.55);--t4:rgba(255,255,255,0.3);--t5:rgba(255,255,255,0.08);}
+body{background:var(--bg);color:var(--t1);font-family:'Outfit',sans-serif;overflow-x:hidden;min-height:100vh;}
 ::selection{background:rgba(255,255,255,0.15);}
 
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:64px;background:var(--bg1);border-right:1px solid var(--borda);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px;z-index:100;}
-.sidebar-logo{width:36px;height:36px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;margin-bottom:28px;cursor:pointer;letter-spacing:-0.5px;}
-.sidebar-item{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;color:var(--t4);position:relative;}
-.sidebar-item:hover{color:var(--t2);background:var(--t5);}
-.sidebar-item.active{color:#fff;background:rgba(255,255,255,0.06);}
-.sidebar-item.active::before{content:'';position:absolute;left:-12px;width:2px;height:18px;background:#fff;border-radius:0 2px 2px 0;}
+/* LOGIN */
+.login-wrap{position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;}
+.login-box{width:100%;max-width:340px;padding:24px;}
+.login-logo{text-align:center;margin-bottom:48px;}
+.login-logo h1{font-size:42px;font-weight:900;letter-spacing:-2px;}
+.login-logo h1 span{color:rgba(255,255,255,0.15);}
+.login-logo p{font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px;}
+.login-input{width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:10px;outline:none;transition:border-color .2s;}
+.login-input:focus{border-color:rgba(255,255,255,0.25);}
+.login-btn{width:100%;padding:14px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.login-btn:hover{opacity:0.85;}
+.login-erro{text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:12px;min-height:18px;}
 
-.main{margin-left:64px;padding:2vh 2.5vw;min-height:100vh;}
-
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2vh;}
-.header-title{font-size:clamp(18px,2vw,28px);font-weight:700;letter-spacing:-0.5px;}
-.header-sub{font-size:clamp(10px,1vw,14px);color:var(--t4);margin-top:2px;letter-spacing:1px;}
-.header-right{display:flex;gap:16px;align-items:center;}
-.header-time{font-size:clamp(24px,3vw,48px);font-weight:300;color:var(--t3);letter-spacing:1px;font-variant-numeric:tabular-nums;}
-.header-date{font-size:clamp(10px,1vw,16px);color:var(--t4);text-align:right;}
-.status-live{display:flex;align-items:center;gap:6px;font-size:clamp(10px,0.9vw,14px);color:var(--t4);letter-spacing:2px;font-weight:600;}
-.status-live::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 2s infinite;}
+/* APP LAYOUT */
+.app{display:none;min-height:100vh;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:20px 28px;border-bottom:1px solid var(--borda);}
+.topbar-logo{font-size:20px;font-weight:900;letter-spacing:-1px;cursor:default;}
+.topbar-logo span{color:rgba(255,255,255,0.15);}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t4);letter-spacing:2px;font-weight:600;}
+.topbar-status::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.2;}}
+.topbar-time{font-size:14px;color:var(--t3);font-weight:300;font-variant-numeric:tabular-nums;}
+.topbar-sair{background:none;border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--t4);font-family:'Outfit',sans-serif;font-size:11px;padding:6px 14px;cursor:pointer;transition:all .2s;}
+.topbar-sair:hover{border-color:rgba(255,255,255,0.2);color:var(--t2);}
 
-.tabs{display:flex;gap:2px;margin-bottom:2vh;background:var(--t5);border-radius:10px;padding:3px;width:fit-content;}
-.tab{padding:8px 20px;border-radius:8px;font-size:clamp(12px,1vw,16px);font-weight:500;cursor:pointer;transition:all .2s;color:var(--t3);}
-.tab:hover{color:var(--t2);}
-.tab.active{background:rgba(255,255,255,0.08);color:#fff;}
+/* CONTEUDO */
+.content{max-width:800px;margin:0 auto;padding:32px 24px 120px;}
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2vw;margin-bottom:2vh;}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1vw;margin-bottom:2vh;}
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1vw;margin-bottom:2vh;}
+/* SAUDACAO */
+.greeting{margin-bottom:32px;}
+.greeting h2{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;line-height:1.2;}
+.greeting p{font-size:14px;color:var(--t4);margin-top:6px;}
 
-.card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:clamp(14px,1.5vw,28px);transition:border-color .3s;}
-.card:hover{border-color:var(--borda2);}
-.card-label{font-size:clamp(10px,0.85vw,15px);font-weight:600;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:clamp(6px,0.8vh,14px);}
-.card-value{font-size:clamp(24px,2.8vw,52px);font-weight:800;letter-spacing:-1px;line-height:1;}
-.card-sub{font-size:clamp(11px,0.9vw,16px);color:var(--t4);margin-top:clamp(4px,0.5vh,10px);}
-.card-warn{border-left:2px solid rgba(255,255,255,0.4);}
-.card-ok{border-left:2px solid rgba(255,255,255,0.1);}
+/* BRIEFING */
+.briefing{margin-bottom:32px;}
+.briefing-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.briefing-label{font-size:11px;font-weight:600;color:var(--t4);letter-spacing:2px;text-transform:uppercase;}
+.briefing-refresh{background:none;border:1px solid var(--borda);border-radius:8px;color:var(--t4);font-family:'Outfit',sans-serif;font-size:11px;padding:6px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.briefing-refresh:hover{border-color:var(--borda2);color:var(--t2);}
+.briefing-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:24px;line-height:1.7;font-size:15px;color:var(--t2);}
+.briefing-card p{margin-bottom:12px;}
+.briefing-card p:last-child{margin-bottom:0;}
+.briefing-card strong{color:var(--t1);font-weight:700;}
+.briefing-empty{text-align:center;padding:48px 24px;color:var(--t4);font-size:14px;}
+.briefing-empty button{margin-top:16px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:12px 28px;cursor:pointer;}
 
-.sec-title{font-size:clamp(12px,1vw,18px);font-weight:600;color:var(--t3);letter-spacing:1px;margin-bottom:clamp(10px,1vh,20px);text-transform:uppercase;display:flex;align-items:center;gap:8px;}
-.sec-title::before{content:'';width:2px;height:12px;background:rgba(255,255,255,0.2);border-radius:1px;}
-
-.row{display:flex;align-items:center;gap:12px;padding:clamp(8px,0.8vh,16px) 0;border-bottom:1px solid var(--borda);}
-.row:last-child{border-bottom:none;}
-.row-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.row-text{flex:1;font-size:clamp(12px,1vw,17px);color:var(--t3);line-height:1.5;}
-.row-text strong{color:var(--t2);}
-.row-val{font-size:clamp(12px,1vw,17px);font-weight:700;color:var(--t2);white-space:nowrap;}
-.row-sub{font-size:clamp(10px,0.8vw,14px);color:var(--t4);white-space:nowrap;}
-
-.bar-wrap{width:clamp(60px,8vw,120px);height:5px;background:var(--t5);border-radius:2px;overflow:hidden;}
-.bar-fill{height:100%;background:#fff;border-radius:2px;}
-
-.scroll-y{max-height:50vh;overflow-y:auto;}
-.scroll-y::-webkit-scrollbar{width:3px;}
-.scroll-y::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px;}
-
-.view{display:none;}.view.active{display:block;}
-.loading{text-align:center;padding:40px;color:var(--t4);font-size:clamp(12px,1vw,16px);letter-spacing:1px;}
-
-.kanban-row{display:flex;gap:clamp(4px,0.5vw,10px);margin-bottom:2vh;}
-.kanban-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:10px;padding:clamp(8px,1vw,18px);text-align:center;}
-.kanban-col .kv{font-size:clamp(18px,2vw,36px);font-weight:800;}
-.kanban-col .kl{font-size:clamp(9px,0.75vw,13px);color:var(--t4);margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;}
-.kanban-col .kb{height:3px;background:var(--t5);border-radius:2px;margin-top:8px;overflow:hidden;}
-.kanban-col .kf{height:100%;background:rgba(255,255,255,0.3);border-radius:2px;}
-
-/* AÇÕES */
-.acao-item{display:flex;gap:14px;align-items:flex-start;padding:clamp(10px,1vw,18px) clamp(12px,1.2vw,20px);background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;margin-bottom:8px;transition:all .2s;cursor:pointer;}
-.acao-item:hover{border-color:var(--borda2);background:rgba(255,255,255,0.04);}
-.acao-item.feito{opacity:0.3;}
-.acao-item.feito .acao-titulo{text-decoration:line-through;}
+/* ACOES */
+.acoes{margin-bottom:40px;}
+.acoes-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.acoes-label{font-size:11px;font-weight:600;color:var(--t4);letter-spacing:2px;text-transform:uppercase;}
+.acoes-count{font-size:11px;color:var(--t4);}
+.acao{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;margin-bottom:8px;transition:all .2s;cursor:pointer;}
+.acao:hover{border-color:var(--borda2);background:rgba(255,255,255,0.04);}
+.acao.feito{opacity:0.25;}
+.acao.feito .acao-titulo{text-decoration:line-through;}
 .acao-check{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-radius:6px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.acao-item.feito .acao-check{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);}
-.acao-item.feito .acao-check::after{content:'✓';font-size:12px;color:var(--t2);}
+.acao.feito .acao-check{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);}
+.acao.feito .acao-check::after{content:'\2713';font-size:12px;color:var(--t2);}
 .acao-body{flex:1;}
-.acao-titulo{font-size:clamp(13px,1.1vw,18px);font-weight:600;color:var(--t2);line-height:1.4;}
-.acao-detalhe{font-size:clamp(11px,0.9vw,15px);color:var(--t3);margin-top:3px;}
-.acao-tag{display:inline-block;font-size:clamp(9px,0.7vw,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t3);margin-top:6px;}
+.acao-titulo{font-size:14px;font-weight:600;color:var(--t2);line-height:1.4;}
+.acao-detalhe{font-size:12px;color:var(--t3);margin-top:3px;line-height:1.5;}
+.acao-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t4);margin-top:6px;}
 
-/* DIAGNOSTICO IA */
-.diag-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:20px;margin-bottom:16px;max-height:400px;overflow-y:auto;}
-.diag-card::-webkit-scrollbar{width:3px;}
-.diag-card::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px;}
-.diag-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.diag-titulo{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
-.diag-titulo .ia-badge{font-size:9px;font-weight:600;letter-spacing:1px;color:var(--t4);padding:2px 8px;border:1px solid var(--borda);border-radius:4px;}
-.diag-hora{font-size:10px;color:var(--t4);}
-.diag-resumo{font-size:clamp(12px,1vw,16px);color:var(--t2);line-height:1.6;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:2px solid rgba(255,255,255,0.15);}
-.diag-section{margin-bottom:14px;}
-.diag-section-title{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
-.diag-item{display:flex;gap:8px;align-items:flex-start;padding:5px 0;}
-.diag-item .di-icon{font-size:10px;margin-top:2px;flex-shrink:0;width:14px;text-align:center;}
-.diag-item .di-text{font-size:clamp(11px,0.9vw,15px);color:var(--t3);line-height:1.5;}
-.diag-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.06);border:1px solid var(--borda);border-radius:8px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
-.diag-btn:hover{background:rgba(255,255,255,0.1);color:var(--t2);}
+/* NUMEROS RAPIDOS */
+.numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:40px;}
+.num-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;padding:16px;transition:border-color .2s;}
+.num-card:hover{border-color:var(--borda2);}
+.num-label{font-size:9px;font-weight:600;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.num-value{font-size:clamp(20px,2.5vw,32px);font-weight:800;letter-spacing:-1px;}
+.num-sub{font-size:10px;color:var(--t4);margin-top:4px;}
+.num-warn{border-left:2px solid rgba(255,255,255,0.4);}
 
-/* CHATBOT */
-.chat-fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:#fff;color:#000;border:none;border-radius:14px;font-size:20px;cursor:pointer;z-index:200;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:transform .2s;}
-.chat-fab:hover{transform:scale(1.08);}
-.chat-panel{position:fixed;bottom:80px;right:20px;width:360px;max-height:500px;background:var(--bg1);border:1px solid var(--borda2);border-radius:16px;z-index:200;display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.6);}
-.chat-panel.open{display:flex;}
-.chat-panel-header{padding:14px 16px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:center;}
-.chat-panel-title{font-size:13px;font-weight:700;}
-.chat-panel-close{background:none;border:none;color:var(--t4);font-size:18px;cursor:pointer;padding:0 4px;}
-.chat-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:360px;}
-.chat-msg{font-size:11px;line-height:1.6;padding:10px 14px;border-radius:12px;max-width:90%;}
+/* CHAT */
+.chat-area{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(transparent, #000 20%);padding:12px 24px 20px;z-index:100;}
+.chat-box{max-width:800px;margin:0 auto;display:flex;gap:10px;}
+.chat-input{flex:1;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid var(--borda2);border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.chat-input:focus{border-color:rgba(255,255,255,0.3);}
+.chat-input::placeholder{color:var(--t4);}
+.chat-send{background:#fff;color:#000;border:none;border-radius:12px;padding:0 24px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;transition:opacity .2s;}
+.chat-send:hover{opacity:0.85;}
+
+/* CHAT MSGS */
+.chat-msgs{max-width:800px;margin:0 auto 16px;display:none;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;padding:0 4px;}
+.chat-msgs.has-msgs{display:flex;}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px;}
+.chat-msg{font-size:13px;line-height:1.6;padding:12px 16px;border-radius:12px;max-width:85%;animation:fadeIn .2s;}
 .chat-msg.bot{background:rgba(255,255,255,0.04);color:var(--t2);align-self:flex-start;border:1px solid var(--borda);}
 .chat-msg.user{background:rgba(255,255,255,0.1);color:var(--t1);align-self:flex-end;}
-.chat-input-wrap{padding:10px 14px;border-top:1px solid var(--borda);display:flex;gap:8px;}
-.chat-input{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-radius:10px;padding:10px 14px;color:#fff;font-family:'Outfit',sans-serif;font-size:12px;outline:none;}
-.chat-input::placeholder{color:var(--t4);}
-.chat-send{background:#fff;color:#000;border:none;border-radius:10px;padding:0 16px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;}
-.chat-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px;}
-.chat-quick-btn{padding:5px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-radius:8px;font-size:10px;color:var(--t3);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
-.chat-quick-btn:hover{background:rgba(255,255,255,0.08);color:var(--t2);}
+.chat-msg.loading{color:var(--t4);font-style:italic;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-@media(max-width:800px){.grid-4{grid-template-columns:1fr 1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
-@media(max-width:768px){
-  .sidebar{width:48px;}
-  .sidebar-logo{width:30px;height:30px;font-size:9px;border-radius:8px;margin-bottom:20px;}
-  .sidebar-item{width:32px;height:32px;font-size:14px;border-radius:8px;}
-  .main{margin-left:48px;padding:14px 12px;}
-  .header{margin-bottom:16px;}.header-title{font-size:16px;}.header-time{font-size:18px;}
-  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .tab{padding:7px 14px;font-size:11px;white-space:nowrap;}
-  .grid-2,.grid-3{grid-template-columns:1fr;gap:12px;}
-  .grid-4{grid-template-columns:1fr 1fr;gap:10px;}
-  .card{padding:12px;border-radius:12px;}.card-value{font-size:20px;}
-  .card-label{font-size:9px;letter-spacing:1px;margin-bottom:6px;}
-  .card-sub{font-size:10px;}
-  .kanban-row{flex-wrap:wrap;}.kanban-col{min-width:calc(50% - 4px);}
-  .chat-panel{width:calc(100% - 24px);right:12px;bottom:74px;max-height:70vh;}
-  .chat-fab{bottom:14px;right:14px;width:42px;height:42px;font-size:18px;border-radius:12px;}
+/* MOBILE */
+@media(max-width:640px){
+  .topbar{padding:14px 16px;}
+  .content{padding:20px 16px 120px;}
+  .numeros{grid-template-columns:1fr 1fr;gap:8px;}
+  .num-card{padding:12px;}
+  .briefing-card{padding:18px;font-size:14px;}
+  .chat-area{padding:10px 16px 16px;}
 }
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div style="width:100%;max-width:340px;padding:24px;">
-    <div style="text-align:center;margin-bottom:40px;">
-      <div style="font-family:'Outfit',sans-serif;font-size:42px;font-weight:900;letter-spacing:-2px;">DM<span style="color:rgba(255,255,255,0.15);">.</span>Stack</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px;">COMMAND CENTER</div>
+<div class="login-wrap" id="tela-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>DM<span>.</span>Stack</h1>
+      <p>COMMAND CENTER</p>
     </div>
-    <input id="login-email" type="email" placeholder="Email" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:10px;outline:none;" autocomplete="email">
-    <input id="login-senha" type="password" placeholder="Senha" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:16px;outline:none;" autocomplete="current-password">
-    <button onclick="fazerLogin()" style="width:100%;padding:14px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">Entrar</button>
-    <div id="login-erro" style="text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:12px;min-height:18px;"></div>
+    <input class="login-input" id="login-email" type="email" placeholder="Email" autocomplete="email">
+    <input class="login-input" id="login-senha" type="password" placeholder="Senha" autocomplete="current-password">
+    <button class="login-btn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-erro" id="login-erro"></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app-container" style="display:none;">
-<nav class="sidebar">
-  <div class="sidebar-logo" onclick="switchView('hoje')">DM</div>
-  <div class="sidebar-item active" data-view="hoje" onclick="switchView('hoje')" title="Hoje">&#9733;</div>
-  <div class="sidebar-item" data-view="edr" onclick="switchView('edr')" title="EDR System">&#9874;</div>
-  <div class="sidebar-item" data-view="rpm" onclick="switchView('rpm')" title="RPM Pro">&#9881;</div>
-  <div style="flex:1;"></div>
-  <div class="sidebar-item" onclick="fazerLogout()" title="Sair" style="color:#ef4444;opacity:0.6;">&#10140;</div>
-</nav>
-
-<div class="main">
-  <div class="header">
-    <div>
-      <div class="header-title">Command Center</div>
-      <div class="header-sub">DM.STACK</div>
-    </div>
-    <div class="header-right">
-      <div class="status-live" id="cc-status">CARREGANDO</div>
-      <div>
-        <div class="header-date" id="cc-date"></div>
-        <div class="header-time" id="cc-time"></div>
-      </div>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-logo">DM<span>.</span>Stack</div>
+    <div class="topbar-right">
+      <div class="topbar-status" id="app-status">CARREGANDO</div>
+      <div class="topbar-time" id="app-time"></div>
+      <button class="topbar-sair" onclick="fazerLogout()">Sair</button>
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-view="hoje" onclick="switchView('hoje')">Hoje</div>
-    <div class="tab" data-view="edr" onclick="switchView('edr')">EDR System</div>
-    <div class="tab" data-view="rpm" onclick="switchView('rpm')">RPM Pro</div>
-  </div>
+  <div class="content">
+    <!-- SAUDACAO -->
+    <div class="greeting">
+      <h2 id="app-greeting">Bom dia, Duam.</h2>
+      <p id="app-date"></p>
+    </div>
 
-  <!-- HOJE -->
-  <div id="view-hoje" class="view active">
-    <div class="grid-4" id="cc-resumo"><div class="loading">Carregando...</div></div>
-    <div class="grid-2">
-      <div>
-        <div class="sec-title">Acoes do Dia</div>
-        <div id="cc-acoes"><div class="loading">Carregando...</div></div>
+    <!-- NUMEROS RAPIDOS -->
+    <div class="numeros" id="app-numeros">
+      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
+      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
+      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
+      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
+    </div>
+
+    <!-- BRIEFING DO DIA -->
+    <div class="briefing">
+      <div class="briefing-header">
+        <div class="briefing-label">Briefing do dia</div>
+        <button class="briefing-refresh" onclick="gerarBriefing()">&#8635; Atualizar</button>
       </div>
-      <div>
-        <div class="sec-title">Diagnostico IA</div>
-        <div id="cc-diag" class="scroll-y" style="max-height:500px;"><div class="loading">Carregando...</div></div>
+      <div id="app-briefing">
+        <div class="briefing-empty">
+          <div>Nenhum briefing gerado hoje</div>
+          <button onclick="gerarBriefing()">Gerar briefing com IA</button>
+        </div>
       </div>
+    </div>
+
+    <!-- ACOES DO DIA -->
+    <div class="acoes">
+      <div class="acoes-header">
+        <div class="acoes-label">Acoes do dia</div>
+        <div class="acoes-count" id="app-acoes-count"></div>
+      </div>
+      <div id="app-acoes"><div style="text-align:center;padding:24px;color:var(--t4);font-size:13px;">Carregando...</div></div>
     </div>
   </div>
 
-  <!-- EDR SYSTEM -->
-  <div id="view-edr" class="view">
-    <div class="grid-4" id="edr-kpis"><div class="loading">Carregando...</div></div>
-    <div class="grid-2">
-      <div>
-        <div class="sec-title">Obras — Orcamento Consumido</div>
-        <div class="card"><div class="scroll-y" id="edr-obras"><div class="loading">Carregando...</div></div></div>
-      </div>
-      <div>
-        <div class="sec-title">Alertas</div>
-        <div class="card"><div class="scroll-y" id="edr-alertas"><div class="loading">Carregando...</div></div></div>
-      </div>
+  <!-- CHAT FIXO NO FUNDO -->
+  <div class="chat-area">
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chat-box">
+      <input class="chat-input" id="chat-input" placeholder="Pergunta sobre seus negocios..." onkeydown="if(event.key==='Enter')enviarChat()">
+      <button class="chat-send" onclick="enviarChat()">&#8594;</button>
     </div>
-  </div>
-
-  <!-- RPM PRO -->
-  <div id="view-rpm" class="view">
-    <div class="grid-4" id="rpm-kpis"><div class="loading">Carregando...</div></div>
-    <div class="sec-title">Kanban — OS por Status</div>
-    <div class="kanban-row" id="rpm-kanban"><div class="loading">Carregando...</div></div>
-    <div class="grid-2">
-      <div>
-        <div class="sec-title">Fluxos Travados</div>
-        <div class="card"><div class="scroll-y" id="rpm-fluxos"><div class="loading">Carregando...</div></div></div>
-      </div>
-      <div>
-        <div class="sec-title">Onde Ta Perdendo Dinheiro</div>
-        <div class="card"><div class="scroll-y" id="rpm-dinheiro"><div class="loading">Carregando...</div></div></div>
-      </div>
-    </div>
-    <div style="margin-top:16px;">
-      <div class="sec-title">Modulos — Adocao</div>
-      <div class="card"><div class="scroll-y" id="rpm-modulos"><div class="loading">Carregando...</div></div></div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- CHATBOT -->
-<button class="chat-fab" onclick="toggleChat()" title="Ajuda">?</button>
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-panel-header">
-    <div class="chat-panel-title">Ajuda DM.Stack</div>
-    <button class="chat-panel-close" onclick="toggleChat()">&#10005;</button>
-  </div>
-  <div class="chat-msgs" id="chat-msgs">
-    <div class="chat-msg bot">Oi Duam! Posso te ajudar a entender qualquer coisa no DM.Stack. Pergunta ai ou clica num atalho abaixo.</div>
-  </div>
-  <div class="chat-quick" id="chat-quick">
-    <button class="chat-quick-btn" onclick="chatPergunta('O que cada aba mostra?')">Abas</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('O que e saldo negativo?')">Saldo</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('O que e mao de obra?')">Mao de Obra</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('O que e o Kanban?')">Kanban</button>
-    <button class="chat-quick-btn" onclick="chatPergunta('Como funciona o diagnostico IA?')">Diagnostico IA</button>
-  </div>
-  <div class="chat-input-wrap">
-    <input class="chat-input" id="chat-input" placeholder="Pergunta..." onkeydown="if(event.key==='Enter')chatEnviar()">
-    <button class="chat-send" onclick="chatEnviar()">&#8594;</button>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════
-// CONEXÃO SUPABASE (SÓ DMS — chaves EDR/RPM ficam no servidor)
-// ══════════════════════════════════════
-const DMS_URL='https://bkfkzauhnlulrtttgcii.supabase.co';
-const DMS_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
-const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+// ══════════════════════════════════════════════════════
+// DM.STACK v2 — AGENTE, NAO DASHBOARD
+// ══════════════════════════════════════════════════════
+const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
+const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
 
-// ══════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════
-function fmtR(v){return(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
-function fmtK(v){const n=Number(v)||0;return Math.abs(n)>=1000?'R$ '+(n/1000).toFixed(1)+'k':fmtR(n);}
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-function hoje(){return new Date().toISOString().split('T')[0];}
-function dt(v){return v?(v.length>10?v.substring(0,10):v):'';}
-function fmtData(v){if(!v)return '—';const d=dt(v);return d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';}
+let _token = null;
 
-let _authToken=null;
+// ── Helpers ──
+function fmtR(v) { return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtK(v) { const n=Number(v)||0; return Math.abs(n)>=1000?'R$ '+(n/1000).toFixed(1)+'k':fmtR(n); }
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function hoje() { return new Date().toISOString().split('T')[0]; }
 
-function dmsGet(t,q=''){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]);}
-function dmsPatch(t,q='',b={}){return fetch(`${DMS_URL}/rest/v1/${t}${q}`,{method:'PATCH',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(b)}).catch(()=>{});}
-function dmsPost(t,b){return fetch(`${DMS_URL}/rest/v1/${t}`,{method:'POST',headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)}).then(r=>r.json()).catch(()=>[]);}
-
-function updateClock(){
-  const n=new Date();
-  document.getElementById('cc-time').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  const ds=['Domingo','Segunda','Terca','Quarta','Quinta','Sexta','Sabado'];
-  const ms=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('cc-date').textContent=ds[n.getDay()]+', '+n.getDate()+' de '+ms[n.getMonth()];
+function dmsGet(t,q='') {
+  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
+    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Accept':'application/json'}
+  }).then(r=>r.json()).catch(()=>[]);
+}
+function dmsPost(t,b) {
+  return fetch(`${DMS_URL}/rest/v1/${t}`, {
+    method:'POST',
+    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json', 'Prefer':'return=representation'},
+    body: JSON.stringify(b)
+  }).then(r=>r.json()).catch(()=>[]);
+}
+function dmsPatch(t,q='',b={}) {
+  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
+    method:'PATCH',
+    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json', 'Prefer':'return=minimal'},
+    body: JSON.stringify(b)
+  }).catch(()=>{});
 }
 
-function switchView(v){
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
-  document.getElementById('view-'+v)?.classList.add('active');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
-  document.querySelectorAll('.sidebar-item[data-view]').forEach(s=>s.classList.toggle('active',s.dataset.view===v));
+function callEdge(fn, body={}) {
+  return fetch(`${DMS_URL}/functions/v1/${fn}`, {
+    method: 'POST',
+    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  }).then(r => r.json()).catch(e => ({ok:false, erro:e.message}));
 }
 
-// Cache dos dados (preenchido pela Edge Function)
-let _edr=null,_rpm=null;
+// ── Clock & Greeting ──
+function updateUI() {
+  const n = new Date();
+  const h = n.getHours();
+  const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('app-greeting').textContent = saudacao + ', Duam.';
 
-// ══════════════════════════════════════
-// RENDER — HOJE
-// ══════════════════════════════════════
-function renderHoje(){
-  const edr=_edr||{},rpm=_rpm||{};
-  const mm=new Date().getMonth();
-
-  document.getElementById('cc-resumo').innerHTML=`
-    <div class="card"><div class="card-label">Saldo EDR ${MESES[mm]}</div><div class="card-value">${fmtK(edr.saldo||0)}</div><div class="card-sub">Entradas ${fmtK(edr.total_entrada||0)} · Saidas ${fmtK(edr.total_saida||0)}</div></div>
-    <div class="card"><div class="card-label">Mao de Obra</div><div class="card-value">${edr.pct_mao||0}%</div><div class="card-sub">${fmtK(edr.mao_obra||0)} de ${fmtK(edr.total_saida||0)}</div></div>
-    <div class="card"><div class="card-label">RPM — OS Hoje</div><div class="card-value">${rpm.os_hoje||0}</div><div class="card-sub">${rpm.os_abertas||0} abertas · ${rpm.dias_com_os||0}/7 dias ativos</div></div>
-    <div class="card"><div class="card-label">RPM — Faturado ${MESES[mm]}</div><div class="card-value">${fmtK(rpm.faturamento_mes||0)}</div><div class="card-sub">${rpm.entregues_mes||0} entregas · ticket ${fmtR(rpm.ticket_medio||0)}</div></div>`;
+  const dias = ['Domingo','Segunda-feira','Terca-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sabado'];
+  const meses = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  document.getElementById('app-date').textContent = dias[n.getDay()] + ', ' + n.getDate() + ' de ' + meses[n.getMonth()] + ' de ' + n.getFullYear();
+  document.getElementById('app-time').textContent = String(h).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
 }
 
-// ══════════════════════════════════════
-// RENDER — EDR SYSTEM
-// ══════════════════════════════════════
-function renderEDR(){
-  const e=_edr||{},mm=new Date().getMonth();
-  const alertas=[];
+// ── Dados ──
+let _dados = null; // { edr: {...}, rpm: {...} }
 
-  // KPIs
-  document.getElementById('edr-kpis').innerHTML=`
-    <div class="card ${(e.saldo||0)<0?'card-warn':'card-ok'}"><div class="card-label">Saldo ${MESES[mm]}</div><div class="card-value">${fmtK(e.saldo||0)}</div><div class="card-sub">Entradas ${fmtK(e.total_entrada||0)}</div></div>
-    <div class="card"><div class="card-label">Saidas ${MESES[mm]}</div><div class="card-value">${fmtK(e.total_saida||0)}</div></div>
-    <div class="card ${(e.pct_mao||0)>40?'card-warn':'card-ok'}"><div class="card-label">Mao de Obra</div><div class="card-value">${e.pct_mao||0}%</div><div class="card-sub">${fmtK(e.mao_obra||0)}</div></div>
-    <div class="card"><div class="card-label">Obras</div><div class="card-value">${(e.obras||[]).length}</div><div class="card-sub">em andamento${(e.nao_iniciadas||[]).length?' · '+(e.nao_iniciadas||[]).length+' aguardando':''}${(e.internos||[]).length?' · '+(e.internos||[]).length+' interno':''}</div></div>`;
-
-  // Obras em andamento
-  const obras=e.obras||[];
-  const naoIniciadas=e.nao_iniciadas||[];
-  const internos=e.internos||[];
-  let oh='';
-  obras.forEach(o=>{
-    const pct=o.pct||0;
-    if(pct>85)alertas.push(`<strong>${esc(o.nome)}</strong> em ${pct}% do orcamento — gasto ${fmtK(o.gasto_total)} de ${fmtK(o.receita)}`);
-    oh+=`<div class="row">
-      <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--t2);">${esc(o.nome)}</div><div style="font-size:10px;color:var(--t4);margin-top:2px;">Mes: ${fmtK(o.gasto_mes)} · Total: ${fmtK(o.gasto_total)}</div></div>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(pct,100)}%;opacity:${pct>85?0.6:1};"></div></div>
-      <div style="font-size:12px;font-weight:700;width:36px;text-align:right;${pct>85?'color:var(--t2);':'color:var(--t3);'}">${pct}%</div>
-      <div style="font-size:11px;color:var(--t4);width:70px;text-align:right;">${fmtK(o.receita)}</div>
-    </div>`;
-  });
-  // Obras em documentação / aguardando início
-  if(naoIniciadas.length){
-    oh+=`<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--borda);"><div style="font-size:10px;color:var(--t4);letter-spacing:1px;margin-bottom:8px;">DOCUMENTACAO / AGUARDANDO</div>`;
-    naoIniciadas.forEach(o=>{
-      oh+=`<div class="row" style="opacity:0.5;"><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--t3);">${esc(o.nome)}</div><div style="font-size:10px;color:var(--t4);margin-top:2px;">Receita: ${fmtK(o.receita)}${o.gasto_total>0?' · Doc: '+fmtK(o.gasto_total):''}</div></div><div style="font-size:10px;color:var(--t4);">Aguardando</div></div>`;
-    });
-    oh+=`</div>`;
-  }
-  // Custos internos (escritório, etc)
-  if(internos.length){
-    oh+=`<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--borda);"><div style="font-size:10px;color:var(--t4);letter-spacing:1px;margin-bottom:8px;">CUSTO INTERNO</div>`;
-    internos.forEach(o=>{
-      oh+=`<div class="row" style="opacity:0.4;"><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--t3);">${esc(o.nome)}</div><div style="font-size:10px;color:var(--t4);margin-top:2px;">Mes: ${fmtK(o.gasto_mes)} · Total: ${fmtK(o.gasto_total)}</div></div></div>`;
-    });
-    oh+=`</div>`;
-  }
-  document.getElementById('edr-obras').innerHTML=oh||'<div class="loading">Nenhuma obra</div>';
-
-  // Alertas
-  if((e.saldo||0)<0)alertas.push(`<strong>Saldo negativo</strong> em ${MESES[mm]}: ${fmtR(e.saldo)} — conferir repasses pendentes`);
-  if((e.pct_mao||0)>40)alertas.push(`<strong>Mao de obra</strong> em ${e.pct_mao}% das saidas — ideal abaixo de 35-40%`);
-  if((e.lanc_sem_codigo||0)>3)alertas.push(`<strong>${e.lanc_sem_codigo} lancamentos</strong> sem codigo do catalogo este mes`);
-  if((e.dias_sem_lanc||0)>3)alertas.push(`<strong>${e.dias_sem_lanc} dias</strong> sem lancamento — dados podem estar defasados`);
-
-  document.getElementById('edr-alertas').innerHTML=alertas.length?alertas.map(a=>`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.4);"></div><div class="row-text">${a}</div></div>`).join(''):'<div style="text-align:center;padding:20px;font-size:11px;color:var(--t4);">Nenhum alerta</div>';
-}
-
-// ══════════════════════════════════════
-// RENDER — RPM PRO
-// ══════════════════════════════════════
-function renderRPM(){
-  const r=_rpm||{},mm=new Date().getMonth();
-
-  // KPIs
-  const dTrial=r.trial_ate?Math.ceil((new Date(r.trial_ate)-new Date())/(864e5)):null;
-  document.getElementById('rpm-kpis').innerHTML=`
-    <div class="card"><div class="card-label">${esc(r.nome||'Carbon')}</div><div class="card-value">${r.total_os||0} OS</div><div class="card-sub">${dTrial!==null?(dTrial>0?'Trial: '+dTrial+' dias':'Trial expirado'):'Ativo'}</div></div>
-    <div class="card ${(r.dias_com_os||0)<3?'card-warn':'card-ok'}"><div class="card-label">Frequencia</div><div class="card-value">${r.dias_com_os||0}/7</div><div class="card-sub">Dias com OS na semana</div></div>
-    <div class="card"><div class="card-label">Faturado ${MESES[mm]}</div><div class="card-value">${fmtK(r.faturamento_mes||0)}</div><div class="card-sub">${r.entregues_mes||0} entregas</div></div>
-    <div class="card"><div class="card-label">Ticket Medio</div><div class="card-value">${fmtR(r.ticket_medio||0)}</div></div>`;
-
-  // Kanban
-  const kanban=r.kanban||{};
-  const labels=r.statusLabels||{};
-  const total=Math.max(Object.values(kanban).reduce((s,v)=>s+v,0),1);
-  // Ordem fixa dos status
-  const statusOrder=['entrada','diagnostico','orcamento','aprovada','aguardando_peca','execucao','pronto','entregue'];
-  let kh='';
-  statusOrder.forEach(st=>{
-    const v=kanban[st]||0;
-    if(v>0||['execucao','pronto','entregue'].includes(st)){
-      kh+=`<div class="kanban-col"><div class="kv">${v}</div><div class="kl">${labels[st]||st}</div><div class="kb"><div class="kf" style="width:${v/total*100}%;"></div></div></div>`;
+async function carregarDados() {
+  const st = document.getElementById('app-status');
+  try {
+    const r = await callEdge('get-dashboard-data');
+    if (r.ok) {
+      _dados = r;
+      st.textContent = 'LIVE';
+      renderNumeros();
+      gerarAcoesLocais();
+    } else {
+      st.textContent = 'OFFLINE';
+      st.style.color = 'rgba(255,255,255,0.2)';
     }
+  } catch(e) {
+    st.textContent = 'ERRO';
+    st.style.color = 'rgba(255,255,255,0.2)';
+  }
+}
+
+function renderNumeros() {
+  if (!_dados) return;
+  const edr = _dados.edr || {};
+  const rpm = _dados.rpm || {};
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mm = meses[new Date().getMonth()];
+
+  document.getElementById('app-numeros').innerHTML = `
+    <div class="num-card ${(edr.saldo||0)<0?'num-warn':''}">
+      <div class="num-label">Saldo EDR ${mm}</div>
+      <div class="num-value">${fmtK(edr.saldo||0)}</div>
+      <div class="num-sub">Ent ${fmtK(edr.total_entrada||0)} · Sai ${fmtK(edr.total_saida||0)}</div>
+    </div>
+    <div class="num-card ${(edr.pct_mao||0)>40?'num-warn':''}">
+      <div class="num-label">Mao de Obra</div>
+      <div class="num-value">${edr.pct_mao||0}%</div>
+      <div class="num-sub">${fmtK(edr.mao_obra||0)} de ${fmtK(edr.total_saida||0)}</div>
+    </div>
+    <div class="num-card">
+      <div class="num-label">RPM — OS Abertas</div>
+      <div class="num-value">${rpm.os_abertas||0}</div>
+      <div class="num-sub">${rpm.os_hoje||0} hoje · ${rpm.entregues_mes||0} entregas ${mm}</div>
+    </div>
+    <div class="num-card">
+      <div class="num-label">RPM — Faturado ${mm}</div>
+      <div class="num-value">${fmtK(rpm.faturamento_mes||0)}</div>
+      <div class="num-sub">Ticket ${fmtR(rpm.ticket_medio||0)}</div>
+    </div>
+  `;
+}
+
+// ── Acoes do dia (geradas localmente a partir dos dados) ──
+function gerarAcoesLocais() {
+  if (!_dados) return;
+  const edr = _dados.edr || {};
+  const rpm = _dados.rpm || {};
+  const acoes = [];
+
+  // EDR
+  (edr.obras||[]).forEach(o => {
+    if ((o.pct||0) > 85) acoes.push({pri:1, tag:'edr', titulo:`${o.nome} em ${o.pct}% do orcamento`, detalhe:`Gasto ${fmtK(o.gasto_total)} de ${fmtK(o.receita)}`});
   });
-  document.getElementById('rpm-kanban').innerHTML=kh||'<div class="loading">Sem dados</div>';
+  if ((edr.saldo||0) < 0) acoes.push({pri:1, tag:'edr', titulo:`Saldo negativo: ${fmtR(edr.saldo)}`, detalhe:'Conferir repasses pendentes'});
+  if ((edr.pct_mao||0) > 40) acoes.push({pri:2, tag:'edr', titulo:`Mao de obra em ${edr.pct_mao}%`, detalhe:'Ideal abaixo de 35-40%'});
 
-  // Fluxos travados
-  let fh='';
-  if(r.sem_mecanico>0)fh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.4);"></div><div class="row-text"><strong>${r.sem_mecanico} OS</strong> abertas sem mecanico atribuido</div></div>`;
-  if(r.entregue_sem_pgto>0)fh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.5);"></div><div class="row-text"><strong>${r.entregue_sem_pgto} OS</strong> entregues sem pagamento — ${fmtR(r.valor_sem_pgto)} no limbo</div></div>`;
-  if(r.peca_sem_custo>0)fh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.3);"></div><div class="row-text"><strong>${r.peca_sem_custo} pecas</strong> com custo zerado — margem impossivel de calcular</div></div>`;
-  document.getElementById('rpm-fluxos').innerHTML=fh||'<div style="text-align:center;padding:20px;font-size:11px;color:var(--t4);">Nenhum fluxo travado</div>';
+  // RPM
+  if ((rpm.entregue_sem_pgto||0) > 0) acoes.push({pri:1, tag:'rpm', titulo:`${rpm.entregue_sem_pgto} OS sem pagamento — ${fmtR(rpm.valor_sem_pgto)}`, detalhe:'Cobrar do Marcondes/Rafael'});
+  if ((rpm.sem_mecanico||0) > 0) acoes.push({pri:2, tag:'rpm', titulo:`${rpm.sem_mecanico} OS sem mecanico`, detalhe:'Fluxo travado'});
+  if ((rpm.peca_sem_custo||0) > 0) acoes.push({pri:2, tag:'rpm', titulo:`${rpm.peca_sem_custo} pecas sem custo`, detalhe:'Margem impossivel de calcular'});
+  if ((rpm.dias_com_os||0) < 3) acoes.push({pri:2, tag:'rpm', titulo:`Carbon usou RPM so ${rpm.dias_com_os}/7 dias`, detalhe:'Frequencia baixa'});
 
-  // Dinheiro perdido
-  let dh='';
-  if(r.valor_sem_pgto>0)dh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.5);"></div><div class="row-text"><strong>${fmtR(r.valor_sem_pgto)}</strong> entregue sem cobrar (${r.entregue_sem_pgto} OS)</div></div>`;
-  if(r.canceladas>0)dh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.3);"></div><div class="row-text"><strong>${r.canceladas} OS canceladas</strong> — ${fmtR(r.valor_canceladas)} perdido</div></div>`;
-  if(r.peca_vendida_sem_custo>0)dh+=`<div class="row"><div class="row-dot" style="background:rgba(255,255,255,0.3);"></div><div class="row-text"><strong>${r.peca_vendida_sem_custo} pecas</strong> vendidas sem custo cadastrado — margem cega</div></div>`;
-  document.getElementById('rpm-dinheiro').innerHTML=dh||'<div style="text-align:center;padding:20px;font-size:11px;color:var(--t4);">Sem perdas detectadas</div>';
+  // Quinzena
+  const dia = new Date().getDate();
+  if ([14,15,16,30,31].includes(dia)) acoes.push({pri:1, tag:'edr', titulo:'Quinzena fecha — conferir diarias', detalhe:'Revisar faltas e valores'});
 
-  // Módulos
-  const mods=r.modulos||[];
-  document.getElementById('rpm-modulos').innerHTML=mods.map(m=>{
-    const op=m.usado?0.5:0.15;
-    return `<div class="row"><div class="row-dot" style="background:rgba(255,255,255,${op});"></div><div class="row-text"><strong>${m.nome}</strong></div><div class="row-val">${m.qtd>0?m.qtd+'x':'Nunca usado'}</div></div>`;
-  }).join('');
-}
+  acoes.sort((a,b) => a.pri - b.pri);
 
-// ══════════════════════════════════════
-// AÇÕES DO DIA
-// ══════════════════════════════════════
-let _acoesCarregando=false;
-async function loadAcoes(){
-  if(_acoesCarregando)return;
-  _acoesCarregando=true;
-  try{await _loadAcoesInner();}finally{_acoesCarregando=false;}
-}
-async function _loadAcoesInner(){
-  const hj=hoje();
-  let acoes=await dmsGet('dmstack_acoes','?data=eq.'+hj+'&order=prioridade,categoria');
-  if(!Array.isArray(acoes))acoes=[];
+  const el = document.getElementById('app-acoes');
+  const countEl = document.getElementById('app-acoes-count');
 
-  if(!acoes.length){
-    const edr=_edr||{},rpm=_rpm||{},novas=[];
-    const mm=MESES[new Date().getMonth()];
-
-    // EDR — só obras em andamento (iniciadas)
-    (edr.obras||[]).forEach(o=>{
-      if(o.pct>85)novas.push({data:hj,prioridade:1,categoria:'edr',titulo:o.nome+' em '+o.pct+'% do orcamento',detalhe:'Gasto '+fmtK(o.gasto_total)+' / Receita '+fmtK(o.receita),fonte:'edr'});
-    });
-    if((edr.saldo||0)<0)novas.push({data:hj,prioridade:1,categoria:'edr',titulo:'Saldo negativo em '+mm+': '+fmtR(edr.saldo),detalhe:'Entradas '+fmtK(edr.total_entrada)+' / Saidas '+fmtK(edr.total_saida),fonte:'edr'});
-    if((edr.pct_mao||0)>40)novas.push({data:hj,prioridade:2,categoria:'edr',titulo:'Mao de obra em '+edr.pct_mao+'% das saidas',detalhe:'Ideal abaixo de 35-40%',fonte:'edr'});
-
-    // RPM
-    if((rpm.entregue_sem_pgto||0)>0)novas.push({data:hj,prioridade:1,categoria:'rpm',titulo:rpm.entregue_sem_pgto+' OS entregues sem pagamento — '+fmtR(rpm.valor_sem_pgto),detalhe:'Cobrar do Marcondes',fonte:'rpm'});
-    if((rpm.sem_mecanico||0)>0)novas.push({data:hj,prioridade:2,categoria:'rpm',titulo:rpm.sem_mecanico+' OS sem mecanico atribuido',detalhe:'Fluxo travado na Carbon',fonte:'rpm'});
-    if((rpm.dias_com_os||0)<3)novas.push({data:hj,prioridade:2,categoria:'rpm',titulo:'Carbon usou RPM so '+rpm.dias_com_os+'/7 dias',detalhe:'Frequencia baixa — ligar pro Marcondes',fonte:'rpm'});
-
-    // Quinzena
-    const dia=new Date().getDate();
-    if([14,15,16,30,31].includes(dia))novas.push({data:hj,prioridade:1,categoria:'edr',titulo:'Quinzena fecha — conferir diarias',detalhe:'Revisar faltas e valores antes do fechamento',fonte:'edr'});
-
-    // Deduplicar por título antes de salvar
-    const titulosVistos=new Set();
-    const unicas=novas.filter(a=>{if(titulosVistos.has(a.titulo))return false;titulosVistos.add(a.titulo);return true;});
-    for(const a of unicas){await dmsPost('dmstack_acoes',a);}
-    acoes=acoes.concat(unicas);
-  }
-
-  // Deduplicar ações com mesmo título (pode ter duplicatas do banco)
-  const _seen=new Set();
-  acoes=acoes.filter(a=>{if(_seen.has(a.titulo))return false;_seen.add(a.titulo);return true;});
-  acoes.sort((a,b)=>(a.feito?1:0)-(b.feito?1:0)||a.prioridade-b.prioridade);
-  const pendentes=acoes.filter(a=>!a.feito).length;
-
-  if(!acoes.length){
-    document.getElementById('cc-acoes').innerHTML='<div class="card" style="text-align:center;padding:40px;"><div style="font-size:24px;margin-bottom:12px;">&#10003;</div><div style="font-size:13px;color:var(--t3);">Nenhuma acao pendente hoje.</div></div>';
-  } else {
-    document.getElementById('cc-acoes').innerHTML=
-      `<div style="margin-bottom:12px;font-size:12px;color:var(--t3);">${pendentes} pendente${pendentes!==1?'s':''} de ${acoes.length}</div>`+
-      acoes.map(a=>`<div class="acao-item ${a.feito?'feito':''}" onclick="toggleAcao('${a.id}',this)">
-        <div class="acao-check"></div>
-        <div class="acao-body">
-          <div class="acao-titulo">${esc(a.titulo)}</div>
-          ${a.detalhe?`<div class="acao-detalhe">${esc(a.detalhe)}</div>`:''}
-          <div class="acao-tag">${a.categoria||'geral'}</div>
-        </div>
-      </div>`).join('');
-  }
-}
-
-async function toggleAcao(id,el){
-  const feito=!el.classList.contains('feito');
-  el.classList.toggle('feito',feito);
-  await dmsPatch('dmstack_acoes','?id=eq.'+id,{feito});
-}
-
-// ══════════════════════════════════════
-// DIAGNOSTICO IA (OPCIONAL)
-// ══════════════════════════════════════
-async function loadDiagnosticos(){
-  const hj=hoje();
-  let diags=await dmsGet('dmstack_diagnosticos','?order=data.desc&limit=10');
-  if(!Array.isArray(diags))diags=[];
-  const ultimo=diags.find(d=>d.produto==='edr')||diags[0];
-
-  if(!ultimo){
-    document.getElementById('cc-diag').innerHTML=`<div class="diag-card" style="text-align:center;">
-      <div style="font-size:11px;color:var(--t4);margin-bottom:12px;">Nenhum diagnostico IA gerado</div>
-      <button class="diag-btn" onclick="rodarDiagnostico()">&#9881; Gerar Diagnostico</button>
-      <div style="font-size:9px;color:var(--t4);margin-top:8px;">Requer Edge Function deployada</div>
-    </div>`;
+  if (!acoes.length) {
+    el.innerHTML = '<div style="text-align:center;padding:32px;"><div style="font-size:20px;margin-bottom:8px;">&#10003;</div><div style="font-size:13px;color:var(--t3);">Nenhuma acao pendente.</div></div>';
+    countEl.textContent = '';
     return;
   }
 
-  // Mostrar os 2 mais recentes (resumo compacto)
-  let h='';
-  diags.slice(0,2).forEach(d=>{h+=renderDiagCard(d);});
-  h+=`<div style="text-align:center;margin-top:8px;"><button class="diag-btn" onclick="rodarDiagnostico()">&#9881; Atualizar Diagnostico</button></div>`;
-  document.getElementById('cc-diag').innerHTML=h;
+  countEl.textContent = acoes.length + ' pendente' + (acoes.length!==1?'s':'');
+  el.innerHTML = acoes.map((a,i) => `
+    <div class="acao" onclick="this.classList.toggle('feito')">
+      <div class="acao-check"></div>
+      <div class="acao-body">
+        <div class="acao-titulo">${esc(a.titulo)}</div>
+        ${a.detalhe ? `<div class="acao-detalhe">${esc(a.detalhe)}</div>` : ''}
+        <div class="acao-tag">${a.tag}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
-function renderDiagCard(d){
-  const problemas=d.problemas||[];
-  const acertos=d.acertos||[];
-  const recs=d.recomendacoes||[];
-  const hora=d.created_at?new Date(d.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
-  const diasAtras=Math.floor((Date.now()-new Date(d.data+'T12:00:00').getTime())/864e5);
-  const label=d.produto==='rpm'?'RPM Pro':'EDR System';
-  const freshLabel=diasAtras===0?'Hoje':diasAtras===1?'Ontem':diasAtras+' dias atras';
+// ── Briefing IA ──
+async function carregarBriefing() {
+  const diags = await dmsGet('dmstack_diagnosticos', '?order=created_at.desc&limit=1');
+  if (!Array.isArray(diags) || !diags.length) return;
 
-  let h=`<div class="diag-card">
-    <div class="diag-header">
-      <div class="diag-titulo">${label} <span class="ia-badge">IA</span></div>
-      <div class="diag-hora">${freshLabel} ${hora}</div>
-    </div>`;
-  if(d.resumo)h+=`<div class="diag-resumo">${esc(d.resumo)}</div>`;
-  if(problemas.length){h+=`<div class="diag-section"><div class="diag-section-title">Problemas</div>`;problemas.forEach(p=>{h+=`<div class="diag-item"><div class="di-icon">&#9679;</div><div class="di-text">${esc(p)}</div></div>`;});h+=`</div>`;}
-  if(recs.length){h+=`<div class="diag-section"><div class="diag-section-title">Recomendacoes</div>`;recs.forEach((r,i)=>{h+=`<div class="diag-item"><div class="di-icon">${i+1}</div><div class="di-text" style="color:var(--t2);">${esc(r)}</div></div>`;});h+=`</div>`;}
-  h+=`</div>`;
-  return h;
+  const d = diags[0];
+  const hj = hoje();
+  const dData = (d.data || d.created_at || '').substring(0, 10);
+  const diasAtras = Math.floor((Date.now() - new Date(dData+'T12:00:00').getTime()) / 864e5);
+  const freshLabel = diasAtras === 0 ? 'Hoje' : diasAtras === 1 ? 'Ontem' : diasAtras + ' dias atras';
+
+  // Briefing direto ou fallback pro resumo
+  let briefingText = d.briefing || '';
+  if (!briefingText) {
+    try { const raw = typeof d.raw_analysis === 'string' ? JSON.parse(d.raw_analysis) : d.raw_analysis; briefingText = raw?.analise?.briefing || d.resumo || ''; } catch(e) { briefingText = d.resumo || ''; }
+  }
+
+  // Problemas + recomendacoes
+  const problemas = d.problemas || [];
+  const recs = d.recomendacoes || [];
+
+  if (!briefingText && !problemas.length && !recs.length) return;
+
+  let html = '<div class="briefing-card">';
+  if (briefingText) html += `<p>${esc(briefingText)}</p>`;
+  if (problemas.length) {
+    html += '<p><strong>Atencao:</strong></p>';
+    problemas.forEach(p => { html += `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`; });
+  }
+  if (recs.length) {
+    html += '<p><strong>Recomendacoes:</strong></p>';
+    recs.forEach(r => { html += `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`; });
+  }
+  html += `<div style="text-align:right;font-size:10px;color:var(--t4);margin-top:12px;">${freshLabel} — gerado por IA</div>`;
+  html += '</div>';
+
+  document.getElementById('app-briefing').innerHTML = html;
 }
 
-async function rodarDiagnostico(){
-  const el=document.getElementById('cc-diag');
-  el.innerHTML='<div class="loading">Gerando diagnostico com IA... (30s)</div>';
-  try{
-    await refreshToken();
-    const r=await fetch(DMS_URL+'/functions/v1/diagnostico-diario',{
-      method:'POST',
-      headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
+async function gerarBriefing() {
+  const el = document.getElementById('app-briefing');
+  el.innerHTML = '<div class="briefing-empty" style="padding:24px;"><div style="font-size:13px;color:var(--t3);">Gerando briefing com IA... (30s)</div></div>';
+
+  const r = await callEdge('agente-diario');
+  if (r.ok) {
+    await carregarBriefing();
+  } else {
+    el.innerHTML = `<div class="briefing-empty"><div>Erro: ${esc(r.erro || 'falha na Edge Function')}</div><button onclick="gerarBriefing()" style="margin-top:12px;">Tentar de novo</button></div>`;
+  }
+}
+
+// ── Chat Interativo ──
+function addMsg(text, tipo) {
+  const el = document.getElementById('chat-msgs');
+  el.classList.add('has-msgs');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + tipo;
+  div.innerHTML = text;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function enviarChat() {
+  const inp = document.getElementById('chat-input');
+  const texto = inp.value.trim();
+  if (!texto) return;
+  inp.value = '';
+
+  addMsg(esc(texto), 'user');
+  addMsg('Pensando...', 'bot loading');
+
+  const r = await callEdge('agente-chat', { pergunta: texto });
+
+  // Remove "Pensando..."
+  const msgs = document.getElementById('chat-msgs');
+  const loading = msgs.querySelector('.loading');
+  if (loading) loading.remove();
+
+  if (r.ok && r.resposta) {
+    addMsg(esc(r.resposta), 'bot');
+  } else {
+    addMsg('Nao consegui processar. Tenta de novo.', 'bot');
+  }
+}
+
+// ── Auth ──
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const erroEl = document.getElementById('login-erro');
+  if (!email || !senha) { erroEl.textContent = 'Preencha email e senha.'; return; }
+  erroEl.textContent = 'Entrando...';
+
+  try {
+    const r = await fetch(DMS_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: {'apikey': DMS_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password: senha})
     });
-    if(!r.ok){
-      el.innerHTML=`<div class="diag-card" style="text-align:center;">
-        <div style="font-size:12px;color:var(--t3);margin-bottom:8px;">Diagnostico IA indisponivel</div>
-        <div style="font-size:10px;color:var(--t4);line-height:1.6;">A Edge Function precisa ser deployada no Supabase.<br>Os dados do dashboard estao atualizados em tempo real.</div>
-      </div>`;return;
-    }
-    const d=await r.json();
-    if(d.ok){await loadDiagnosticos();}
-    else{el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro: ${esc(d.erro||'falha')}</div>`;}
-  }catch(e){el.innerHTML=`<div class="diag-card" style="color:var(--t3);font-size:11px;">Erro de conexao</div>`;}
-}
-
-// ══════════════════════════════════════
-// CHATBOT AJUDA
-// ══════════════════════════════════════
-function toggleChat(){document.getElementById('chat-panel').classList.toggle('open');}
-
-const chatBase={
-  'o que cada aba mostra':`<strong>Hoje:</strong> Resumo rapido + acoes do dia + diagnostico IA.<br><strong>EDR System:</strong> Saude financeira das obras — saldo, mao de obra, orcamento por obra.<br><strong>RPM Pro:</strong> Como a Carbon ta usando o sistema — frequencia, fluxos travados, dinheiro perdido, kanban.`,
-  'o que e saldo negativo':`Saldo negativo = as obras gastaram mais do que receberam no mes.<br><strong>Entradas</strong> = repasses CEF + pagamentos extras<br><strong>Saidas</strong> = lancamentos (material, mao de obra, etc)<br>Se ta negativo: falta repasse ou precisa cortar gasto.`,
-  'o que e mao de obra':`Percentual de mao de obra sobre o total de saidas. Ideal: 35-40%.<br>Se ta acima: obra com muita gente, diarias erradas, ou material nao lançado.`,
-  'o que e o kanban':`Kanban mostra quantas OS em cada etapa na oficina:<br><strong>Entrada/Diagnostico/Orcamento</strong> = inicio do fluxo<br><strong>Execucao</strong> = mecanico trabalhando<br><strong>Pronto</strong> = concluido, espera retirada<br><strong>Entregue</strong> = finalizado<br>Muita OS parada = fluxo lento.`,
-  'como funciona o diagnostico ia':`O diagnostico IA usa Claude pra analisar todos os dados e gerar insights. Roda via Edge Function no Supabase (botao "Gerar Diagnostico").<br>Se der erro, os dados reais continuam aparecendo normalmente — o IA e so um bonus.`,
-};
-
-function chatResposta(pergunta){
-  const p=pergunta.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[?!.]/g,'').trim();
-  for(const[k,v]of Object.entries(chatBase)){if(p.includes(k)||k.split(' ').filter(w=>w.length>3).every(w=>p.includes(w)))return v;}
-  if(p.includes('aba')||p.includes('tela'))return chatBase['o que cada aba mostra'];
-  if(p.includes('ia')||p.includes('diagnos'))return chatBase['como funciona o diagnostico ia'];
-  if(p.includes('saldo')||p.includes('negativ'))return chatBase['o que e saldo negativo'];
-  if(p.includes('mao')||p.includes('obra'))return chatBase['o que e mao de obra'];
-  if(p.includes('kanban')||p.includes('status'))return chatBase['o que e o kanban'];
-  return 'Tenta perguntar sobre: <strong>abas, saldo, mao de obra, kanban, diagnostico IA</strong>.';
-}
-
-function chatAddMsg(text,tipo){const el=document.getElementById('chat-msgs');const div=document.createElement('div');div.className='chat-msg '+tipo;div.innerHTML=text;el.appendChild(div);el.scrollTop=el.scrollHeight;}
-function chatPergunta(texto){chatAddMsg(esc(texto),'user');setTimeout(()=>chatAddMsg(chatResposta(texto),'bot'),300);}
-function chatEnviar(){const inp=document.getElementById('chat-input');const txt=inp.value.trim();if(!txt)return;inp.value='';chatPergunta(txt);}
-
-// ══════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════
-async function fazerLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const senha=document.getElementById('login-senha').value;
-  const erroEl=document.getElementById('login-erro');
-  if(!email||!senha){erroEl.textContent='Preencha email e senha.';return;}
-  erroEl.textContent='Entrando...';
-  try{
-    const r=await fetch(DMS_URL+'/auth/v1/token?grant_type=password',{
-      method:'POST',headers:{'apikey':DMS_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({email,password:senha})
-    });
-    const d=await r.json();
-    if(!r.ok){erroEl.textContent=d.error_description||d.msg||'Email ou senha incorretos.';return;}
-    _authToken=d.access_token;
-    localStorage.setItem('dms_token',d.access_token);
-    localStorage.setItem('dms_refresh',d.refresh_token);
+    const d = await r.json();
+    if (!r.ok) { erroEl.textContent = d.error_description || 'Email ou senha incorretos.'; return; }
+    _token = d.access_token;
+    localStorage.setItem('dms_token', d.access_token);
+    localStorage.setItem('dms_refresh', d.refresh_token);
     iniciarApp();
-  }catch(e){erroEl.textContent='Erro de conexao.';}
+  } catch(e) { erroEl.textContent = 'Erro de conexao.'; }
 }
 
-async function refreshToken(){
-  const rt=localStorage.getItem('dms_refresh');
-  if(!rt)return false;
-  try{
-    const r=await fetch(DMS_URL+'/auth/v1/token?grant_type=refresh_token',{
-      method:'POST',headers:{'apikey':DMS_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({refresh_token:rt})
+async function refreshToken() {
+  const rt = localStorage.getItem('dms_refresh');
+  if (!rt) return false;
+  try {
+    const r = await fetch(DMS_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: {'apikey': DMS_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({refresh_token: rt})
     });
-    const d=await r.json();
-    if(!r.ok)return false;
-    _authToken=d.access_token;
-    localStorage.setItem('dms_token',d.access_token);
-    localStorage.setItem('dms_refresh',d.refresh_token);
+    const d = await r.json();
+    if (!r.ok) return false;
+    _token = d.access_token;
+    localStorage.setItem('dms_token', d.access_token);
+    localStorage.setItem('dms_refresh', d.refresh_token);
     return true;
-  }catch(e){return false;}
+  } catch(e) { return false; }
 }
 
-function fazerLogout(){
-  _authToken=null;
+function fazerLogout() {
+  _token = null;
   localStorage.removeItem('dms_token');
   localStorage.removeItem('dms_refresh');
-  document.getElementById('app-container').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('login-email').value='';
-  document.getElementById('login-senha').value='';
-  document.getElementById('login-erro').textContent='';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('tela-login').style.display = 'flex';
 }
 
-// ══════════════════════════════════════
-// INIT
-// ══════════════════════════════════════
-async function carregarTudo(){
-  const st=document.getElementById('cc-status');
-  try{
-    // Busca dados via Edge Function (chaves ficam no servidor)
-    const r=await fetch(DMS_URL+'/functions/v1/get-dashboard-data',{
-      headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+(_authToken||DMS_KEY),'Content-Type':'application/json'}
-    });
-    if(!r.ok)throw new Error('Status '+r.status);
-    const d=await r.json();
-    if(d.ok){_edr=d.edr;_rpm=d.rpm;}
-    if(st){st.textContent='LIVE';st.style.color='';}
-  }catch(e){
-    console.warn('Erro coleta:',e);
-    if(st){st.textContent='ERRO';st.style.color='rgba(255,255,255,0.3)';}
-  }
-  renderHoje();
-  renderEDR();
-  renderRPM();
-  loadAcoes();
-  loadDiagnosticos();
-}
+// ── Init ──
+async function iniciarApp() {
+  document.getElementById('tela-login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  updateUI();
+  setInterval(updateUI, 30000);
 
-async function iniciarApp(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app-container').style.display='block';
-  updateClock();
-  setInterval(updateClock,30000);
-  await carregarTudo();
+  // Carrega tudo em paralelo
+  await Promise.all([
+    carregarDados(),
+    carregarBriefing()
+  ]);
+
   // Refresh a cada 5 min
-  setInterval(async()=>{await refreshToken();await carregarTudo();},5*60*1000);
+  setInterval(async () => {
+    await refreshToken();
+    await carregarDados();
+  }, 5 * 60 * 1000);
 }
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+// Service Worker
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 // Auto-login
-(async()=>{
-  const saved=localStorage.getItem('dms_token');
-  if(saved){
-    if(await refreshToken()){iniciarApp();return;}
-    _authToken=saved;
-    const r=await fetch(DMS_URL+'/auth/v1/user',{headers:{'apikey':DMS_KEY,'Authorization':'Bearer '+saved}}).catch(()=>({ok:false}));
-    if(r.ok){iniciarApp();return;}
+(async () => {
+  const saved = localStorage.getItem('dms_token');
+  if (saved) {
+    if (await refreshToken()) { iniciarApp(); return; }
+    _token = saved;
+    const r = await fetch(DMS_URL + '/auth/v1/user', {
+      headers: {'apikey': DMS_KEY, 'Authorization': 'Bearer ' + saved}
+    }).catch(() => ({ok:false}));
+    if (r.ok) { iniciarApp(); return; }
   }
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('app-container').style.display='none';
-  document.getElementById('login-senha').addEventListener('keydown',e=>{if(e.key==='Enter')fazerLogin();});
-  document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-senha').focus();});
+  document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-senha').addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
+  document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-senha').focus(); });
 })();
 </script>
 </body>
