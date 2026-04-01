@@ -360,8 +360,12 @@ async function coletarEDR(){
     const addIds=new Set(oadd.filter(a=>a.obra_id===o.id).map(a=>a.id));
     const addReceb=apg.filter(p=>addIds.has(p.adicional_id)).reduce((s,p)=>s+Number(p.valor||0),0);
     const totalEntradas=entradasObra+addReceb;
-    return {nome:o.nome,gasto_total:gt,gasto_mes:gm,mao_mes:maoMes,receita:rc,pct,entradas:totalEntradas,saldo:totalEntradas-gt};
+    const iniciada=gt>0||totalEntradas>0;
+    return {nome:o.nome,gasto_total:gt,gasto_mes:gm,mao_mes:maoMes,receita:rc,pct,entradas:totalEntradas,saldo:totalEntradas-gt,iniciada};
   });
+
+  const obrasIniciadas=obrasResumo.filter(o=>o.iniciada);
+  const obrasNaoIniciadas=obrasResumo.filter(o=>!o.iniciada);
 
   const semCod=lm.filter(l=>l.descricao&&!/^00/.test(l.descricao)).length;
   const ultLanc=lancAtivas.length?lancAtivas[0].data:null;
@@ -371,7 +375,7 @@ async function coletarEDR(){
     obras_ativas:obras.length,total_entrada:tEnt,total_saida:tSai,saldo:tEnt-tSai,
     mao_obra:tMao,pct_mao:tSai>0?Math.round(tMao/tSai*100):0,
     lanc_sem_codigo:semCod,dias_sem_lanc:diasSemLanc,
-    obras:obrasResumo,
+    obras:obrasIniciadas,nao_iniciadas:obrasNaoIniciadas,
   };
 }
 
@@ -485,10 +489,11 @@ function renderEDR(){
     <div class="card ${(e.saldo||0)<0?'card-warn':'card-ok'}"><div class="card-label">Saldo ${MESES[mm]}</div><div class="card-value">${fmtK(e.saldo||0)}</div><div class="card-sub">Entradas ${fmtK(e.total_entrada||0)}</div></div>
     <div class="card"><div class="card-label">Saidas ${MESES[mm]}</div><div class="card-value">${fmtK(e.total_saida||0)}</div></div>
     <div class="card ${(e.pct_mao||0)>40?'card-warn':'card-ok'}"><div class="card-label">Mao de Obra</div><div class="card-value">${e.pct_mao||0}%</div><div class="card-sub">${fmtK(e.mao_obra||0)}</div></div>
-    <div class="card"><div class="card-label">Obras Ativas</div><div class="card-value">${e.obras_ativas||0}</div></div>`;
+    <div class="card"><div class="card-label">Obras</div><div class="card-value">${(e.obras||[]).length}</div><div class="card-sub">em andamento${(e.nao_iniciadas||[]).length?' · '+(e.nao_iniciadas||[]).length+' aguardando':''}</div></div>`;
 
-  // Obras
+  // Obras em andamento
   const obras=e.obras||[];
+  const naoIniciadas=e.nao_iniciadas||[];
   let oh='';
   obras.forEach(o=>{
     const pct=o.pct||0;
@@ -500,6 +505,14 @@ function renderEDR(){
       <div style="font-size:11px;color:var(--t4);width:70px;text-align:right;">${fmtK(o.receita)}</div>
     </div>`;
   });
+  // Obras não iniciadas — só listar, sem barra nem alerta
+  if(naoIniciadas.length){
+    oh+=`<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--borda);"><div style="font-size:10px;color:var(--t4);letter-spacing:1px;margin-bottom:8px;">NAO INICIADAS</div>`;
+    naoIniciadas.forEach(o=>{
+      oh+=`<div class="row" style="opacity:0.5;"><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--t3);">${esc(o.nome)}</div><div style="font-size:10px;color:var(--t4);margin-top:2px;">${o.receita>0?'Receita: '+fmtK(o.receita):'Sem valor definido'}</div></div><div style="font-size:10px;color:var(--t4);">Aguardando</div></div>`;
+    });
+    oh+=`</div>`;
+  }
   document.getElementById('edr-obras').innerHTML=oh||'<div class="loading">Nenhuma obra</div>';
 
   // Alertas
@@ -574,7 +587,7 @@ async function loadAcoes(){
     const edr=_edr||{},rpm=_rpm||{},novas=[];
     const mm=MESES[new Date().getMonth()];
 
-    // EDR
+    // EDR — só obras em andamento (iniciadas)
     (edr.obras||[]).forEach(o=>{
       if(o.pct>85)novas.push({data:hj,prioridade:1,categoria:'edr',titulo:o.nome+' em '+o.pct+'% do orcamento',detalhe:'Gasto '+fmtK(o.gasto_total)+' / Receita '+fmtK(o.receita),fonte:'edr'});
     });
