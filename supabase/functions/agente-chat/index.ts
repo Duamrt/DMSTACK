@@ -62,8 +62,8 @@ async function coletarContexto() {
     sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `?company_id=eq.${EDR_CO}`),
     sbGet(EDR_URL, EDR_KEY, "materiais", `?company_id=eq.${EDR_CO}&select=id,nome,obra_id,quantidade,valor_unitario,unidade&order=nome&limit=500`),
     sbGet(EDR_URL, EDR_KEY, "notas_fiscais", `?company_id=eq.${EDR_CO}&select=id,fornecedor,valor,data,obra_id&order=data.desc&limit=100`),
-    sbGet(EDR_URL, EDR_KEY, "diarias", `?company_id=eq.${EDR_CO}&select=id,obra_id,data,valor_total,obras(nome)&order=data.desc&limit=200`),
-    sbGet(EDR_URL, EDR_KEY, "diarias_funcionarios", `?select=id,diaria_id,funcionario,valor,tipo&limit=500`),
+    sbGet(EDR_URL, EDR_KEY, "diarias", `?select=id,quinzena_id,data,funcionario,cargo,valor,periodos&order=data.desc&limit=500`),
+    sbGet(EDR_URL, EDR_KEY, "diarias_funcionarios", `?select=id,nome,cargo,diaria,ativo&ativo=eq.true`),
     sbGet(EDR_URL, EDR_KEY, "cronograma_tarefas", `?company_id=eq.${EDR_CO}&select=id,obra_id,titulo,progresso,data_inicio,data_fim&order=data_inicio&limit=200`),
     sbGet(EDR_URL, EDR_KEY, "contas_pagar", `?company_id=eq.${EDR_CO}&select=id,descricao,valor,vencimento,pago,obra_id&order=vencimento&limit=100`),
     // RPM
@@ -117,14 +117,14 @@ async function coletarContexto() {
     }
   })
 
-  // Diarias resumo
+  // Diarias resumo (tabela diarias tem: data, funcionario, valor, periodos)
   const diariasMes = diarias.filter((d: any) => (d.data || "").startsWith(ma))
-  const totalDiarias = diariasMes.reduce((s: number, d: any) => s + Number(d.valor_total || 0), 0)
-  // Funcionarios mais ativos
+  const totalDiarias = diariasMes.reduce((s: number, d: any) => s + Number(d.valor || 0), 0)
+  // Funcionarios: quanto cada um recebeu no mes
   const porFunc: Record<string, number> = {}
-  diariasFuncs.forEach((df: any) => {
-    const nome = df.funcionario || '-'
-    porFunc[nome] = (porFunc[nome] || 0) + Number(df.valor || 0)
+  diariasMes.forEach((d: any) => {
+    const nome = d.funcionario || '-'
+    porFunc[nome] = (porFunc[nome] || 0) + Number(d.valor || 0)
   })
   const topFuncionarios = Object.entries(porFunc).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([nome, valor]) => ({ nome, valor }))
 
@@ -151,7 +151,7 @@ async function coletarContexto() {
         total_mes: totalDiarias,
         funcionarios: topFuncionarios,
         ultimas_7_dias: diarias.filter((d: any) => (d.data||'') >= new Date(Date.now()-7*864e5).toISOString().split('T')[0])
-          .map((d: any) => ({ data: d.data, obra: d.obras?.nome || '-', valor: d.valor_total }))
+          .map((d: any) => ({ data: d.data, funcionario: d.funcionario, cargo: d.cargo, valor: d.valor, periodos: d.periodos }))
       },
       contas_pagar: { pendentes: contasPendentes.length, valor: totalContasPendentes, vencidas: contasVencidas.length },
       estoque_geral: { total_itens: materiais.length, valor_total: materiais.reduce((s: number, m: any) => s + (Number(m.quantidade||0) * Number(m.valor_unitario||0)), 0) },
