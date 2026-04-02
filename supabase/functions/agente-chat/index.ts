@@ -50,12 +50,23 @@ async function coletarContexto() {
   const ma = mesAtual()
   const hj = hoje()
 
-  const [obras, lanc, rep, apg, oadd, os, cli, pecas, prof] = await Promise.all([
+  // EDR: obras, financeiro, estoque, diarias, cronograma, contas
+  // RPM: OS, clientes, pecas, equipe
+  const [obras, lanc, rep, apg, oadd, materiais, nfs, diarias, diariasFuncs, cronograma, contasPagar,
+         os, cli, pecas, prof] = await Promise.all([
+    // EDR
     sbGet(EDR_URL, EDR_KEY, "obras", `?company_id=eq.${EDR_CO}&arquivada=eq.false&select=id,nome,valor_venda`),
-    sbGet(EDR_URL, EDR_KEY, "lancamentos", `?company_id=eq.${EDR_CO}&select=obra_id,total,data,etapa&order=data.desc&limit=3000`),
+    sbGet(EDR_URL, EDR_KEY, "lancamentos", `?company_id=eq.${EDR_CO}&select=obra_id,total,data,etapa,descricao&order=data.desc&limit=3000`),
     sbGet(EDR_URL, EDR_KEY, "repasses_cef", `?company_id=eq.${EDR_CO}&select=valor,data_credito,obra_id&order=data_credito.desc`),
     sbGet(EDR_URL, EDR_KEY, "adicional_pagamentos", `?order=data.desc`),
     sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `?company_id=eq.${EDR_CO}`),
+    sbGet(EDR_URL, EDR_KEY, "materiais", `?company_id=eq.${EDR_CO}&select=id,nome,obra_id,quantidade,valor_unitario,unidade&order=nome&limit=500`),
+    sbGet(EDR_URL, EDR_KEY, "notas_fiscais", `?company_id=eq.${EDR_CO}&select=id,fornecedor,valor,data,obra_id&order=data.desc&limit=100`),
+    sbGet(EDR_URL, EDR_KEY, "diarias", `?company_id=eq.${EDR_CO}&select=id,obra_id,data,valor_total&order=data.desc&limit=200`),
+    sbGet(EDR_URL, EDR_KEY, "diarias_funcionarios", `?select=id,diaria_id,funcionario,valor,tipo&limit=500`),
+    sbGet(EDR_URL, EDR_KEY, "cronograma_tarefas", `?company_id=eq.${EDR_CO}&select=id,obra_id,titulo,progresso,data_inicio,data_fim&order=data_inicio&limit=200`),
+    sbGet(EDR_URL, EDR_KEY, "contas_pagar", `?company_id=eq.${EDR_CO}&select=id,descricao,valor,vencimento,pago,obra_id&order=vencimento&limit=100`),
+    // RPM
     sbGet(RPM_URL, RPM_KEY, "ordens_servico", `?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,forma_pagamento,pago,created_at,clientes(nome),veiculos(placa)&order=created_at.desc&limit=200`),
     sbGet(RPM_URL, RPM_KEY, "clientes", `?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp`),
     sbGet(RPM_URL, RPM_KEY, "pecas", `?oficina_id=eq.${CARBON_ID}&select=id,nome,quantidade,custo,preco_venda&limit=100`),
@@ -86,8 +97,41 @@ async function coletarContexto() {
     const entradas = entradasRep + addReceb
     const faltaReceber = rc - entradas
     const pct = rc > 0 ? Math.round(gt / rc * 100) : 0
-    return { nome: o.nome, gasto_total: gt, gasto_mes: gm, receita: rc, entradas, falta_receber: faltaReceber, pct, saldo: entradas - gt }
+    // Estoque da obra
+    const mats = materiais.filter((m: any) => m.obra_id === o.id)
+    const totalMats = mats.length
+    const valorEstoque = mats.reduce((s: number, m: any) => s + (Number(m.quantidade || 0) * Number(m.valor_unitario || 0)), 0)
+    // Cronograma da obra
+    const tarefas = cronograma.filter((t: any) => t.obra_id === o.id)
+    const tarefasConcluidas = tarefas.filter((t: any) => (t.progresso || 0) >= 100).length
+    const progressoGeral = tarefas.length ? Math.round(tarefas.reduce((s: number, t: any) => s + (t.progresso || 0), 0) / tarefas.length) : 0
+    // NFs da obra
+    const nfsObra = nfs.filter((n: any) => n.obra_id === o.id)
+    const totalNFs = nfsObra.reduce((s: number, n: any) => s + Number(n.valor || 0), 0)
+
+    return {
+      nome: o.nome, gasto_total: gt, gasto_mes: gm, receita: rc, entradas, falta_receber: faltaReceber, pct, saldo: entradas - gt,
+      estoque: { itens: totalMats, valor: valorEstoque },
+      cronograma: { tarefas: tarefas.length, concluidas: tarefasConcluidas, progresso: progressoGeral },
+      nfs: { qtd: nfsObra.length, valor: totalNFs }
+    }
   })
+
+  // Diarias resumo
+  const diariasMes = diarias.filter((d: any) => (d.data || "").startsWith(ma))
+  const totalDiarias = diariasMes.reduce((s: number, d: any) => s + Number(d.valor_total || 0), 0)
+  // Funcionarios mais ativos
+  const porFunc: Record<string, number> = {}
+  diariasFuncs.forEach((df: any) => {
+    const nome = df.funcionario || '-'
+    porFunc[nome] = (porFunc[nome] || 0) + Number(df.valor || 0)
+  })
+  const topFuncionarios = Object.entries(porFunc).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([nome, valor]) => ({ nome, valor }))
+
+  // Contas a pagar
+  const contasPendentes = contasPagar.filter((c: any) => !c.pago)
+  const totalContasPendentes = contasPendentes.reduce((s: number, c: any) => s + Number(c.valor || 0), 0)
+  const contasVencidas = contasPendentes.filter((c: any) => (c.vencimento || '') < hj)
 
   // RPM resumo
   const abertas = os.filter((o: any) => !['entregue','cancelada','cancelado'].includes(o.status))
@@ -103,6 +147,10 @@ async function coletarContexto() {
       saldo_mes: tEnt - tSai, entradas_mes: tEnt, saidas_mes: tSai,
       mao_obra_mes: tMao, pct_mao: tSai > 0 ? Math.round(tMao/tSai*100) : 0,
       obras: obrasResumo,
+      diarias: { total_mes: totalDiarias, funcionarios: topFuncionarios },
+      contas_pagar: { pendentes: contasPendentes.length, valor: totalContasPendentes, vencidas: contasVencidas.length },
+      estoque_geral: { total_itens: materiais.length, valor_total: materiais.reduce((s: number, m: any) => s + (Number(m.quantidade||0) * Number(m.valor_unitario||0)), 0) },
+      notas_fiscais_mes: nfs.filter((n: any) => (n.data||"").startsWith(ma)).length,
     },
     rpm: {
       os_abertas: abertas.length, os_entregues: entregues.length,
@@ -146,14 +194,23 @@ serve(async (req: Request) => {
     const systemPrompt = `Voce e o agente pessoal do Duam no DM.Stack.
 
 QUEM E O DUAM:
-- Dono da EDR Engenharia (construcao civil, 6 obras)
+- Dono da EDR Engenharia (construcao civil, 6 obras ativas)
 - Criador de 4 SaaS: RPM Pro (oficinas), LoadPro (personal), NaRegua (beleza), EDR System (gestao obras)
 - RPM Pro tem 1 cliente ativo: Carbon Auto Center (dono: Marcondes JR, aux_admin: Rafael)
 - Pai de 5 filhos, tempo escasso, vai pra obra todo dia
+- Elyda = esposa, engenheira responsavel (CREA)
+
+DADOS DISPONIVEIS POR OBRA:
+- Financeiro: gasto_total, gasto_mes, receita, entradas, falta_receber, pct (% consumido), saldo
+- Estoque: itens e valor dos materiais em estoque
+- Cronograma: tarefas totais, concluidas, progresso geral (%)
+- NFs: quantidade e valor de notas fiscais
+- Diarias: total do mes, ranking de funcionarios por valor
+- Contas a pagar: pendentes, vencidas, valor total
 
 COMO RESPONDER:
 - Direto, curto, sem formalidade — como socio falando
-- Use dados reais do contexto abaixo
+- Use dados reais do contexto abaixo — SEMPRE cite numeros
 - Se nao tiver o dado, diga que nao tem — nao invente
 - Foque em dinheiro e acoes praticas
 - Portugues brasileiro sem acento
