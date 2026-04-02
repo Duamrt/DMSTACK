@@ -52,7 +52,7 @@ async function coletarContexto() {
 
   // EDR: obras, financeiro, estoque, diarias, cronograma, contas
   // RPM: OS, clientes, pecas, equipe
-  const [obras, lanc, rep, apg, oadd, materiais, nfs, diarias, diariasFuncs, cronograma, contasPagar,
+  const [obras, lanc, rep, apg, oadd, materiais, nfs, diarias, diariasFuncs, cronograma, contasPagar, projecoesCaixa,
          os, cli, pecas, prof] = await Promise.all([
     // EDR
     sbGet(EDR_URL, EDR_KEY, "obras", `?company_id=eq.${EDR_CO}&arquivada=eq.false&select=id,nome,valor_venda`),
@@ -66,6 +66,7 @@ async function coletarContexto() {
     sbGet(EDR_URL, EDR_KEY, "diarias_funcionarios", `?select=id,nome,cargo,diaria,ativo&ativo=eq.true`),
     sbGet(EDR_URL, EDR_KEY, "cronograma_tarefas", `?company_id=eq.${EDR_CO}&select=id,obra_id,titulo,progresso,data_inicio,data_fim&order=data_inicio&limit=200`),
     sbGet(EDR_URL, EDR_KEY, "contas_pagar", `?company_id=eq.${EDR_CO}&select=id,descricao,valor,vencimento,pago,obra_id&order=vencimento&limit=100`),
+    sbGet(EDR_URL, EDR_KEY, "projecoes_caixa", `?select=id,descricao,tipo,valor,data_prevista,realizado&order=data_prevista&limit=100`),
     // RPM
     sbGet(RPM_URL, RPM_KEY, "ordens_servico", `?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,forma_pagamento,pago,created_at,clientes(nome),veiculos(placa)&order=created_at.desc&limit=200`),
     sbGet(RPM_URL, RPM_KEY, "clientes", `?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp`),
@@ -156,6 +157,13 @@ async function coletarContexto() {
       contas_pagar: { pendentes: contasPendentes.length, valor: totalContasPendentes, vencidas: contasVencidas.length },
       estoque_geral: { total_itens: materiais.length, valor_total: materiais.reduce((s: number, m: any) => s + (Number(m.quantidade||0) * Number(m.valor_unitario||0)), 0) },
       notas_fiscais_mes: nfs.filter((n: any) => (n.data||"").startsWith(ma)).length,
+      caixa: {
+        projecoes_pendentes: projecoesCaixa.filter((p: any) => !p.realizado).map((p: any) => ({
+          descricao: p.descricao, tipo: p.tipo, valor: p.valor, data: p.data_prevista
+        })),
+        total_entradas_previstas: projecoesCaixa.filter((p: any) => p.tipo === 'entrada' && !p.realizado).reduce((s: number, p: any) => s + Number(p.valor||0), 0),
+        total_saidas_previstas: projecoesCaixa.filter((p: any) => p.tipo === 'saida' && !p.realizado).reduce((s: number, p: any) => s + Number(p.valor||0), 0),
+      },
     },
     rpm: {
       os_abertas: abertas.length, os_entregues: entregues.length,
@@ -212,6 +220,7 @@ DADOS DISPONIVEIS POR OBRA:
 - NFs: quantidade e valor de notas fiscais
 - Diarias: total do mes, ranking de funcionarios por valor
 - Contas a pagar: pendentes, vencidas, valor total
+- Caixa: projecoes de entradas e saidas futuras (previsoes)
 
 COMO RESPONDER:
 - Direto, curto, sem formalidade — como socio falando
