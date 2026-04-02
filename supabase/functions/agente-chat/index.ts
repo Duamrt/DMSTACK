@@ -50,10 +50,12 @@ async function coletarContexto() {
   const ma = mesAtual()
   const hj = hoje()
 
-  const [obras, lanc, rep, os, cli, pecas, prof] = await Promise.all([
+  const [obras, lanc, rep, apg, oadd, os, cli, pecas, prof] = await Promise.all([
     sbGet(EDR_URL, EDR_KEY, "obras", `?company_id=eq.${EDR_CO}&arquivada=eq.false&select=id,nome,valor_venda`),
-    sbGet(EDR_URL, EDR_KEY, "lancamentos", `?company_id=eq.${EDR_CO}&select=obra_id,total,data,etapa&order=data.desc&limit=500`),
-    sbGet(EDR_URL, EDR_KEY, "repasses_cef", `?company_id=eq.${EDR_CO}&select=valor,data_credito,obra_id&order=data_credito.desc&limit=100`),
+    sbGet(EDR_URL, EDR_KEY, "lancamentos", `?company_id=eq.${EDR_CO}&select=obra_id,total,data,etapa&order=data.desc&limit=3000`),
+    sbGet(EDR_URL, EDR_KEY, "repasses_cef", `?company_id=eq.${EDR_CO}&select=valor,data_credito,obra_id&order=data_credito.desc`),
+    sbGet(EDR_URL, EDR_KEY, "adicional_pagamentos", `?order=data.desc`),
+    sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `?company_id=eq.${EDR_CO}`),
     sbGet(RPM_URL, RPM_KEY, "ordens_servico", `?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,forma_pagamento,pago,created_at,clientes(nome),veiculos(placa)&order=created_at.desc&limit=200`),
     sbGet(RPM_URL, RPM_KEY, "clientes", `?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp`),
     sbGet(RPM_URL, RPM_KEY, "pecas", `?oficina_id=eq.${CARBON_ID}&select=id,nome,quantidade,custo,preco_venda&limit=100`),
@@ -61,17 +63,30 @@ async function coletarContexto() {
   ])
 
   // EDR resumo
-  const lm = lanc.filter((l: any) => (l.data || "").startsWith(ma))
+  const idsAtivas = new Set(obras.map((o: any) => o.id))
+  const lancAtivas = lanc.filter((l: any) => !l.obra_id || idsAtivas.has(l.obra_id))
+  const lm = lancAtivas.filter((l: any) => (l.data || "").startsWith(ma))
   const tSai = lm.reduce((s: number, l: any) => s + Number(l.total || 0), 0)
   const tMao = lm.filter((l: any) => (l.etapa || "") === "28_mao").reduce((s: number, l: any) => s + Number(l.total || 0), 0)
   const rm = rep.filter((r: any) => (r.data_credito || "").startsWith(ma))
   const tEnt = rm.reduce((s: number, r: any) => s + Number(r.valor || 0), 0)
 
   const obrasResumo = obras.map((o: any) => {
-    const lo = lanc.filter((l: any) => l.obra_id === o.id)
+    const lo = lancAtivas.filter((l: any) => l.obra_id === o.id)
     const gt = lo.reduce((s: number, l: any) => s + Number(l.total || 0), 0)
-    const rc = Number(o.valor_venda || 0)
-    return { nome: o.nome, gasto: gt, receita: rc, pct: rc > 0 ? Math.round(gt/rc*100) : 0 }
+    const gm = lo.filter((l: any) => (l.data || "").startsWith(ma)).reduce((s: number, l: any) => s + Number(l.total || 0), 0)
+    // Receita = valor_venda + adicionais
+    const ta = oadd.filter((a: any) => a.obra_id === o.id).reduce((s: number, a: any) => s + Number(a.valor || 0), 0)
+    const rc = Number(o.valor_venda || 0) + ta
+    // Entradas = repasses CEF + pagamentos de adicionais
+    const repsObra = rep.filter((r: any) => r.obra_id === o.id)
+    const entradasRep = repsObra.reduce((s: number, r: any) => s + Number(r.valor || 0), 0)
+    const addIds = new Set(oadd.filter((a: any) => a.obra_id === o.id).map((a: any) => a.id))
+    const addReceb = apg.filter((p: any) => addIds.has(p.adicional_id)).reduce((s: number, p: any) => s + Number(p.valor || 0), 0)
+    const entradas = entradasRep + addReceb
+    const faltaReceber = rc - entradas
+    const pct = rc > 0 ? Math.round(gt / rc * 100) : 0
+    return { nome: o.nome, gasto_total: gt, gasto_mes: gm, receita: rc, entradas, falta_receber: faltaReceber, pct, saldo: entradas - gt }
   })
 
   // RPM resumo
