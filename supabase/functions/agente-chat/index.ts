@@ -62,7 +62,7 @@ async function coletarContexto() {
     sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `?company_id=eq.${EDR_CO}`),
     sbGet(EDR_URL, EDR_KEY, "materiais", `?company_id=eq.${EDR_CO}&select=id,nome,obra_id,quantidade,valor_unitario,unidade&order=nome&limit=500`),
     sbGet(EDR_URL, EDR_KEY, "notas_fiscais", `?company_id=eq.${EDR_CO}&select=id,fornecedor,valor,data,obra_id&order=data.desc&limit=100`),
-    sbGet(EDR_URL, EDR_KEY, "diarias", `?company_id=eq.${EDR_CO}&select=id,obra_id,data,valor_total&order=data.desc&limit=200`),
+    sbGet(EDR_URL, EDR_KEY, "diarias", `?company_id=eq.${EDR_CO}&select=id,obra_id,data,valor_total,obras(nome)&order=data.desc&limit=200`),
     sbGet(EDR_URL, EDR_KEY, "diarias_funcionarios", `?select=id,diaria_id,funcionario,valor,tipo&limit=500`),
     sbGet(EDR_URL, EDR_KEY, "cronograma_tarefas", `?company_id=eq.${EDR_CO}&select=id,obra_id,titulo,progresso,data_inicio,data_fim&order=data_inicio&limit=200`),
     sbGet(EDR_URL, EDR_KEY, "contas_pagar", `?company_id=eq.${EDR_CO}&select=id,descricao,valor,vencimento,pago,obra_id&order=vencimento&limit=100`),
@@ -147,7 +147,12 @@ async function coletarContexto() {
       saldo_mes: tEnt - tSai, entradas_mes: tEnt, saidas_mes: tSai,
       mao_obra_mes: tMao, pct_mao: tSai > 0 ? Math.round(tMao/tSai*100) : 0,
       obras: obrasResumo,
-      diarias: { total_mes: totalDiarias, funcionarios: topFuncionarios },
+      diarias: {
+        total_mes: totalDiarias,
+        funcionarios: topFuncionarios,
+        ultimas_7_dias: diarias.filter((d: any) => (d.data||'') >= new Date(Date.now()-7*864e5).toISOString().split('T')[0])
+          .map((d: any) => ({ data: d.data, obra: d.obras?.nome || '-', valor: d.valor_total }))
+      },
       contas_pagar: { pendentes: contasPendentes.length, valor: totalContasPendentes, vencidas: contasVencidas.length },
       estoque_geral: { total_itens: materiais.length, valor_total: materiais.reduce((s: number, m: any) => s + (Number(m.quantidade||0) * Number(m.valor_unitario||0)), 0) },
       notas_fiscais_mes: nfs.filter((n: any) => (n.data||"").startsWith(ma)).length,
