@@ -15,15 +15,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS })
 
   try {
-    const { texto } = await req.json()
+    const { texto, sistema } = await req.json()
     if (!texto || texto.trim().length < 20) {
       return new Response(JSON.stringify({ error: "Texto muito curto" }), {
         status: 400, headers: { ...CORS, "Content-Type": "application/json" }
       })
     }
 
-    const prompt = `Você é um assistente de triagem técnica para um portfólio de SaaS (EDR System, RPM Pro, NaRegua, LoadPro, DM Stack).
+    const sistemaInstrucao = sistema
+      ? `\nATENÇÃO: Este texto é sobre o sistema ${sistema}. TODOS os itens devem ter sistema="${sistema}". NÃO classifique nada como outro sistema a menos que o texto mencione EXPLICITAMENTE outro produto.\n`
+      : ''
 
+    const prompt = `Você é um assistente de triagem técnica para um portfólio de SaaS (EDR System, RPM Pro, NaRegua, LoadPro, DM Stack).
+${sistemaInstrucao}
 Analise o texto abaixo e extraia APENAS os itens acionáveis: bugs confirmados e demandas de melhoria/feature.
 
 REGRAS:
@@ -57,7 +61,7 @@ ${texto}`
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "claude-sonnet-4-6",
         max_tokens: 2048,
         messages: [{ role: "user", content: prompt }],
       }),

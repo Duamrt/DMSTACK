@@ -719,8 +719,19 @@ button{font-family:'Outfit',sans-serif;}
     <div class="modal-title">Importar análise com IA</div>
     <div id="triagem-step-input">
       <div class="modal-field">
+        <div class="modal-label">Sistema desta análise</div>
+        <select class="modal-input" id="triagem-sistema">
+          <option value="">Auto-detectar (pode errar)</option>
+          <option value="EDR">EDR System</option>
+          <option value="RPM">RPM Pro</option>
+          <option value="NAREGUA">NaRegua</option>
+          <option value="LOADPRO">LoadPro</option>
+          <option value="DMSTACK">DM Stack</option>
+        </select>
+      </div>
+      <div class="modal-field">
         <div class="modal-label">Cole a análise aqui</div>
-        <textarea class="modal-textarea" id="triagem-texto" style="min-height:180px;" placeholder="Cole qualquer texto de análise, relatório, conversa ou lista de pendências. A IA vai classificar automaticamente em bugs e demandas."></textarea>
+        <textarea class="modal-textarea" id="triagem-texto" style="min-height:160px;" placeholder="Cole qualquer texto de análise, relatório, conversa ou lista de pendências. A IA vai classificar automaticamente em bugs e demandas."></textarea>
       </div>
       <div class="modal-actions">
         <button class="btn-primary" onclick="processarTriagem()" id="triagem-btn">Processar com IA</button>
@@ -749,7 +760,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101122';
+const _DMS_VER = 'dmstack-04101127';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1166,7 +1177,8 @@ async function processarTriagem() {
   btn.textContent = 'Processando...'; btn.disabled = true;
 
   try {
-    const data = await callEdge('triagem-ia', { texto });
+    const sistema = document.getElementById('triagem-sistema').value;
+    const data = await callEdge('triagem-ia', { texto, sistema });
     if (data.error) throw new Error(data.error);
 
     _triagemItens = data.itens || [];
