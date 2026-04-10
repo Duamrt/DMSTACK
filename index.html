@@ -1051,7 +1051,8 @@ async function carregarBriefing() {
   if (probs.length) html += `<p><strong>Atenção:</strong></p>${probs.map(p=>`<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`).join('')}`;
   if (recs.length) html += `<p><strong>Recomendações:</strong></p>${recs.map(r=>`<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`).join('')}`;
   html += `<div class="briefing-footer">${label} — gerado por IA</div></div>`;
-  document.getElementById('app-briefing').innerHTML = html;
+  const bEl = document.getElementById('app-briefing');
+  if (bEl) bEl.innerHTML = html;
 }
 
 async function gerarBriefing() {
