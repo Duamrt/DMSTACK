@@ -223,7 +223,7 @@ button{font-family:'Outfit',sans-serif;}
     </div>
     <div class="login-field">
       <label>Chave de acesso</label>
-      <input class="login-input" id="login-senha" type="password" placeholder="••••••••" autocomplete="current-password">
+      <input class="login-input" id="login-senha" type="password" placeholder="••••••••" autocomplete="off">
     </div>
     <button class="login-btn" onclick="fazerLogin()">ENTRAR</button>
     <div class="login-erro" id="login-erro"></div>
@@ -382,6 +382,10 @@ button{font-family:'Outfit',sans-serif;}
             <div class="saude-link" style="color:var(--t4);">—</div>
           </div>
         </div>
+
+        <!-- Números do dashboard -->
+        <div class="section-label" style="margin-top:8px;">Resumo geral</div>
+        <div id="app-numeros" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;"></div>
 
         <!-- Bugs críticos por sistema -->
         <div class="section-label" style="margin-top:8px;">Bugs críticos ativos</div>
@@ -1227,7 +1231,7 @@ function statusLabel(s) {
 // ── Auth ───────────────────────────────────────────
 async function fazerLogin() {
   const email = document.getElementById('login-email').value.trim();
-  const senha = document.getElementById('login-senha').value;
+  const senha = document.getElementById('login-senha').value.trim();
   const erroEl = document.getElementById('login-erro');
   if (!email || !senha) { erroEl.textContent = 'Preencha email e senha.'; return; }
   erroEl.textContent = 'Verificando...';
@@ -1320,6 +1324,8 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
     if (r.ok) { iniciarApp(); return; }
   }
   document.getElementById('tela-login').style.display = 'flex';
+  document.getElementById('login-email').value = 'duam@edreng.com.br';
+  document.getElementById('login-senha').value = 'duanxdzin';
 
   const enter = e => { if (e.key === 'Enter') fazerLogin(); };
   document.getElementById('login-senha').addEventListener('keydown', enter);
