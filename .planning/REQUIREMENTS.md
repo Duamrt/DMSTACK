@@ -69,7 +69,7 @@
 | CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 1 | Complete |
 | CORE-04 | Phase 1 | Complete |
-| CORE-05 | Phase 1 | Pending |
+| CORE-05 | Phase 1 | Complete |
 | SAUDE-01 | Phase 2 | Pending |
 | SAUDE-02 | Phase 2 | Pending |
 | SAUDE-03 | Phase 2 | Pending |

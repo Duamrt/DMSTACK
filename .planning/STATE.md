@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-base-conectada-01-01-PLAN.md
-last_updated: "2026-04-10T11:41:22.182Z"
+status: verifying
+stopped_at: "Checkpoint 01-02 Task 3: human-verify PWA instalavel"
+last_updated: "2026-04-10T11:44:31.014Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (created 2026-04-09)
 
 Phase: 01 (base-conectada) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-10
 
 Progress: [░░░░░░░░░░] 0%
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-base-conectada P01 | 15 | 2 tasks | 1 files |
+| Phase 01-base-conectada P02 | 8 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,7 @@ Progress: [░░░░░░░░░░] 0%
 - Fase 4: pg_cron dia 1 e 16 às 8h — não alterar
 - [Phase 01-base-conectada]: Sidebar com 5 abas fixas — Home e Deploys removidos da nav (funcoes JS mantidas)
 - [Phase 01-base-conectada]: EDR e RPM acessados via anon key — sem service_role necessario para leitura basica
+- [Phase 01-base-conectada]: Cache busting no deploy.sh via Node.js (nao Python nem sed — Windows safe)
 
 ### Pending Todos
 
@@ -76,6 +78,6 @@ Nenhum ainda.
 
 ## Session Continuity
 
-Last session: 2026-04-10T11:41:22.179Z
-Stopped at: Completed 01-base-conectada-01-01-PLAN.md
+Last session: 2026-04-10T11:44:31.011Z
+Stopped at: Checkpoint 01-02 Task 3: human-verify PWA instalavel
 Resume file: None

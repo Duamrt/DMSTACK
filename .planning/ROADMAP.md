@@ -6,7 +6,7 @@ O DM Stack passa de uma página de briefing básica para um painel de comando co
 
 ## Phases
 
-- [ ] **Phase 1: Base Conectada** - Fundação técnica: conexão com os 3 Supabase, autenticação, design system e estrutura das 5 telas
+- [x] **Phase 1: Base Conectada** - Fundação técnica: conexão com os 3 Supabase, autenticação, design system e estrutura das 5 telas (completed 2026-04-10)
 - [ ] **Phase 2: Saúde dos SaaS** - Status verde/amarelo/vermelho em tempo real para cada sistema monitorado
 - [ ] **Phase 3: Bugs e Features** - Lista centralizada de bugs e rastreamento de features por projeto (substitui o bloco de notas)
 - [ ] **Phase 4: Diagnóstico IA** - Edge function existente integrada à tela Melhorias com sugestões automáticas por projeto
@@ -25,10 +25,10 @@ O DM Stack passa de uma página de briefing básica para um painel de comando co
   3. O painel lê dados do Supabase DMS (dmstack) sem erro de CORS ou auth
   4. O PWA pode ser instalado no celular (manifest.json + sw.js funcionando)
   5. A conexão com os 3 Supabase (mepzoxoahpwcvvlymlfh, roeeyypssutzfzzkypsq, bkfkzauhnlulrtttgcii) é confirmada no console sem erro
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 01-01-PLAN.md — Reestruturar sidebar (5 abas finais) + conectar 3 Supabase
-- [ ] 01-02-PLAN.md — PWA: icones PNG, manifest, apple-touch-icon, cache busting
+- [x] 01-02-PLAN.md — PWA: icones PNG, manifest, apple-touch-icon, cache busting
 **UI hint**: yes
 
 ### Phase 2: Saúde dos SaaS
@@ -96,7 +96,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base Conectada | 1/2 | In Progress|  |
+| 1. Base Conectada | 2/2 | Complete   | 2026-04-10 |
 | 2. Saúde dos SaaS | 0/? | Not started | - |
 | 3. Bugs e Features | 0/? | Not started | - |
 | 4. Diagnóstico IA | 0/? | Not started | - |
