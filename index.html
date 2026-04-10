@@ -749,7 +749,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101119';
+const _DMS_VER = 'dmstack-04101122';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1222,34 +1222,35 @@ async function confirmarTriagem() {
   const btn = document.getElementById('triagem-confirmar-btn');
   btn.textContent = `Importando ${selecionados.length}...`; btn.disabled = true;
 
-  let ok = 0;
+  let ok = 0, erros = 0;
   for (const item of selecionados) {
-    try {
-      if (item.tipo === 'bug') {
-        await dmsPost('bugs', {
-          titulo: item.titulo,
-          sistema: item.sistema,
-          severidade: item.prioridade === 'critico' ? 'critico' : item.prioridade === 'baixo' ? 'baixo' : 'medio',
-          status: 'aberto',
-          descricao: item.descricao || '',
-          created_at: new Date().toISOString()
-        });
-      } else {
-        await dmsPost('demandas', {
-          titulo: item.titulo,
-          sistema: item.sistema,
-          prioridade: item.prioridade === 'baixo' ? 'baixa' : item.prioridade === 'medio' ? 'media' : 'alta',
-          status: 'backlog',
-          descricao: item.descricao || '',
-          created_at: new Date().toISOString()
-        });
-      }
-      ok++;
-    } catch (e) { console.warn('Erro ao importar item:', e); }
+    let res;
+    if (item.tipo === 'bug') {
+      res = await dmsPost('bugs', {
+        titulo: item.titulo,
+        sistema: item.sistema,
+        severidade: item.prioridade === 'critico' ? 'critico' : item.prioridade === 'baixo' ? 'baixo' : 'medio',
+        status: 'aberto',
+        descricao: item.descricao || '',
+        created_at: new Date().toISOString()
+      });
+    } else {
+      res = await dmsPost('demandas', {
+        titulo: item.titulo,
+        sistema: item.sistema,
+        prioridade: item.prioridade === 'baixo' ? 'baixa' : item.prioridade === 'medio' ? 'media' : 'alta',
+        status: 'backlog',
+        descricao: item.descricao || '',
+        created_at: new Date().toISOString()
+      });
+    }
+    if (res && res.code) { erros++; console.warn('Falha ao importar:', res.message, item.titulo); }
+    else ok++;
   }
 
   fecharModal('modal-triagem');
   btn.textContent = 'Importar selecionados'; btn.disabled = false;
+  if (erros > 0) alert(`${ok} importados, ${erros} falharam. Veja o console para detalhes.`);
 
   // Recarregar lista relevante e navegar pra ela
   const temBugs = selecionados.some(i => i.tipo === 'bug');
