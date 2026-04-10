@@ -126,14 +126,26 @@ button{font-family:'Outfit',sans-serif;}
 
 /* ─── KANBAN ──────────────────────────────────── */
 .kanban-board{display:flex;gap:14px;padding:0 32px 32px;overflow-x:auto;}
-.kanban-col{flex:0 0 210px;min-height:200px;}
-.kanban-col-header{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t4);padding:0 0 10px;display:flex;align-items:center;justify-content:space-between;}
-.kanban-col-count{background:var(--t5);border-radius:10px;padding:2px 7px;font-size:10px;color:var(--t3);}
-.kanban-card{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:background .15s;}
-.kanban-card:hover{background:rgba(255,255,255,0.06);}
-.kanban-card-title{font-size:12px;font-weight:500;color:var(--t2);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.kanban-col{flex:0 0 220px;min-height:200px;}
+.kanban-col-header{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t4);padding:0 2px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borda);margin-bottom:10px;}
+.kanban-col-header.col-aberto{color:rgba(255,255,255,0.6);}
+.kanban-col-header.col-em_andamento{color:rgba(255,255,255,0.8);}
+.kanban-col-header.col-bloqueado{color:rgba(251,191,36,0.8);}
+.kanban-col-header.col-resolvido{color:var(--t4);}
+.kanban-col-header.col-backlog{color:rgba(255,255,255,0.5);}
+.kanban-col-header.col-concluido{color:rgba(255,255,255,0.35);}
+.kanban-col-count{background:var(--t5);border-radius:10px;padding:2px 7px;font-size:10px;color:var(--t4);}
+.kanban-card{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-left:3px solid rgba(255,255,255,0.1);border-radius:6px;padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:background .15s;}
+.kanban-card:hover{background:rgba(255,255,255,0.055);}
+.kanban-card.st-aberto{border-left-color:rgba(255,255,255,0.25);}
+.kanban-card.st-em_andamento{border-left-color:rgba(255,255,255,0.5);}
+.kanban-card.st-bloqueado{border-left-color:rgba(251,191,36,0.6);}
+.kanban-card.st-resolvido{border-left-color:rgba(255,255,255,0.06);opacity:0.45;}
+.kanban-card.st-backlog{border-left-color:rgba(255,255,255,0.15);}
+.kanban-card.st-concluido{border-left-color:rgba(255,255,255,0.06);opacity:0.45;}
+.kanban-card-title{font-size:12px;font-weight:500;color:var(--t2);line-height:1.45;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .kanban-card-footer{display:flex;align-items:center;justify-content:space-between;}
-.kanban-card-sistema{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:.5px;}
+.kanban-card-sistema{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:.5px;background:var(--t5);padding:2px 6px;border-radius:3px;}
 .view-toggle{display:flex;gap:4px;}
 .view-toggle button{padding:4px 12px;border:1px solid var(--borda);background:transparent;color:var(--t4);border-radius:6px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;}
 .view-toggle button.active{background:rgba(255,255,255,0.08);color:var(--t2);border-color:var(--borda2);}
@@ -1401,18 +1413,18 @@ function renderKanban(containerId, items, colunas, tipo) {
   el.innerHTML = `<div class="kanban-board">${colunas.map(col => {
     const cards = items.filter(i => i.status === col.status);
     return `<div class="kanban-col">
-      <div class="kanban-col-header">
+      <div class="kanban-col-header col-${col.status}">
         <span>${col.label}</span>
         <span class="kanban-col-count">${cards.length}</span>
       </div>
       ${cards.length ? cards.map(i => `
-        <div class="kanban-card" onclick="abrirDetail('${tipo}','${i.id}')">
+        <div class="kanban-card st-${i.status}" onclick="abrirDetail('${tipo}','${i.id}')">
           <div class="kanban-card-title">${esc(i.titulo)}</div>
           <div class="kanban-card-footer">
             <span class="kanban-card-sistema">${i.sistema}</span>
             <span class="badge-ag ${i.aguardando}" title="${i.aguardando||''}">${agLabel(i.aguardando)}</span>
           </div>
-        </div>`).join('') : `<div style="font-size:11px;color:var(--t4);padding:8px 0;">Vazio</div>`}
+        </div>`).join('') : `<div style="font-size:11px;color:var(--t4);padding:8px 4px;">Vazio</div>`}
     </div>`;
   }).join('')}</div>`;
 }
