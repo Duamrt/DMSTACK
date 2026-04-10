@@ -1026,7 +1026,7 @@ async function carregarMelhorias() {
 async function gerarBriefingMelhorias() {
   const el = document.getElementById('melhorias-content');
   if (el) el.innerHTML = '<div class="briefing-empty">Gerando diagnóstico com IA... (30s)</div>';
-  const r = await callEdge('agente-diario');
+  const r = await callEdge('diagnostico-diario');
   if (r && r.ok) carregarMelhorias();
   else if (el) el.innerHTML = '<div class="briefing-empty">Falha ao gerar. Tente novamente.</div>';
 }
@@ -1055,7 +1055,7 @@ async function carregarBriefing() {
 async function gerarBriefing() {
   const el = document.getElementById('app-briefing');
   if (el) el.innerHTML = '<div class="briefing-empty">Gerando... (30s)</div>';
-  const r = await callEdge('agente-diario');
+  const r = await callEdge('diagnostico-diario');
   if (r && r.ok) carregarBriefing();
 }
 
