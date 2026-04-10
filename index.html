@@ -749,7 +749,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101112';
+const _DMS_VER = 'dmstack-04101119';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1229,7 +1229,7 @@ async function confirmarTriagem() {
         await dmsPost('bugs', {
           titulo: item.titulo,
           sistema: item.sistema,
-          severidade: item.prioridade === 'critico' ? 'critico' : item.prioridade === 'alto' ? 'alto' : 'medio',
+          severidade: item.prioridade === 'critico' ? 'critico' : item.prioridade === 'baixo' ? 'baixo' : 'medio',
           status: 'aberto',
           descricao: item.descricao || '',
           created_at: new Date().toISOString()
@@ -1238,7 +1238,7 @@ async function confirmarTriagem() {
         await dmsPost('demandas', {
           titulo: item.titulo,
           sistema: item.sistema,
-          prioridade: item.prioridade === 'critico' ? 'critico' : item.prioridade === 'alto' ? 'alto' : item.prioridade === 'medio' ? 'medio' : 'baixo',
+          prioridade: item.prioridade === 'baixo' ? 'baixa' : item.prioridade === 'medio' ? 'media' : 'alta',
           status: 'backlog',
           descricao: item.descricao || '',
           created_at: new Date().toISOString()
