@@ -797,7 +797,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101158';
+const _DMS_VER = 'dmstack-04101200';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1542,16 +1542,13 @@ async function checarEDR() {
 
 async function checarRPM() {
   try {
-    const [oficinas, os] = await Promise.all([
-      rpmGet('oficinas', '?select=id'),
-      rpmGet('ordens_servico', '?select=created_at&order=created_at.desc&limit=1')
-    ]);
-    const n = Array.isArray(oficinas) ? oficinas.filter(o => o.id !== 'aaaa0001-0000-0000-0000-000000000001').length : 0;
-    const ultimaOS = os?.[0]?.created_at || null;
+    const oficinas = await rpmGet('oficinas', '?select=id,nome');
+    const ativas = Array.isArray(oficinas) ? oficinas.filter(o => o.id !== 'aaaa0001-0000-0000-0000-000000000001') : [];
+    const n = ativas.length;
     return {
       status: n > 0 ? 'ok' : 'warn',
-      metricas: `${n} oficina${n !== 1 ? 's' : ''}`,
-      ultimaAtividade: ultimaOS ? `Última OS: ${aging(ultimaOS)}` : 'Sem atividade recente',
+      metricas: `${n} oficina${n !== 1 ? 's' : ''} ativa${n !== 1 ? 's' : ''}`,
+      ultimaAtividade: n > 0 ? ativas.map(o => o.nome).slice(0,2).join(', ') + (n > 2 ? ` +${n-2}` : '') : 'Nenhuma oficina',
       checado: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})
     };
   } catch(e) {
