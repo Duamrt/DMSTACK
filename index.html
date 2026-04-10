@@ -582,6 +582,10 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
+const EDR_URL = 'https://mepzoxoahpwcvvlymlfh.supabase.co';
+const EDR_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lcHpveG9haHB3Y3Z2bHltbGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNzAyMDUsImV4cCI6MjA4Nzg0NjIwNX0.2_4hqT2vzM5Dw3iesOF_5V7esxkZafDnMFpDkCSBVlE';
+const RPM_URL = 'https://roeeyypssutzfzzkypsq.supabase.co';
+const RPM_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZWV5eXBzc3V0emZ6emt5cHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTk0MTgsImV4cCI6MjA5MDM5NTQxOH0.9oCOmABUTXox3FaRViD2zcUaqv94VfOJFMQYz_fcJi4';
 
 let _token = null;
 let _bugs = [];
@@ -663,6 +667,35 @@ function callEdge(fn, body = {}) {
     headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   }).then(r => r.json()).catch(e => ({ ok: false, erro: e.message }));
+}
+
+function edrGet(t, q = '') {
+  return fetch(`${EDR_URL}/rest/v1/${t}${q}`, {
+    headers: { 'apikey': EDR_KEY, 'Authorization': 'Bearer ' + EDR_KEY }
+  }).then(r => r.json()).catch(() => null);
+}
+
+function rpmGet(t, q = '') {
+  return fetch(`${RPM_URL}/rest/v1/${t}${q}`, {
+    headers: { 'apikey': RPM_KEY, 'Authorization': 'Bearer ' + RPM_KEY }
+  }).then(r => r.json()).catch(() => null);
+}
+
+async function verificarConexoes() {
+  const [dms, edr, rpm] = await Promise.allSettled([
+    fetch(`${DMS_URL}/rest/v1/bugs?limit=1`, {
+      headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY) }
+    }),
+    fetch(`${EDR_URL}/rest/v1/companies?limit=1`, {
+      headers: { 'apikey': EDR_KEY, 'Authorization': 'Bearer ' + EDR_KEY }
+    }),
+    fetch(`${RPM_URL}/rest/v1/oficinas?limit=1`, {
+      headers: { 'apikey': RPM_KEY, 'Authorization': 'Bearer ' + RPM_KEY }
+    })
+  ]);
+  console.log('[DM Stack] DMS:', dms.status === 'fulfilled' && dms.value.ok ? 'OK' : 'FALHA');
+  console.log('[DM Stack] EDR:', edr.status === 'fulfilled' && edr.value.ok ? 'OK' : 'FALHA');
+  console.log('[DM Stack] RPM:', rpm.status === 'fulfilled' && rpm.value.ok ? 'OK' : 'FALHA');
 }
 
 // ── Toggle Sidebar ─────────────────────────────────
@@ -1261,6 +1294,7 @@ async function iniciarApp() {
     carregarBriefing()
   ]);
   carregarDadosDash();
+  verificarConexoes();
 
   // Refresh a cada 5 min
   setInterval(async () => {
