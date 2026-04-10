@@ -931,7 +931,7 @@ async function carregarMelhorias() {
   if (!el) return;
   el.innerHTML = '<div class="briefing-empty">Carregando diagnósticos...</div>';
 
-  const diags = await dmsGet('dmstack_diagnosticos', '?order=created_at.desc&limit=5');
+  const diags = await dmsGet('dmstack_diagnosticos', '?produto=eq.dmstack&order=created_at.desc&limit=5');
   if (!Array.isArray(diags) || !diags.length) {
     el.innerHTML = '<div class="briefing-empty">Nenhum diagnóstico ainda.<br><br><button class="btn-primary" onclick="gerarBriefingMelhorias()">Gerar agora</button></div>';
     return;
@@ -962,7 +962,7 @@ async function gerarBriefingMelhorias() {
 }
 
 async function carregarBriefing() {
-  const diags = await dmsGet('dmstack_diagnosticos', '?order=created_at.desc&limit=1');
+  const diags = await dmsGet('dmstack_diagnosticos', '?produto=eq.dmstack&order=created_at.desc&limit=1');
   if (!Array.isArray(diags) || !diags.length) return;
   const d = diags[0];
   let txt = d.briefing || d.resumo || '';
