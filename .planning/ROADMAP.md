@@ -25,9 +25,9 @@ O DM Stack passa de uma página de briefing básica para um painel de comando co
   3. O painel lê dados do Supabase DMS (dmstack) sem erro de CORS ou auth
   4. O PWA pode ser instalado no celular (manifest.json + sw.js funcionando)
   5. A conexão com os 3 Supabase (mepzoxoahpwcvvlymlfh, roeeyypssutzfzzkypsq, bkfkzauhnlulrtttgcii) é confirmada no console sem erro
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 01-01-PLAN.md — Reestruturar sidebar (5 abas finais) + conectar 3 Supabase
+- [x] 01-01-PLAN.md — Reestruturar sidebar (5 abas finais) + conectar 3 Supabase
 - [ ] 01-02-PLAN.md — PWA: icones PNG, manifest, apple-touch-icon, cache busting
 **UI hint**: yes
 
@@ -96,7 +96,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Base Conectada | 0/2 | Planning | - |
+| 1. Base Conectada | 1/2 | In Progress|  |
 | 2. Saúde dos SaaS | 0/? | Not started | - |
 | 3. Bugs e Features | 0/? | Not started | - |
 | 4. Diagnóstico IA | 0/? | Not started | - |
