@@ -111,6 +111,11 @@ button{font-family:'Outfit',sans-serif;}
 .item-col{font-size:11px;color:var(--t3);}
 .lista-empty{padding:48px 16px;text-align:center;color:var(--t4);font-size:13px;}
 
+/* ─── COMMAND PALETTE ─────────────────────────── */
+.cmd-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;transition:background .1s;}
+.cmd-item:hover,.cmd-item.selected{background:var(--hover);}
+.cmd-item.selected{background:#1a1a2a;}
+
 /* ─── BADGES ──────────────────────────────────── */
 .badge-sev{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
 .badge-sev.critico{background:rgba(255,60,60,0.18);color:rgba(255,110,110,0.95);border:1px solid rgba(255,60,60,0.25);}
@@ -330,10 +335,12 @@ button{font-family:'Outfit',sans-serif;}
       <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
       <div class="nav-item" data-view="alertas" onclick="irPara('alertas')"><span>Alertas</span><span class="badge" id="badge-alertas"></span></div>
       <div class="nav-item" data-view="agentes" onclick="irPara('agentes')">Agentes IA</div>
+      <div class="nav-item" data-view="deploys" onclick="irPara('deploys')">Deploys</div>
     </nav>
     <div class="sb-bottom">
       <div class="sb-dot"></div>
       <span class="sb-status" id="sb-status">LIVE</span>
+      <button class="sb-sair" onclick="abrirCmd()" title="Comandos (Ctrl+K)" style="font-size:11px;letter-spacing:1px;opacity:.5;margin-right:4px;">⌘K</button>
       <button class="sb-sair" onclick="fazerLogout()" title="Sair">↩</button>
     </div>
   </div>
@@ -537,8 +544,38 @@ button{font-family:'Outfit',sans-serif;}
       </div>
     </div>
 
+    <!-- ── VIEW: DEPLOYS ── -->
+    <div id="view-deploys" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Deploys</div>
+          <div class="page-sub" id="deploys-sub">Histórico de deploys dos sistemas</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" onclick="abrirModalDeploy()">+ Registrar deploy</button>
+        </div>
+      </div>
+      <div class="lista-header" style="grid-template-columns:100px 80px 1fr 100px 80px;padding:0 32px;">
+        <div>Versão</div><div>Sistema</div><div>Mensagem</div><div>Status</div><div>Aging</div>
+      </div>
+      <div style="padding:4px 0 32px;" id="lista-deploys">
+        <div class="lista-empty">Carregando...</div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
+
+<!-- ══ COMMAND PALETTE ══ -->
+<div id="cmd-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:flex-start;justify-content:center;padding-top:120px;" onclick="fecharCmd(event)">
+  <div style="width:520px;background:#111118;border:1px solid #2a2a3a;border-radius:12px;overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #1a1a2a;">
+      <span style="color:var(--t4);font-size:18px;">⌘</span>
+      <input id="cmd-input" style="flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:16px;font-family:inherit;" placeholder="Digite um comando..." oninput="filtrarCmds()" onkeydown="navCmds(event)">
+    </div>
+    <div id="cmd-list" style="max-height:320px;overflow-y:auto;padding:8px 0;"></div>
+  </div>
+</div>
 
 <!-- ══ MODAL BUG ══ -->
 <div class="modal-bg" id="modal-bug">
@@ -760,7 +797,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101129';
+const _DMS_VER = 'dmstack-04101158';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1295,6 +1332,7 @@ function irPara(view) {
   if (view === 'melhorias') carregarMelhorias();
   if (view === 'alertas') renderAlertas();
   if (view === 'agentes') carregarAgentes();
+  if (view === 'deploys') carregarDeploys();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
@@ -2027,7 +2065,8 @@ async function iniciarApp() {
     carregarBugs(),
     carregarFeatures(),
     carregarBriefing(),
-    carregarSaude()
+    carregarSaude(),
+    carregarDeploys()
   ]);
   carregarDadosDash();
   atualizarBadgeAlertas();
@@ -2063,7 +2102,84 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
   const enter = e => { if (e.key === 'Enter') fazerLogin(); };
   document.getElementById('login-senha').addEventListener('keydown', enter);
   document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-senha').focus(); });
+
+  // Command palette — Cmd+K ou Ctrl+K
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); abrirCmd(); }
+    if (e.key === 'Escape') fecharCmd();
+  });
 })();
+
+// ── Command Palette ─────────────────────────────────
+const _CMDS = [
+  { id:'status',    icon:'💚', label:'/status',    desc:'Saúde de todos os sistemas',         acao:() => irPara('saude') },
+  { id:'bugs',      icon:'🐛', label:'/bugs',      desc:'Ver bugs abertos',                   acao:() => irPara('bugs') },
+  { id:'demandas',  icon:'📋', label:'/demandas',  desc:'Ver backlog de demandas',            acao:() => irPara('features') },
+  { id:'deploy',    icon:'🚀', label:'/deploy',    desc:'Registrar novo deploy',              acao:() => { fecharCmd(); abrirModalDeploy(); } },
+  { id:'deploys',   icon:'📦', label:'/deploys',   desc:'Histórico de deploys',               acao:() => irPara('deploys') },
+  { id:'insights',  icon:'🤖', label:'/insights',  desc:'Diagnóstico IA / gerar briefing',    acao:() => irPara('melhorias') },
+  { id:'ultraplan', icon:'⚡', label:'/ultraplan', desc:'Gerar diagnóstico técnico completo', acao:() => { irPara('melhorias'); fecharCmd(); setTimeout(gerarBriefing, 100); } },
+  { id:'agentes',   icon:'🧠', label:'/agentes',   desc:'Painel de agentes IA',               acao:() => irPara('agentes') },
+  { id:'alertas',   icon:'🔔', label:'/alertas',   desc:'Feed de alertas',                    acao:() => irPara('alertas') },
+  { id:'triagem',   icon:'✨', label:'/triagem',   desc:'Importar análise com IA',            acao:() => { fecharCmd(); abrirTriagem(); } },
+];
+
+let _cmdIdx = 0;
+
+function abrirCmd() {
+  const overlay = document.getElementById('cmd-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('cmd-input').value = '';
+  filtrarCmds();
+  setTimeout(() => document.getElementById('cmd-input').focus(), 50);
+}
+
+function fecharCmd(e) {
+  if (e && e.target !== document.getElementById('cmd-overlay')) return;
+  document.getElementById('cmd-overlay').style.display = 'none';
+}
+
+function filtrarCmds() {
+  const q = document.getElementById('cmd-input').value.replace(/^\//, '').toLowerCase();
+  const filtrados = q ? _CMDS.filter(c => c.id.includes(q) || c.desc.toLowerCase().includes(q)) : _CMDS;
+  _cmdIdx = 0;
+  document.getElementById('cmd-list').innerHTML = filtrados.map((c, i) => `
+    <div class="cmd-item ${i === 0 ? 'selected' : ''}" data-idx="${i}" onclick="executarCmd(${_CMDS.indexOf(c)})" onmouseenter="this.parentNode.querySelectorAll('.cmd-item').forEach((el,j)=>{el.classList.toggle('selected',j===parseInt(this.dataset.idx));});_cmdIdx=${i}">
+      <span style="font-size:16px;width:24px;text-align:center;">${c.icon}</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${c.label}</div>
+        <div style="font-size:11px;color:var(--t4);">${c.desc}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="padding:16px 20px;color:var(--t4);font-size:13px;">Nenhum comando encontrado</div>';
+}
+
+function navCmds(e) {
+  const items = document.querySelectorAll('.cmd-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { _cmdIdx = Math.min(_cmdIdx + 1, items.length - 1); }
+  else if (e.key === 'ArrowUp') { _cmdIdx = Math.max(_cmdIdx - 1, 0); }
+  else if (e.key === 'Enter') {
+    const q = document.getElementById('cmd-input').value.replace(/^\//, '').toLowerCase();
+    const filtrados = q ? _CMDS.filter(c => c.id.includes(q) || c.desc.toLowerCase().includes(q)) : _CMDS;
+    if (filtrados[_cmdIdx]) executarCmd(_CMDS.indexOf(filtrados[_cmdIdx]));
+    return;
+  } else return;
+  items.forEach((el, i) => el.classList.toggle('selected', i === _cmdIdx));
+  items[_cmdIdx]?.scrollIntoView({ block:'nearest' });
+}
+
+function executarCmd(idx) {
+  document.getElementById('cmd-overlay').style.display = 'none';
+  _CMDS[idx]?.acao();
+}
+
+function abrirTriagem() {
+  document.getElementById('triagem-texto').value = '';
+  document.getElementById('triagem-passo1').style.display = '';
+  document.getElementById('triagem-passo2').style.display = 'none';
+  document.getElementById('modal-triagem').classList.add('open');
+}
 </script>
 </body>
 </html>
