@@ -8,7 +8,7 @@ const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY") || ""
 
 // DM Stack Supabase (bugs, demandas, deploys)
 const DMS_URL = "https://bkfkzauhnlulrtttgcii.supabase.co"
-const DMS_KEY = Deno.env.get("DMS_SERVICE_KEY") || ""
+const DMS_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("DMS_SERVICE_KEY") || ""
 
 // EDR System Supabase (contagem de tenants)
 const EDR_URL = "https://mepzoxoahpwcvvlymlfh.supabase.co"
@@ -40,7 +40,7 @@ async function coletarDadosProdutos() {
     sbGet(RPM_URL, RPM_KEY, "oficinas", "?select=id,nome,trial_ate,created_at"),
   ])
 
-  const sistemas = ["EDR", "RPM", "NAREGUA", "LOADPRO"]
+  const sistemas = ["EDR", "RPM", "NAREGUA", "LOADPRO", "DMSTACK"]
   const statusAtivoBug = (b: any) => b.status !== "resolvido" && b.status !== "descartado"
   const statusAtivaFeat = (f: any) => f.status !== "concluido" && f.status !== "descartado"
 
@@ -173,7 +173,7 @@ async function salvarDiagnostico(analise: any, dadosBrutos: any) {
     method: "DELETE",
     headers: { apikey: DMS_KEY, Authorization: `Bearer ${DMS_KEY}` },
   })
-  await fetch(`${DMS_URL}/rest/v1/dmstack_diagnosticos`, {
+  const saveResp = await fetch(`${DMS_URL}/rest/v1/dmstack_diagnosticos`, {
     method: "POST",
     headers: {
       apikey: DMS_KEY,
@@ -195,6 +195,10 @@ async function salvarDiagnostico(analise: any, dadosBrutos: any) {
       raw_analysis: JSON.stringify({ analise, dados: dadosBrutos }),
     }),
   })
+  if (!saveResp.ok) {
+    const errBody = await saveResp.text()
+    throw new Error(`Falha ao salvar: ${saveResp.status} ${errBody}`)
+  }
 }
 
 // ═══ HANDLER ═══
