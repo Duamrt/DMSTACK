@@ -173,6 +173,20 @@ button{font-family:'Outfit',sans-serif;}
 .badge-sev.aviso{background:rgba(255,170,40,0.15);color:rgba(255,190,80,0.9);border:1px solid rgba(255,170,40,0.2);}
 .badge-sistema{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:3px;background:var(--t5);color:var(--t4);border:1px solid var(--borda);}
 
+/* ─── AGENTES ─────────────────────────────────── */
+.agente-section{padding:18px 0 4px;font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--borda);margin-bottom:2px;}
+.agente-item{display:grid;grid-template-columns:80px 1fr 160px 70px;gap:12px;align-items:center;padding:11px 16px;border-radius:6px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background .1s;}
+.agente-item:hover{background:var(--hover);}
+.agente-nome{font-size:13px;font-weight:600;color:var(--t2);}
+.agente-trigger{font-size:11px;color:var(--t4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agente-ultima{font-size:11px;color:var(--t4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge-agente{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
+.badge-agente.ativo{background:rgba(40,190,100,0.12);color:rgba(70,210,120,0.9);border:1px solid rgba(40,190,100,0.2);}
+.badge-agente.em_execucao{background:rgba(70,130,255,0.15);color:rgba(100,165,255,0.9);border:1px solid rgba(70,130,255,0.25);animation:pulse 1.5s infinite;}
+.badge-agente.inativo{background:transparent;color:var(--t4);border:1px solid var(--borda);}
+.btn-registrar{padding:3px 10px;border:1px solid var(--borda);background:transparent;color:var(--t4);border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-registrar:hover{border-color:var(--borda2);color:var(--t2);}
+
 /* ─── HOME ────────────────────────────────────── */
 .home-greeting{font-size:clamp(28px,3vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
 .home-date{font-size:13px;color:var(--t4);margin-bottom:32px;}
@@ -304,6 +318,7 @@ button{font-family:'Outfit',sans-serif;}
       <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
       <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
       <div class="nav-item" data-view="alertas" onclick="irPara('alertas')"><span>Alertas</span><span class="badge" id="badge-alertas"></span></div>
+      <div class="nav-item" data-view="agentes" onclick="irPara('agentes')">Agentes IA</div>
     </nav>
     <div class="sb-bottom">
       <div class="sb-dot"></div>
@@ -495,6 +510,20 @@ button{font-family:'Outfit',sans-serif;}
       </div>
     </div>
 
+    <!-- ── VIEW: AGENTES ── -->
+    <div id="view-agentes" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Agentes IA</div>
+          <div class="page-sub" id="agentes-sub">25 agentes ativos</div>
+        </div>
+      </div>
+      <div class="filtros" id="filtros-agentes" style="padding:0 0 0 0;margin-top:20px;"></div>
+      <div style="padding:4px 0 32px;" id="lista-agentes">
+        <div class="lista-empty">Carregando...</div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 
@@ -648,6 +677,29 @@ button{font-family:'Outfit',sans-serif;}
   </div>
 </div>
 
+<!-- ══ MODAL AGENTE ══ -->
+<div class="modal-bg" id="modal-agente">
+  <div class="modal">
+    <div class="modal-title" id="mag-title">Registrar uso</div>
+    <div class="modal-field">
+      <div class="modal-label">O que foi feito</div>
+      <textarea class="modal-textarea" id="mag-acao" placeholder="Ex: Mapeou codebase do RPM antes de refatorar financeiro"></textarea>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Status após uso</div>
+      <select class="modal-select" id="mag-status">
+        <option value="ativo">Ativo (concluído ok)</option>
+        <option value="em_execucao">Em execução (ainda rodando)</option>
+        <option value="inativo">Inativo (pausado)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="salvarUsoAgente()" id="mag-btn">Registrar</button>
+      <button class="btn-ghost" onclick="fecharModal('modal-agente')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ DETAIL PANEL ══ -->
 <div class="detail-bg" id="detail-panel">
   <button class="detail-close" onclick="fecharDetail()">← Fechar</button>
@@ -658,7 +710,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101039';
+const _DMS_VER = 'dmstack-04101045';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -911,6 +963,144 @@ function renderAlertas() {
   lista.innerHTML = html;
 }
 
+// ── Agentes ────────────────────────────────────────
+let _agentes = [];
+let _fAgenteCamada = '';
+let _agEditId = null;
+
+const _AGENTES_STATIC = [
+  {id:'software-architect',       nome:'Software Architect',       camada:'planejamento', trigger_quando:'Feature complexa nova — define estrutura antes de codar'},
+  {id:'gsd-planner',              nome:'gsd-planner',              camada:'planejamento', trigger_quando:'Quebra feature grande em tarefas executáveis'},
+  {id:'gsd-phase-researcher',     nome:'gsd-phase-researcher',     camada:'planejamento', trigger_quando:'Não sabe como implementar algo — pesquisa primeiro'},
+  {id:'gsd-roadmapper',           nome:'gsd-roadmapper',           camada:'planejamento', trigger_quando:'Novo projeto ou milestone — monta roadmap'},
+  {id:'gsd-ui-researcher',        nome:'gsd-ui-researcher',        camada:'planejamento', trigger_quando:'Feature tem interface — gera spec de design'},
+  {id:'gsd-advisor-researcher',   nome:'gsd-advisor-researcher',   camada:'planejamento', trigger_quando:'Decisão técnica difícil — pesquisa e compara opções'},
+  {id:'gsd-executor',             nome:'gsd-executor',             camada:'execucao',     trigger_quando:'Plano pronto — executa com commits atômicos'},
+  {id:'gsd-codebase-mapper',      nome:'gsd-codebase-mapper',      camada:'execucao',     trigger_quando:'Entender projeto sem ler tudo manualmente'},
+  {id:'gsd-debugger',             nome:'gsd-debugger',             camada:'execucao',     trigger_quando:'Bug não resolvido em 2 tentativas'},
+  {id:'gsd-assumptions-analyzer', nome:'gsd-assumptions-analyzer', camada:'execucao',     trigger_quando:'Antes de mexer em código crítico'},
+  {id:'code-reviewer',            nome:'Code Reviewer',            camada:'verificacao',  trigger_quando:'Feature concluída — revisão antes de subir'},
+  {id:'reality-checker',          nome:'Reality Checker',          camada:'verificacao',  trigger_quando:'Antes de dizer "pronto" — certifica que está'},
+  {id:'evidence-collector',       nome:'Evidence Collector',       camada:'verificacao',  trigger_quando:'Precisa prova visual que algo funciona'},
+  {id:'gsd-verifier',             nome:'gsd-verifier',             camada:'verificacao',  trigger_quando:'Confere se entregou o que foi prometido'},
+  {id:'gsd-ui-auditor',           nome:'gsd-ui-auditor',           camada:'verificacao',  trigger_quando:'Interface pronta — auditoria visual 6 dimensões'},
+  {id:'gsd-integration-checker',  nome:'gsd-integration-checker',  camada:'verificacao',  trigger_quando:'Múltiplas partes novas — verifica conexão'},
+  {id:'api-tester',               nome:'API Tester',               camada:'qualidade',    trigger_quando:'Edge Functions ou endpoints Supabase'},
+  {id:'workflow-optimizer',       nome:'Workflow Optimizer',       camada:'qualidade',    trigger_quando:'Processo repetitivo — otimizar'},
+  {id:'gsd-nyquist-auditor',      nome:'gsd-nyquist-auditor',      camada:'qualidade',    trigger_quando:'Cobertura de testes de uma fase'},
+  {id:'growth-hacker',            nome:'Growth Hacker',            camada:'estrategia',   trigger_quando:'RPM Pro/NaRegua — estratégia de aquisição'},
+  {id:'gsd-project-researcher',   nome:'gsd-project-researcher',   camada:'estrategia',   trigger_quando:'Novo SaaS — pesquisa domínio/mercado'},
+  {id:'gsd-user-profiler',        nome:'gsd-user-profiler',        camada:'estrategia',   trigger_quando:'Entender padrão de uso dos clientes'},
+  {id:'gsd-manager',              nome:'gsd-manager',              camada:'gestao',       trigger_quando:'Ver status geral de todos os projetos GSD'},
+  {id:'gsd-next',                 nome:'gsd-next',                 camada:'gestao',       trigger_quando:'Avançar para próxima fase automaticamente'},
+  {id:'gsd-fast',                 nome:'gsd-fast',                 camada:'gestao',       trigger_quando:'Tarefa trivial inline — sem overhead de plano'}
+];
+
+const _CAMADA_LABEL = {planejamento:'Planejamento', execucao:'Execução', verificacao:'Verificação', qualidade:'Qualidade', estrategia:'Estratégia', gestao:'Gestão GSD'};
+const _CAMADAS_ORDER = ['planejamento','execucao','verificacao','qualidade','estrategia','gestao'];
+
+async function carregarAgentes() {
+  const lista = document.getElementById('lista-agentes');
+  if (!lista) return;
+
+  // Tenta banco, usa estático como fallback
+  const db = await dmsGet('agentes', '?order=camada,nome');
+  if (Array.isArray(db) && db.length) {
+    _agentes = _AGENTES_STATIC.map(s => {
+      const d = db.find(r => r.id === s.id) || {};
+      return { ...s, status: d.status || 'ativo', ultima_acao: d.ultima_acao || null, ultima_acao_ts: d.ultima_acao_ts || null };
+    });
+  } else {
+    _agentes = _AGENTES_STATIC.map(s => ({ ...s, status: 'ativo', ultima_acao: null, ultima_acao_ts: null }));
+  }
+
+  initFiltrosAgentes();
+  renderAgentes();
+}
+
+function initFiltrosAgentes() {
+  const cont = document.getElementById('filtros-agentes');
+  if (!cont) return;
+  const opcoes = [['', 'Todos'], ..._CAMADAS_ORDER.map(c => [c, _CAMADA_LABEL[c]])];
+  cont.innerHTML = opcoes.map(([val, label]) =>
+    `<button class="filtro${_fAgenteCamada === val ? ' on' : ''}" onclick="setFiltroAgente('${val}')">${label}</button>`
+  ).join('');
+}
+
+function setFiltroAgente(camada) {
+  _fAgenteCamada = camada;
+  initFiltrosAgentes();
+  renderAgentes();
+}
+
+function renderAgentes() {
+  const lista = document.getElementById('lista-agentes');
+  const sub = document.getElementById('agentes-sub');
+  if (!lista) return;
+
+  let items = _agentes;
+  if (_fAgenteCamada) items = items.filter(a => a.camada === _fAgenteCamada);
+
+  if (sub) {
+    const emEx = _agentes.filter(a => a.status === 'em_execucao').length;
+    sub.textContent = `${_agentes.length} agentes${emEx ? ` · ${emEx} em execução` : ''}`;
+  }
+
+  if (!items.length) { lista.innerHTML = '<div class="lista-empty">Nenhum agente nesta camada.</div>'; return; }
+
+  // Agrupar por camada se não filtrado
+  let html = '';
+  const camadas = _fAgenteCamada ? [_fAgenteCamada] : _CAMADAS_ORDER.filter(c => items.some(a => a.camada === c));
+
+  camadas.forEach(camada => {
+    const grupo = items.filter(a => a.camada === camada);
+    if (!grupo.length) return;
+    html += `<div class="agente-section" style="padding:18px 16px 6px;">${_CAMADA_LABEL[camada]} <span style="font-weight:400;opacity:.5;">(${grupo.length})</span></div>`;
+    html += grupo.map(a => `
+      <div class="agente-item">
+        <div><span class="badge-agente ${a.status}">${a.status === 'em_execucao' ? 'RODANDO' : a.status === 'inativo' ? 'INATIVO' : 'ATIVO'}</span></div>
+        <div>
+          <div class="agente-nome">${esc(a.nome)}</div>
+          <div class="agente-trigger">${esc(a.trigger_quando || '')}</div>
+        </div>
+        <div class="agente-ultima">${a.ultima_acao ? esc(a.ultima_acao) : '<span style="color:var(--t4)">—</span>'}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${a.ultima_acao_ts ? `<span style="font-size:10px;color:var(--t4);">${aging(a.ultima_acao_ts)}</span>` : ''}
+          <button class="btn-registrar" onclick="abrirRegistrarAgente('${a.id}')">▶ Usar</button>
+        </div>
+      </div>
+    `).join('');
+  });
+
+  lista.innerHTML = html;
+}
+
+function abrirRegistrarAgente(id) {
+  _agEditId = id;
+  const a = _agentes.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('mag-title').textContent = a.nome;
+  document.getElementById('mag-acao').value = '';
+  document.getElementById('mag-status').value = 'ativo';
+  document.getElementById('modal-agente').classList.add('open');
+  setTimeout(() => document.getElementById('mag-acao').focus(), 100);
+}
+
+async function salvarUsoAgente() {
+  const acao = document.getElementById('mag-acao').value.trim();
+  if (!acao) { document.getElementById('mag-acao').focus(); return; }
+  const status = document.getElementById('mag-status').value;
+  const btn = document.getElementById('mag-btn');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+
+  const payload = { status, ultima_acao: acao, ultima_acao_ts: new Date().toISOString(), updated_at: new Date().toISOString() };
+  await dmsPatch('agentes', `?id=eq.${_agEditId}`, payload);
+
+  fecharModal('modal-agente');
+  btn.textContent = 'Registrar'; btn.disabled = false;
+  await carregarAgentes();
+}
+
 // ── Toggle Sidebar ─────────────────────────────────
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
@@ -930,6 +1120,7 @@ function irPara(view) {
   if (view === 'saude') carregarSaude();
   if (view === 'melhorias') carregarMelhorias();
   if (view === 'alertas') renderAlertas();
+  if (view === 'agentes') carregarAgentes();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
