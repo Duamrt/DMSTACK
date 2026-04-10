@@ -280,10 +280,10 @@ button{font-family:'Outfit',sans-serif;}
       <!-- Números rápidos -->
       <div class="section-label">Visão geral</div>
       <div class="home-numeros" id="app-numeros">
-        <div class="num-card"><div class="num-label">EDR</div><div class="num-value">—</div></div>
-        <div class="num-card"><div class="num-label">RPM OS</div><div class="num-value">—</div></div>
-        <div class="num-card"><div class="num-label">Bugs abertos</div><div class="num-value" id="num-bugs">—</div></div>
-        <div class="num-card"><div class="num-label">Demandas</div><div class="num-value" id="num-features">—</div></div>
+        <div class="num-card"><div class="num-label">Pendências totais</div><div class="num-value" id="num-bugs">—</div></div>
+        <div class="num-card"><div class="num-label">Críticos abertos</div><div class="num-value">—</div></div>
+        <div class="num-card"><div class="num-label">EDR System</div><div class="num-value">—</div></div>
+        <div class="num-card"><div class="num-label">RPM Pro</div><div class="num-value" id="num-features">—</div></div>
       </div>
 
       <!-- Briefing IA -->
@@ -965,40 +965,46 @@ async function gerarBriefing() {
   if (r && r.ok) carregarBriefing();
 }
 
-// ── Dados do dashboard (EDR/RPM) ───────────────────
-async function carregarDadosDash() {
-  try {
-    const r = await callEdge('get-dashboard-data');
-    if (!r || !r.ok) return;
-    const edr = r.edr || {};
-    const rpm = r.rpm || {};
-    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const mm = meses[new Date().getMonth()];
+// ── Números home — métricas do produto, não do cliente ─
+function carregarDadosDash() {
+  const sistemas = ['EDR','RPM','NAREGUA','LOADPRO'];
+  const labels = {'EDR':'EDR System','RPM':'RPM Pro','NAREGUA':'NaRegua','LOADPRO':'LoadPro'};
 
-    document.getElementById('app-numeros').innerHTML = `
-      <div class="num-card ${(edr.saldo||0)<0?'num-warn':''}">
-        <div class="num-label">Saldo EDR ${mm}</div>
-        <div class="num-value">${fmtK(edr.saldo||0)}</div>
-        <div class="num-sub">Ent ${fmtK(edr.total_entrada||0)} · Sai ${fmtK(edr.total_saida||0)}</div>
-      </div>
-      <div class="num-card">
-        <div class="num-label">RPM — OS Abertas</div>
-        <div class="num-value">${rpm.os_abertas||0}</div>
-        <div class="num-sub">${rpm.os_hoje||0} hoje · ${rpm.entregues_mes||0} entregas ${mm}</div>
-      </div>
-      <div class="num-card">
-        <div class="num-label">Bugs abertos</div>
-        <div class="num-value" id="num-bugs">${_bugs.filter(b=>b.status!=='resolvido'&&b.status!=='descartado').length}</div>
-      </div>
-      <div class="num-card">
-        <div class="num-label">Demandas ativas</div>
-        <div class="num-value" id="num-features">${_features.filter(f=>f.status!=='concluido'&&f.status!=='descartado').length}</div>
-      </div>
-    `;
-    document.getElementById('sb-status').textContent = 'LIVE';
-  } catch(e) {
-    document.getElementById('sb-status').textContent = 'OFFLINE';
-  }
+  const bugsAbertos = _bugs.filter(b => b.status !== 'resolvido' && b.status !== 'descartado');
+  const featAtivas  = _features.filter(f => f.status !== 'concluido' && f.status !== 'descartado');
+  const total = bugsAbertos.length + featAtivas.length;
+
+  // pendências críticas
+  const criticos = bugsAbertos.filter(b => b.severidade === 'critico').length;
+
+  // breakdown por sistema (top 2 com mais pendências)
+  const contPorSistema = {};
+  sistemas.forEach(s => {
+    contPorSistema[s] = bugsAbertos.filter(b=>b.sistema===s).length + featAtivas.filter(f=>f.sistema===s).length;
+  });
+
+  document.getElementById('app-numeros').innerHTML = `
+    <div class="num-card">
+      <div class="num-label">Pendências totais</div>
+      <div class="num-value" id="num-bugs">${total}</div>
+      <div class="num-sub">${bugsAbertos.length} bugs · ${featAtivas.length} demandas</div>
+    </div>
+    <div class="num-card ${criticos>0?'num-warn':''}">
+      <div class="num-label">Críticos abertos</div>
+      <div class="num-value">${criticos}</div>
+      <div class="num-sub">${criticos>0?'Requer atenção':'Tudo ok'}</div>
+    </div>
+    <div class="num-card">
+      <div class="num-label">EDR System</div>
+      <div class="num-value">${contPorSistema['EDR']}</div>
+      <div class="num-sub">${bugsAbertos.filter(b=>b.sistema==='EDR').length} bugs · ${featAtivas.filter(f=>f.sistema==='EDR').length} demandas</div>
+    </div>
+    <div class="num-card">
+      <div class="num-label">RPM Pro</div>
+      <div class="num-value" id="num-features">${contPorSistema['RPM']}</div>
+      <div class="num-sub">${bugsAbertos.filter(b=>b.sistema==='RPM').length} bugs · ${featAtivas.filter(f=>f.sistema==='RPM').length} demandas</div>
+    </div>
+  `;
 }
 
 // ── Modal helpers ──────────────────────────────────
@@ -1287,13 +1293,14 @@ async function iniciarApp() {
     carregarBugs(),
     carregarFeatures(),
     carregarDeploys(),
-    carregarBriefing(),
-    carregarDadosDash()
+    carregarBriefing()
   ]);
+  carregarDadosDash();
 
   // Refresh a cada 5 min
   setInterval(async () => {
     await refreshToken();
+    await Promise.all([carregarBugs(), carregarFeatures()]);
     carregarDadosDash();
   }, 5 * 60 * 1000);
 }
