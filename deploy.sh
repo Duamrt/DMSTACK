@@ -6,9 +6,13 @@ cd "$(dirname "$0")"
 VER="dmstack-$(date +%m%d%H%M)"
 node -e "
 const fs = require('fs');
+const ver = process.argv[1];
 let sw = fs.readFileSync('sw.js', 'utf8');
-sw = sw.replace(/const CACHE='[^']+'/, \"const CACHE='\" + process.argv[1] + \"'\");
+sw = sw.replace(/const CACHE='[^']+'/, \"const CACHE='\" + ver + \"'\");
 fs.writeFileSync('sw.js', sw);
+let html = fs.readFileSync('index.html', 'utf8');
+html = html.replace(/const _DMS_VER = '[^']+'/, \"const _DMS_VER = '\" + ver + \"'\");
+fs.writeFileSync('index.html', html);
 " "$VER"
 
 git add -A
