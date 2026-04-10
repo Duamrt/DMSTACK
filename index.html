@@ -913,16 +913,12 @@ function toggleSaudeCard(id) {
 
 async function checarEDR() {
   try {
-    const [companies, obras] = await Promise.all([
-      edrGet('companies', '?select=id'),
-      edrGet('obras', '?select=created_at&order=created_at.desc&limit=1')
-    ]);
+    const companies = await edrGet('companies', '?select=id');
     const n = Array.isArray(companies) ? companies.length : 0;
-    const ultimaObra = obras?.[0]?.created_at || null;
     return {
       status: n > 0 ? 'ok' : 'warn',
       metricas: `${n} cliente${n !== 1 ? 's' : ''}`,
-      ultimaAtividade: ultimaObra ? `Última obra: ${aging(ultimaObra)}` : 'Sem atividade recente',
+      ultimaAtividade: 'Banco acessível',
       checado: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})
     };
   } catch(e) {
