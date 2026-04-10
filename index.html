@@ -156,6 +156,15 @@ button{font-family:'Outfit',sans-serif;}
 .saude-sub{font-size:12px;color:var(--t4);margin-bottom:14px;}
 .saude-link{font-size:11px;color:var(--t4);cursor:pointer;transition:color .2s;}
 .saude-link:hover{color:var(--t2);}
+.saude-card{cursor:pointer;transition:border-color .2s;}
+.saude-card:hover{border-color:var(--borda2);}
+.saude-status.checking{background:rgba(255,255,255,0.04);color:var(--t4);animation:pulse 1.2s infinite;}
+.saude-status.warn{background:rgba(255,200,100,0.1);color:rgba(255,220,100,0.9);}
+.saude-details{margin-top:12px;padding-top:12px;border-top:1px solid var(--borda);display:none;}
+.saude-card.expanded .saude-details{display:block;}
+.saude-metric{font-size:11px;color:var(--t3);margin-bottom:4px;}
+.saude-metric span{color:var(--t4);}
+.saude-chevron{font-size:10px;color:var(--t4);margin-top:8px;}
 
 /* ─── BRIEFING ────────────────────────────────── */
 .briefing-card{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);line-height:1.7;font-size:14px;color:var(--t2);margin-bottom:24px;}
@@ -598,6 +607,7 @@ let _features = [];
 let _deploys = [];
 let _editId = null;
 let _editTipo = null;
+let _saudeData = {};
 
 // Filtros ativos
 let _fBugSistema = '', _fBugStatus = '';
@@ -719,7 +729,7 @@ function irPara(view) {
 
   if (view === 'bugs') renderBugs();
   if (view === 'features') renderFeatures();
-  if (view === 'saude') renderSaude();
+  if (view === 'saude') carregarSaude();
   if (view === 'melhorias') carregarMelhorias();
 }
 
@@ -849,7 +859,7 @@ function renderDeploys() {
 }
 
 // ── Saúde ──────────────────────────────────────────
-function renderSaude() {
+function renderSaudeCriticos() {
   const criticos = document.getElementById('saude-criticos');
   if (!criticos) return;
   const bugs = _bugs.filter(b => b.severidade === 'critico' && b.status !== 'resolvido' && b.status !== 'descartado');
@@ -868,9 +878,94 @@ function renderSaude() {
   `).join('');
 }
 
-function carregarSaude() {
-  document.getElementById('saude-update').textContent = 'Atualizado agora';
-  renderSaude();
+function renderSaude() { renderSaudeCriticos(); }
+
+function renderSaudeGrid() {
+  const sistemasConf = [
+    { id:'EDR', nome:'EDR System', sub:'sistema.edreng.com.br', url:'https://sistema.edreng.com.br' },
+    { id:'RPM', nome:'RPM Pro', sub:'rpmpro.com.br', url:'https://rpmpro.com.br/v2/kanban-v2.html' },
+    { id:'NAREGUA', nome:'NaRegua', sub:'usenaregua.com.br', url:'https://usenaregua.com.br' },
+    { id:'LOADPRO', nome:'LoadPro', sub:'sem dados recentes', url:null }
+  ];
+  const labelStatus = { ok:'OPERACIONAL', warn:'DEGRADADO', off:'INATIVO', checking:'VERIFICANDO' };
+  document.getElementById('saude-grid').innerHTML = sistemasConf.map(s => {
+    const d = _saudeData[s.id] || { status:'checking' };
+    return `<div class="saude-card${d.expanded?' expanded':''}" onclick="toggleSaudeCard('${s.id}')">
+      <div class="saude-card-header">
+        <div class="saude-nome">${s.nome}</div>
+        <span class="saude-status ${d.status}">${labelStatus[d.status]||'—'}</span>
+      </div>
+      <div class="saude-sub">${d.metricas || s.sub}</div>
+      <div class="saude-details" id="saude-det-${s.id}">
+        ${d.ultimaAtividade ? `<div class="saude-metric">${esc(d.ultimaAtividade)}</div>` : ''}
+        ${d.checado ? `<div class="saude-metric"><span>Verificado às</span> ${d.checado}</div>` : ''}
+      </div>
+      ${s.url ? `<div class="saude-link" onclick="event.stopPropagation();window.open('${s.url}','_blank')">Acessar →</div>` : `<div class="saude-link" style="color:var(--t4);">—</div>`}
+      <div class="saude-chevron">${d.status !== 'checking' ? '▾ detalhes' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSaudeCard(id) {
+  if (_saudeData[id]) _saudeData[id].expanded = !_saudeData[id].expanded;
+  renderSaudeGrid();
+}
+
+async function checarEDR() {
+  try {
+    const [companies, obras] = await Promise.all([
+      edrGet('companies', '?select=id'),
+      edrGet('obras', '?select=created_at&order=created_at.desc&limit=1')
+    ]);
+    const n = Array.isArray(companies) ? companies.length : 0;
+    const ultimaObra = obras?.[0]?.created_at || null;
+    return {
+      status: n > 0 ? 'ok' : 'warn',
+      metricas: `${n} cliente${n !== 1 ? 's' : ''}`,
+      ultimaAtividade: ultimaObra ? `Última obra: ${aging(ultimaObra)}` : 'Sem atividade recente',
+      checado: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})
+    };
+  } catch(e) {
+    return { status:'off', metricas:'sistema.edreng.com.br', ultimaAtividade:'Falha na verificação', checado:'—' };
+  }
+}
+
+async function checarRPM() {
+  try {
+    const [oficinas, os] = await Promise.all([
+      rpmGet('oficinas', '?select=id'),
+      rpmGet('ordens_servico', '?select=created_at&order=created_at.desc&limit=1')
+    ]);
+    const n = Array.isArray(oficinas) ? oficinas.filter(o => o.id !== 'aaaa0001-0000-0000-0000-000000000001').length : 0;
+    const ultimaOS = os?.[0]?.created_at || null;
+    return {
+      status: n > 0 ? 'ok' : 'warn',
+      metricas: `${n} oficina${n !== 1 ? 's' : ''}`,
+      ultimaAtividade: ultimaOS ? `Última OS: ${aging(ultimaOS)}` : 'Sem atividade recente',
+      checado: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})
+    };
+  } catch(e) {
+    return { status:'off', metricas:'rpmpro.com.br', ultimaAtividade:'Falha na verificação', checado:'—' };
+  }
+}
+
+async function carregarSaude() {
+  document.getElementById('saude-update').textContent = 'Verificando...';
+  _saudeData = {
+    EDR: { status:'checking' },
+    RPM: { status:'checking' },
+    NAREGUA: { status:'checking' },
+    LOADPRO: { status:'off', metricas:'sem dados recentes', ultimaAtividade:'Sistema inativo', checado:'—' }
+  };
+  renderSaudeGrid();
+
+  const [edr, rpm] = await Promise.all([checarEDR(), checarRPM()]);
+  _saudeData.EDR = edr;
+  _saudeData.RPM = rpm;
+  _saudeData.NAREGUA = { status:'ok', metricas:'usenaregua.com.br', ultimaAtividade:'Sem Supabase conectado', checado:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) };
+  renderSaudeGrid();
+  renderSaudeCriticos();
+  document.getElementById('saude-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 }
 
 // ── Home: Aguardando você ──────────────────────────
@@ -1296,7 +1391,8 @@ async function iniciarApp() {
   await Promise.all([
     carregarBugs(),
     carregarFeatures(),
-    carregarBriefing()
+    carregarBriefing(),
+    carregarSaude()
   ]);
   carregarDadosDash();
   verificarConexoes();
