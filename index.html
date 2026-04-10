@@ -113,14 +113,19 @@ button{font-family:'Outfit',sans-serif;}
 
 /* ─── BADGES ──────────────────────────────────── */
 .badge-sev{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
-.badge-sev.critico{background:rgba(255,255,255,0.12);color:#fff;}
-.badge-sev.medio{background:rgba(255,255,255,0.06);color:var(--t3);}
+.badge-sev.critico{background:rgba(255,60,60,0.18);color:rgba(255,110,110,0.95);border:1px solid rgba(255,60,60,0.25);}
+.badge-sev.alto{background:rgba(255,60,60,0.18);color:rgba(255,110,110,0.95);border:1px solid rgba(255,60,60,0.25);}
+.badge-sev.medio{background:rgba(255,170,40,0.15);color:rgba(255,190,80,0.9);border:1px solid rgba(255,170,40,0.2);}
+.badge-sev.media{background:rgba(255,170,40,0.15);color:rgba(255,190,80,0.9);border:1px solid rgba(255,170,40,0.2);}
 .badge-sev.baixo{background:transparent;border:1px solid var(--borda);color:var(--t4);}
 .badge-status{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.5px;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t4);}
-.badge-status.aberto{color:var(--t3);}
-.badge-status.em_andamento{background:rgba(255,255,255,0.08);color:var(--t2);}
-.badge-status.resolvido{color:var(--t4);}
-.badge-status.bloqueado{background:rgba(255,255,255,0.06);color:rgba(255,180,100,0.8);}
+.badge-status.aberto{background:rgba(70,130,255,0.12);color:rgba(100,165,255,0.9);border:1px solid rgba(70,130,255,0.2);}
+.badge-status.em_andamento{background:rgba(40,190,100,0.12);color:rgba(70,210,120,0.9);border:1px solid rgba(40,190,100,0.2);}
+.badge-status.resolvido{background:transparent;color:var(--t4);}
+.badge-status.concluido{background:transparent;color:var(--t4);}
+.badge-status.bloqueado{background:rgba(255,170,40,0.12);color:rgba(255,200,80,0.9);border:1px solid rgba(255,170,40,0.2);}
+.badge-status.backlog{background:rgba(140,100,255,0.1);color:rgba(170,140,255,0.85);border:1px solid rgba(140,100,255,0.18);}
+.badge-novo{display:inline-block;font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:1px 5px;border-radius:3px;background:rgba(0,200,170,0.15);color:rgba(0,220,190,0.9);border:1px solid rgba(0,200,170,0.25);margin-left:6px;vertical-align:middle;}
 .badge-ag{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);color:var(--t2);font-size:10px;font-weight:700;border:1px solid var(--borda2);}
 .badge-ag.duam{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;}
 
@@ -128,20 +133,20 @@ button{font-family:'Outfit',sans-serif;}
 .kanban-board{display:flex;gap:14px;padding:0 32px 32px;overflow-x:auto;}
 .kanban-col{flex:0 0 220px;min-height:200px;}
 .kanban-col-header{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t4);padding:0 2px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borda);margin-bottom:10px;}
-.kanban-col-header.col-aberto{color:rgba(255,255,255,0.6);}
-.kanban-col-header.col-em_andamento{color:rgba(255,255,255,0.8);}
-.kanban-col-header.col-bloqueado{color:rgba(251,191,36,0.8);}
+.kanban-col-header.col-aberto{color:rgba(100,165,255,0.85);}
+.kanban-col-header.col-em_andamento{color:rgba(70,210,120,0.9);}
+.kanban-col-header.col-bloqueado{color:rgba(255,200,80,0.9);}
 .kanban-col-header.col-resolvido{color:var(--t4);}
-.kanban-col-header.col-backlog{color:rgba(255,255,255,0.5);}
+.kanban-col-header.col-backlog{color:rgba(170,140,255,0.85);}
 .kanban-col-header.col-concluido{color:rgba(255,255,255,0.35);}
 .kanban-col-count{background:var(--t5);border-radius:10px;padding:2px 7px;font-size:10px;color:var(--t4);}
 .kanban-card{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-left:3px solid rgba(255,255,255,0.1);border-radius:6px;padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:background .15s;}
 .kanban-card:hover{background:rgba(255,255,255,0.055);}
-.kanban-card.st-aberto{border-left-color:rgba(255,255,255,0.25);}
-.kanban-card.st-em_andamento{border-left-color:rgba(255,255,255,0.5);}
-.kanban-card.st-bloqueado{border-left-color:rgba(251,191,36,0.6);}
+.kanban-card.st-aberto{border-left-color:rgba(70,130,255,0.6);}
+.kanban-card.st-em_andamento{border-left-color:rgba(40,190,100,0.65);}
+.kanban-card.st-bloqueado{border-left-color:rgba(255,180,40,0.7);}
 .kanban-card.st-resolvido{border-left-color:rgba(255,255,255,0.06);opacity:0.45;}
-.kanban-card.st-backlog{border-left-color:rgba(255,255,255,0.15);}
+.kanban-card.st-backlog{border-left-color:rgba(140,100,255,0.5);}
 .kanban-card.st-concluido{border-left-color:rgba(255,255,255,0.06);opacity:0.45;}
 .kanban-card-title{font-size:12px;font-weight:500;color:var(--t2);line-height:1.45;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .kanban-card-footer{display:flex;align-items:center;justify-content:space-between;}
@@ -672,6 +677,13 @@ function aging(dateStr) {
   return days + ' dias';
 }
 
+function isNovo(dateStr) {
+  return Date.now() - new Date(dateStr).getTime() < 48 * 3600000;
+}
+function novoBadge(dateStr) {
+  return isNovo(dateStr) ? '<span class="badge-novo">NOVO</span>' : '';
+}
+
 function agingDays(dateStr) {
   return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
 }
@@ -831,7 +843,7 @@ function renderBugs() {
     <div class="lista-item ${agingClass(b.created_at)}" onclick="abrirDetail('bug', '${b.id}')">
       <div><span class="badge-sev ${b.severidade}">${b.severidade}</span></div>
       <div>
-        <div class="item-titulo">${esc(b.titulo)}</div>
+        <div class="item-titulo">${esc(b.titulo)}${novoBadge(b.created_at)}</div>
       </div>
       <div class="item-col">${b.sistema}</div>
       <div><span class="badge-status ${b.status}">${statusLabel(b.status)}</span></div>
@@ -878,7 +890,7 @@ function renderFeatures() {
     <div class="lista-item ${agingClass(f.created_at)}" onclick="abrirDetail('feature', '${f.id}')">
       <div><span class="badge-sev ${f.prioridade === 'alta' ? 'critico' : f.prioridade === 'media' ? 'medio' : 'baixo'}">${f.prioridade}</span></div>
       <div>
-        <div class="item-titulo">${esc(f.titulo)}</div>
+        <div class="item-titulo">${esc(f.titulo)}${novoBadge(f.created_at)}</div>
       </div>
       <div class="item-col">${f.sistema}</div>
       <div><span class="badge-status ${f.status}">${statusLabel(f.status)}</span></div>
@@ -1078,7 +1090,7 @@ async function carregarMelhorias() {
     return `<div class="briefing-card" style="margin-bottom:16px;">
       <div style="font-size:10px;color:var(--t4);letter-spacing:1px;margin-bottom:12px;">${date}</div>
       ${txt ? `<p>${esc(txt)}</p>` : ''}
-      ${probs.map(p => `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`).join('')}
+      ${probs.map(p => `<p style="padding-left:12px;border-left:2px solid rgba(255,80,80,0.4);margin-left:4px;color:rgba(255,200,200,0.85);">${esc(p)}</p>`).join('')}
       ${recs.length ? `<p style="margin-top:12px;margin-bottom:6px;"><strong>Recomendações:</strong></p>${recsHtml}` : ''}
     </div>`;
   }).join('');
@@ -1107,8 +1119,8 @@ async function carregarBriefing() {
   const probs = d.problemas || [];
   const recs = d.recomendacoes || [];
   let html = `<div class="briefing-card"><p>${esc(txt)}</p>`;
-  if (probs.length) html += `<p><strong>Atenção:</strong></p>${probs.map(p=>`<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`).join('')}`;
-  if (recs.length) html += `<p><strong>Recomendações:</strong></p>${recs.map(r=>`<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`).join('')}`;
+  if (probs.length) html += `<p><strong>Atenção:</strong></p>${probs.map(p=>`<p style="padding-left:12px;border-left:2px solid rgba(255,80,80,0.4);margin-left:4px;color:rgba(255,200,200,0.85);">${esc(p)}</p>`).join('')}`;
+  if (recs.length) html += `<p><strong>Recomendações:</strong></p>${recs.map(r=>`<p style="padding-left:12px;border-left:2px solid rgba(40,190,100,0.35);margin-left:4px;color:rgba(180,240,200,0.85);">${esc(r)}</p>`).join('')}`;
   html += `<div class="briefing-footer">${label} — gerado por IA</div></div>`;
   const bEl = document.getElementById('app-briefing');
   if (bEl) bEl.innerHTML = html;
@@ -1419,7 +1431,7 @@ function renderKanban(containerId, items, colunas, tipo) {
       </div>
       ${cards.length ? cards.map(i => `
         <div class="kanban-card st-${i.status}" onclick="abrirDetail('${tipo}','${i.id}')">
-          <div class="kanban-card-title">${esc(i.titulo)}</div>
+          <div class="kanban-card-title">${esc(i.titulo)}${novoBadge(i.created_at)}</div>
           <div class="kanban-card-footer">
             <span class="kanban-card-sistema">${i.sistema}</span>
             <span class="badge-ag ${i.aguardando}" title="${i.aguardando||''}">${agLabel(i.aguardando)}</span>
