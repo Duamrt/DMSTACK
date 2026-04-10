@@ -1,4 +1,4 @@
-const CACHE='dmstack-04101027';
+const CACHE='dmstack-04101039';
 const ASSETS=['/','/index.html','/manifest.json'];
 
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting();});

@@ -1,47 +1,63 @@
-# Handoff — DM Stack
+# Handoff — DM Stack V2
 **Data:** 2026-04-10
-**Sessão:** Fase 4 (Diagnóstico IA) concluída + Kanban implementado em Bugs/Demandas com design monochrome precisando de cores
+**Sessão:** Cores por status, badge NOVO, versão no F12 em todos os projetos — Fase 4 concluída
 
 ## O que foi feito
-- **Fase 4 IA:** `callEdge('agente-diario')` corrigido para `callEdge('diagnostico-diario')` — função já existia deployada
-- **`diagnostico-diario` fixes:** secret `DMS_SERVICE_KEY` trocado por `SUPABASE_SERVICE_ROLE_KEY` (o antigo não funcionava); adicionado log de erro no save; check constraint `produto` expandida para incluir `dmstack`
-- **Filtro DM Stack:** botão `DM Stack` adicionado nos filtros de Bugs e Demandas
-- **Função analisa DMSTACK:** `sistemas = ["EDR", "RPM", "NAREGUA", "LOADPRO", "DMSTACK"]` na edge function
-- **Fases no banco:** 6 fases do roadmap inseridas como demandas `sistema=DMSTACK` (1-4 concluídas, 5-6 backlog)
-- **Toggle Lista/Kanban:** implementado em Bugs e Demandas — `setBugView()` / `setFeatView()`, estado `_bugKanban` / `_featKanban`
-- **Kanban render:** `renderKanban()` com colunas configuráveis, cards com borda esquerda por status (classes `st-{status}`)
-- **"→ Demanda" em Insights:** `virarDemanda(idx)` + array global `_insightRecs` pré-preenchido
-- **Fix `app-briefing` null:** guard adicionado em `carregarBriefing()`
+
+### DM Stack — Cores e UX
+- Badges de status coloridos: azul (aberto), verde (em andamento), amarelo (bloqueado), roxo (backlog)
+- Badges de severidade coloridos: vermelho (crítico/alto), laranja (médio), cinza (baixo)
+- Kanban: bordas laterais coloridas por status (antes era tudo branco opaco)
+- Cabeçalhos das colunas do kanban também coloridos por status
+- Badge `NOVO` em teal para itens criados nas últimas 48h — aparece na lista e no kanban
+- Briefing/Insights: problemas com borda vermelha + texto rosado; recomendações com borda verde + texto esverdeado
+- Função `novoBadge(dateStr)` e `isNovo(dateStr)` adicionadas antes de `aging()`
+
+### DM Stack — Edge function verificada
+- `diagnostico-diario` está implantada no Supabase DMS (`bkfkzauhnlulrtttgcii`)
+- Front já chamava `callEdge('diagnostico-diario')` corretamente — nada precisou mudar
+
+### Versão no F12 — TODOS OS PROJETOS
+- **EDR System:** snippet em `js/edr-v2-infra.js` (lê `?v=` do currentScript)
+- **RPM Pro:** snippet em `v2/js/infra.js` (lê `?v=` do currentScript)
+- **NaRegua:** snippet em `js/auth.js` (lê `?v=` do currentScript)
+- **LoadPro:** snippet em `js/auth.js` (lê `?v=` do currentScript)
+- **DM Stack:** `const _DMS_VER = 'dmstack-XXXXXXXX'` no topo do `<script>` em `index.html`; `deploy.sh` atualiza automaticamente via Node.js regex
+
+### Deploy DM Stack atualizado
+- `deploy.sh` agora também atualiza `_DMS_VER` em `index.html` além do `sw.js`
+- Deploy final desta sessão: `dmstack-04101027`
 
 ## O que funcionou
-- Stitch gerou design de referência do Kanban (projeto `4458879260444914113`)
-- Deploy `diagnostico-diario` via `npx supabase functions deploy` (sem Docker)
-- Inserção das fases via SQL no Supabase DMS
+- `document.currentScript.src.match(/\?v=(\d+)/)` captura versão automaticamente — zero config extra
+- Node.js inline no deploy.sh para regex em múltiplos arquivos simultaneamente
 
 ## O que não funcionou / bloqueios
-- `verify_jwt` reseta pra `true` a cada redeploy — Duam precisa desabilitar manualmente após cada deploy
-- Service worker causou cache stale várias vezes
-- Design monochrome atual do Kanban dificulta leitura rápida — **PRINCIPAL PENDÊNCIA**
+- Nenhum bloqueio nessa sessão
 
 ## Próximos passos
-1. **URGENTE — Cores no Kanban:** classes `st-{status}` e `col-{status}` já existem no CSS, só mudar as cores:
-   - Aberto: azul `rgba(59,130,246,0.6)` borda esquerda
-   - Em andamento: branco `rgba(255,255,255,0.7)`
-   - Bloqueado: âmbar `rgba(251,191,36,0.7)`
-   - Resolvido/Concluído: verde `rgba(34,197,94,0.4)` + card opacidade 0.45
-   - Considerar fundo sutil na coluna bloqueado
-2. **Fase 5:** Alertas Unificados — feed cronológico de eventos críticos dos 4 SaaS
-3. **pg_cron:** agendar `diagnostico-diario` às 7h todo dia no Supabase DMS
+1. **Fase 5 — Alertas Unificados** (próxima sessão)
+   - Feed cronológico de eventos críticos dos 4 SaaS
+   - Badge na aba de navegação com contagem de alertas não vistos
+   - Marcar alerta como "visto" (soft-delete, preserva histórico)
+   - **Decisão de arquitetura pendente:** alertas vêm de polling ativo nos 4 Supabase OU de registros manuais (bugs críticos já existem na tabela `bugs`) — segunda opção é mais simples e já tem dados
+2. Atualizar ROADMAP.md para marcar Fases 2, 3 e 4 como concluídas
 
 ## Arquivos modificados
-- `~/dmstack/index.html` — toggle kanban, renderKanban(), virarDemanda(), CSS kanban, fix app-briefing, filtro DMSTACK
-- `~/dmstack/supabase/functions/diagnostico-diario/index.ts` — SUPABASE_SERVICE_ROLE_KEY, log erro save, DMSTACK em sistemas[]
+
+| Arquivo | O que mudou |
+|---|---|
+| `~/dmstack/index.html` | Cores badges/kanban, `novoBadge()`, `_DMS_VER`, console.log, briefing cores |
+| `~/dmstack/deploy.sh` | Atualiza `_DMS_VER` em index.html junto com sw.js |
+| `~/edr-system/js/edr-v2-infra.js` | Console.log versão no F12 (verde) |
+| `~/rpmpro/v2/js/infra.js` | Console.log versão no F12 (azul) |
+| `~/naregua/js/auth.js` | Console.log versão no F12 (roxo) |
+| `~/loadpro/js/auth.js` | Console.log versão no F12 (laranja) |
 
 ## Contexto importante
-- **Deploy:** sempre `./deploy.sh "mensagem"` — nunca push manual
-- **Após deploy de edge function:** SEMPRE desabilitar JWT no dashboard (reseta a cada deploy)
-- **Supabase DMS project ref:** `bkfkzauhnlulrtttgcii`
-- **Kanban CSS classes:** `st-{status}` nos cards, `col-{status}` nos headers — só mudar CSS pra mudar cores
-- **_insightRecs:** array global populado em `carregarMelhorias()` — índice usado em `virarDemanda(i)`
-- **Demandas DM Stack no banco:** 6 registros inseridos com `sistema='DMSTACK'`, fases 1-4 `status='concluido'`, 5-6 `status='backlog'`
-- **Deploy atual:** `dmstack-04101012`
+- DM Stack **não usa** `?v=` em scripts — versão está em `_DMS_VER` (literal atualizada pelo deploy.sh)
+- Fases 2, 3, 4 estão **funcionando em produção** mas ROADMAP.md ainda as marca como não iniciadas
+- Supabase DMS: `bkfkzauhnlulrtttgcii` | Login: `duam@edreng.com.br` / `duanxdzin`
+- Edge function `diagnostico-diario`: secrets `ANTHROPIC_API_KEY`, `EDR_SERVICE_KEY`, `RPM_SERVICE_KEY` já configurados
+- Para Fase 5: tabela `bugs` já existe com `sistema`, `severidade`, `status`, `created_at` — usar como fonte dos alertas é o caminho mais rápido
+- `verify_jwt` da edge function reseta a cada redeploy — desabilitar manualmente no dashboard após cada deploy

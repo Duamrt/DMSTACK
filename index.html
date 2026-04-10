@@ -159,6 +159,20 @@ button{font-family:'Outfit',sans-serif;}
 .btn-rec{flex-shrink:0;padding:3px 9px;border:1px solid var(--borda2);background:transparent;color:var(--t3);border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;}
 .btn-rec:hover{background:rgba(255,255,255,0.06);color:var(--t2);}
 
+/* ─── ALERTAS ─────────────────────────────────── */
+.alerta-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:6px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background .1s;}
+.alerta-item:hover{background:var(--hover);}
+.alerta-item.visto{opacity:0.38;}
+.alerta-body{flex:1;min-width:0;}
+.alerta-desc{font-size:13px;font-weight:500;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.alerta-meta{font-size:11px;color:var(--t4);margin-top:2px;display:flex;gap:8px;align-items:center;}
+.alerta-ts{font-size:10px;color:var(--t4);flex-shrink:0;}
+.alerta-visto-btn{flex-shrink:0;padding:3px 10px;border:1px solid var(--borda);background:transparent;color:var(--t4);border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.alerta-visto-btn:hover{border-color:var(--borda2);color:var(--t2);}
+.alerta-sep{padding:6px 16px 2px;font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;}
+.badge-sev.aviso{background:rgba(255,170,40,0.15);color:rgba(255,190,80,0.9);border:1px solid rgba(255,170,40,0.2);}
+.badge-sistema{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:3px;background:var(--t5);color:var(--t4);border:1px solid var(--borda);}
+
 /* ─── HOME ────────────────────────────────────── */
 .home-greeting{font-size:clamp(28px,3vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
 .home-date{font-size:13px;color:var(--t4);margin-bottom:32px;}
@@ -289,7 +303,7 @@ button{font-family:'Outfit',sans-serif;}
       <div class="nav-item" data-view="bugs" onclick="irPara('bugs')"><span>Bugs</span><span class="badge" id="badge-bugs"></span></div>
       <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
       <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
-      <div class="nav-item" data-view="alertas" onclick="irPara('alertas')">Alertas</div>
+      <div class="nav-item" data-view="alertas" onclick="irPara('alertas')"><span>Alertas</span><span class="badge" id="badge-alertas"></span></div>
     </nav>
     <div class="sb-bottom">
       <div class="sb-dot"></div>
@@ -470,11 +484,14 @@ button{font-family:'Outfit',sans-serif;}
       <div class="page-header">
         <div>
           <div class="page-title">Alertas</div>
-          <div class="page-sub">Feed unificado de eventos criticos</div>
+          <div class="page-sub" id="alertas-sub">Feed unificado de eventos críticos</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-ghost" onclick="limparVistos()">Limpar vistos</button>
         </div>
       </div>
-      <div style="padding:20px 32px;">
-        <div class="lista-empty">Nenhum alerta ainda. Conecte na Phase 5.</div>
+      <div style="padding:8px 0 32px;" id="lista-alertas">
+        <div class="lista-empty">Carregando...</div>
       </div>
     </div>
 
@@ -641,7 +658,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101027';
+const _DMS_VER = 'dmstack-04101039';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -661,6 +678,9 @@ let _saudeData = {};
 // Filtros ativos
 let _fBugSistema = '', _fBugStatus = '';
 let _fFeatSistema = '', _fFeatStatus = '';
+
+// Alertas vistos (persistido em localStorage)
+const _vistos = new Set(JSON.parse(localStorage.getItem('dms-alertas-vistos') || '[]'));
 
 // ── Helpers ──────────────────────────────────────
 function esc(s) { const d = document.createElement('div'); d.textContent = String(s||''); return d.innerHTML; }
@@ -769,6 +789,128 @@ async function verificarConexoes() {
   console.log('[DM Stack] RPM:', rpm.status === 'fulfilled' && rpm.value.ok ? 'OK' : 'FALHA');
 }
 
+// ── Alertas ────────────────────────────────────────
+function gerarAlertas() {
+  const alertas = [];
+
+  // Bugs críticos ativos
+  _bugs.filter(b => b.severidade === 'critico' && b.status !== 'resolvido' && b.status !== 'descartado')
+    .forEach(b => alertas.push({
+      key: 'bug-' + b.id,
+      tipo: 'bug_critico',
+      sistema: b.sistema,
+      descricao: b.titulo,
+      severidade: 'critico',
+      ts: b.created_at,
+      id: b.id,
+      tipoRef: 'bug'
+    }));
+
+  // Bugs bloqueados
+  _bugs.filter(b => b.status === 'bloqueado')
+    .forEach(b => alertas.push({
+      key: 'bugblk-' + b.id,
+      tipo: 'bug_bloqueado',
+      sistema: b.sistema,
+      descricao: 'Bloqueado: ' + b.titulo,
+      severidade: 'aviso',
+      ts: b.updated_at || b.created_at,
+      id: b.id,
+      tipoRef: 'bug'
+    }));
+
+  // Deploys com bug
+  _deploys.filter(d => d.status === 'bug')
+    .forEach(d => alertas.push({
+      key: 'dep-' + d.id,
+      tipo: 'deploy_bug',
+      sistema: d.sistema,
+      descricao: 'Deploy com bug: ' + (d.mensagem || d.versao || ''),
+      severidade: 'aviso',
+      ts: d.created_at,
+      id: null,
+      tipoRef: null
+    }));
+
+  // Sistemas offline
+  Object.entries(_saudeData).forEach(([s, d]) => {
+    if (d.status === 'off') alertas.push({
+      key: 'saude-off-' + s,
+      tipo: 'sistema_off',
+      sistema: s,
+      descricao: 'Sistema offline detectado',
+      severidade: 'critico',
+      ts: new Date().toISOString(),
+      id: null,
+      tipoRef: null
+    });
+  });
+
+  return alertas;
+}
+
+function atualizarBadgeAlertas() {
+  const alertas = gerarAlertas();
+  const naovistas = alertas.filter(a => !_vistos.has(a.key) && a.severidade === 'critico').length;
+  const badge = document.getElementById('badge-alertas');
+  if (badge) badge.textContent = naovistas || '';
+}
+
+function marcarVisto(key) {
+  _vistos.add(key);
+  localStorage.setItem('dms-alertas-vistos', JSON.stringify([..._vistos]));
+  renderAlertas();
+  atualizarBadgeAlertas();
+}
+
+function limparVistos() {
+  _vistos.clear();
+  localStorage.setItem('dms-alertas-vistos', '[]');
+  renderAlertas();
+  atualizarBadgeAlertas();
+}
+
+const _sistemaLabel = { EDR:'EDR', RPM:'RPM Pro', NAREGUA:'NaRegua', LOADPRO:'LoadPro', DMSTACK:'DM Stack' };
+
+function renderAlertas() {
+  const lista = document.getElementById('lista-alertas');
+  const sub = document.getElementById('alertas-sub');
+  if (!lista) return;
+
+  const todos = gerarAlertas();
+
+  if (!todos.length) {
+    lista.innerHTML = '<div class="lista-empty">Nenhum alerta ativo. Tudo ok.</div>';
+    if (sub) sub.textContent = 'Nenhum evento crítico';
+    return;
+  }
+
+  const naoVistos = todos.filter(a => !_vistos.has(a.key)).sort((a,b) => new Date(b.ts) - new Date(a.ts));
+  const vistos = todos.filter(a => _vistos.has(a.key)).sort((a,b) => new Date(b.ts) - new Date(a.ts));
+
+  if (sub) sub.textContent = `${naoVistos.length} não visto${naoVistos.length !== 1 ? 's' : ''} · ${todos.length} total`;
+
+  const renderItem = (a) => `
+    <div class="alerta-item${_vistos.has(a.key) ? ' visto' : ''}">
+      <span class="badge-sev ${a.severidade}">${a.severidade.toUpperCase()}</span>
+      <span class="badge-sistema">${_sistemaLabel[a.sistema] || a.sistema}</span>
+      <div class="alerta-body">
+        <div class="alerta-desc">${esc(a.descricao)}${isNovo(a.ts) && !_vistos.has(a.key) ? '<span class="badge-novo">NOVO</span>' : ''}</div>
+        <div class="alerta-meta"><span>há ${aging(a.ts)}</span></div>
+      </div>
+      ${!_vistos.has(a.key) ? `<button class="alerta-visto-btn" onclick="event.stopPropagation();marcarVisto('${a.key}')">Marcar visto</button>` : ''}
+    </div>`;
+
+  let html = '';
+  if (naoVistos.length) html += naoVistos.map(renderItem).join('');
+  if (vistos.length) {
+    html += `<div class="alerta-sep">Vistos</div>`;
+    html += vistos.map(renderItem).join('');
+  }
+
+  lista.innerHTML = html;
+}
+
 // ── Toggle Sidebar ─────────────────────────────────
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
@@ -787,6 +929,7 @@ function irPara(view) {
   if (view === 'features') renderFeatures();
   if (view === 'saude') carregarSaude();
   if (view === 'melhorias') carregarMelhorias();
+  if (view === 'alertas') renderAlertas();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
@@ -1522,6 +1665,7 @@ async function iniciarApp() {
     carregarSaude()
   ]);
   carregarDadosDash();
+  atualizarBadgeAlertas();
   verificarConexoes();
 
   // Refresh a cada 5 min
@@ -1529,6 +1673,7 @@ async function iniciarApp() {
     await refreshToken();
     await Promise.all([carregarBugs(), carregarFeatures()]);
     carregarDadosDash();
+    atualizarBadgeAlertas();
   }, 5 * 60 * 1000);
 }
 
