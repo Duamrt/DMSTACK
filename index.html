@@ -240,28 +240,11 @@ button{font-family:'Outfit',sans-serif;}
       <p>CTO OS</p>
     </div>
     <nav class="sb-nav">
-      <div class="nav-item active" data-view="home" onclick="irPara('home')">
-        Home
-      </div>
-      <div class="sb-section">Projetos</div>
-      <div class="nav-item" data-view="bugs" onclick="irPara('bugs')">
-        Bugs
-        <span class="badge" id="badge-bugs"></span>
-      </div>
-      <div class="nav-item" data-view="features" onclick="irPara('features')">
-        Demandas
-        <span class="badge" id="badge-features"></span>
-      </div>
-      <div class="nav-item" data-view="deploys" onclick="irPara('deploys')">
-        Deploys
-      </div>
-      <div class="sb-section">Sistema</div>
-      <div class="nav-item" data-view="saude" onclick="irPara('saude')">
-        Saúde
-      </div>
-      <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">
-        Insights IA
-      </div>
+      <div class="nav-item active" data-view="saude" onclick="irPara('saude')">Saude</div>
+      <div class="nav-item" data-view="bugs" onclick="irPara('bugs')"><span>Bugs</span><span class="badge" id="badge-bugs"></span></div>
+      <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
+      <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
+      <div class="nav-item" data-view="alertas" onclick="irPara('alertas')">Alertas</div>
     </nav>
     <div class="sb-bottom">
       <div class="sb-dot"></div>
@@ -275,36 +258,6 @@ button{font-family:'Outfit',sans-serif;}
 
   <!-- MAIN -->
   <div class="main">
-
-    <!-- ── VIEW: HOME ── -->
-    <div id="view-home" class="view active">
-      <div class="home-greeting" id="app-greeting">Bom dia, Duam.</div>
-      <div class="home-date" id="app-date"></div>
-
-      <!-- Aguardando você -->
-      <div class="section-label">Aguardando você</div>
-      <div class="aguardando-list" id="home-aguardando">
-        <div class="lista-empty">Carregando...</div>
-      </div>
-
-      <!-- Números rápidos -->
-      <div class="section-label">Visão geral</div>
-      <div class="home-numeros" id="app-numeros">
-        <div class="num-card"><div class="num-label">Pendências totais</div><div class="num-value" id="num-bugs">—</div></div>
-        <div class="num-card"><div class="num-label">Críticos abertos</div><div class="num-value">—</div></div>
-        <div class="num-card"><div class="num-label">EDR System</div><div class="num-value">—</div></div>
-        <div class="num-card"><div class="num-label">RPM Pro</div><div class="num-value" id="num-features">—</div></div>
-      </div>
-
-      <!-- Briefing IA -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <div class="section-label" style="margin-bottom:0;">Briefing do dia</div>
-        <button class="btn-ghost" style="font-size:11px;padding:6px 14px;" onclick="gerarBriefing()">↻ Atualizar</button>
-      </div>
-      <div id="app-briefing">
-        <div class="briefing-empty">Nenhum briefing gerado hoje.<br><br><button class="btn-primary" style="font-size:12px;" onclick="gerarBriefing()">Gerar com IA</button></div>
-      </div>
-    </div>
 
     <!-- ── VIEW: BUGS ── -->
     <div id="view-bugs" class="view">
@@ -381,32 +334,8 @@ button{font-family:'Outfit',sans-serif;}
       </div>
     </div>
 
-    <!-- ── VIEW: DEPLOYS ── -->
-    <div id="view-deploys" class="view">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Deploys</div>
-          <div class="page-sub">Histórico de deploys e bugs vinculados</div>
-        </div>
-        <div class="page-actions">
-          <button class="btn-primary" onclick="abrirModalDeploy()">+ Registrar deploy</button>
-        </div>
-      </div>
-
-      <div style="padding:20px 32px 0;">
-        <div class="lista-header" style="grid-template-columns:100px 80px 1fr 100px 80px;">
-          <div class="lista-col">Versão</div>
-          <div class="lista-col">Sistema</div>
-          <div class="lista-col">Mensagem</div>
-          <div class="lista-col">Status</div>
-          <div class="lista-col">Data</div>
-        </div>
-        <div id="lista-deploys"><div class="lista-empty">Carregando...</div></div>
-      </div>
-    </div>
-
     <!-- ── VIEW: SAUDE ── -->
-    <div id="view-saude" class="view">
+    <div id="view-saude" class="view active">
       <div class="page-header">
         <div>
           <div class="page-title">Saúde dos Sistemas</div>
@@ -472,6 +401,19 @@ button{font-family:'Outfit',sans-serif;}
       </div>
       <div style="padding:24px 32px;" id="melhorias-content">
         <div class="briefing-empty">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: ALERTAS ── -->
+    <div id="view-alertas" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Alertas</div>
+          <div class="page-sub">Feed unificado de eventos criticos</div>
+        </div>
+      </div>
+      <div style="padding:20px 32px;">
+        <div class="lista-empty">Nenhum alerta ainda. Conecte na Phase 5.</div>
       </div>
     </div>
 
@@ -739,7 +681,6 @@ function irPara(view) {
 
   if (view === 'bugs') renderBugs();
   if (view === 'features') renderFeatures();
-  if (view === 'deploys') renderDeploys();
   if (view === 'saude') renderSaude();
   if (view === 'melhorias') carregarMelhorias();
 }
@@ -1317,7 +1258,6 @@ async function iniciarApp() {
   await Promise.all([
     carregarBugs(),
     carregarFeatures(),
-    carregarDeploys(),
     carregarBriefing()
   ]);
   carregarDadosDash();
