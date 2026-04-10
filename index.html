@@ -3,455 +3,1235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DM.Stack — Command Center</title>
+<title>DM Stack</title>
 <link rel="icon" type="image/svg+xml" href="icon-192.svg">
-<link rel="apple-touch-icon" href="icon-192.svg">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--bg:#000;--bg1:#08080c;--bg2:#0e0e14;--borda:rgba(255,255,255,0.06);--borda2:rgba(255,255,255,0.1);--t1:#fff;--t2:rgba(255,255,255,0.85);--t3:rgba(255,255,255,0.55);--t4:rgba(255,255,255,0.3);--t5:rgba(255,255,255,0.08);}
+:root{
+  --bg:#0a0a0f;
+  --sidebar:#06060a;
+  --borda:rgba(255,255,255,0.07);
+  --borda2:rgba(255,255,255,0.14);
+  --t1:#fff;
+  --t2:rgba(255,255,255,0.82);
+  --t3:rgba(255,255,255,0.5);
+  --t4:rgba(255,255,255,0.28);
+  --t5:rgba(255,255,255,0.06);
+  --hover:rgba(255,255,255,0.04);
+}
 body{background:var(--bg);color:var(--t1);font-family:'Outfit',sans-serif;overflow-x:hidden;min-height:100vh;}
 ::selection{background:rgba(255,255,255,0.15);}
+a{color:inherit;text-decoration:none;}
+button{font-family:'Outfit',sans-serif;}
 
-/* LOGIN */
+/* ─── LOGIN ───────────────────────────────────── */
 .login-wrap{position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;}
-.login-box{width:100%;max-width:340px;padding:24px;}
+.login-box{width:100%;max-width:320px;padding:24px;}
 .login-logo{text-align:center;margin-bottom:48px;}
-.login-logo h1{font-size:42px;font-weight:900;letter-spacing:-2px;}
-.login-logo h1 span{color:rgba(255,255,255,0.15);}
-.login-logo p{font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:3px;margin-top:4px;}
-.login-input{width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;margin-bottom:10px;outline:none;transition:border-color .2s;}
-.login-input:focus{border-color:rgba(255,255,255,0.25);}
-.login-btn{width:100%;padding:14px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;}
-.login-btn:hover{opacity:0.85;}
-.login-erro{text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin-top:12px;min-height:18px;}
+.login-logo h1{font-size:38px;font-weight:900;letter-spacing:-2px;}
+.login-logo h1 em{color:rgba(255,255,255,0.15);font-style:normal;}
+.login-logo p{font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:4px;margin-top:6px;}
+.login-field{position:relative;margin-bottom:10px;}
+.login-field label{display:block;font-size:10px;font-weight:600;color:var(--t4);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.login-input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:8px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.login-input:focus{border-color:rgba(255,255,255,0.22);}
+.login-btn{width:100%;padding:13px;background:#fff;color:#000;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;transition:opacity .2s;letter-spacing:.5px;}
+.login-btn:hover{opacity:.88;}
+.login-erro{text-align:center;font-size:12px;color:rgba(255,255,255,0.35);margin-top:10px;min-height:18px;}
+.login-footer{text-align:center;font-size:9px;color:rgba(255,255,255,0.12);letter-spacing:2px;margin-top:40px;}
 
-/* APP LAYOUT */
-.app{display:none;min-height:100vh;}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:20px 28px;border-bottom:1px solid var(--borda);}
-.topbar-logo{font-size:20px;font-weight:900;letter-spacing:-1px;cursor:default;}
-.topbar-logo span{color:rgba(255,255,255,0.15);}
-.topbar-right{display:flex;align-items:center;gap:16px;}
-.topbar-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t4);letter-spacing:2px;font-weight:600;}
-.topbar-status::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.2;}}
-.topbar-time{font-size:14px;color:var(--t3);font-weight:300;font-variant-numeric:tabular-nums;}
-.topbar-sair{background:none;border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:var(--t4);font-family:'Outfit',sans-serif;font-size:11px;padding:6px 14px;cursor:pointer;transition:all .2s;}
-.topbar-sair:hover{border-color:rgba(255,255,255,0.2);color:var(--t2);}
+/* ─── APP ─────────────────────────────────────── */
+.app{display:none;min-height:100vh;flex-direction:row;}
+.app.show{display:flex;}
 
-/* CONTEUDO */
-.content{max-width:800px;margin:0 auto;padding:32px 24px 120px;}
+/* ─── SIDEBAR ─────────────────────────────────── */
+.sidebar{width:200px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--borda);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid var(--borda);}
+.sb-logo h1{font-size:16px;font-weight:900;letter-spacing:-0.5px;}
+.sb-logo h1 em{color:rgba(255,255,255,0.18);font-style:normal;}
+.sb-logo p{font-size:9px;color:var(--t4);letter-spacing:2px;margin-top:2px;}
+.sb-nav{padding:12px 0;flex:1;}
+.sb-section{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;padding:12px 20px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;transition:all .15s;border-left:2px solid transparent;user-select:none;}
+.nav-item:hover{color:var(--t2);background:var(--hover);}
+.nav-item.active{color:var(--t1);border-left-color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.05);}
+.nav-item .badge{margin-left:auto;font-size:10px;font-weight:700;background:rgba(255,255,255,0.1);color:var(--t3);padding:1px 6px;border-radius:20px;}
+.nav-item.active .badge{background:rgba(255,255,255,0.15);color:var(--t2);}
+.sb-bottom{padding:16px 20px;border-top:1px solid var(--borda);display:flex;align-items:center;gap:8px;}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:#fff;flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.15;}}
+.sb-status{font-size:10px;color:var(--t4);letter-spacing:2px;flex:1;}
+.sb-sair{background:none;border:none;color:var(--t4);font-size:11px;cursor:pointer;padding:4px;transition:color .2s;}
+.sb-sair:hover{color:var(--t2);}
 
-/* SAUDACAO */
-.greeting{margin-bottom:32px;}
-.greeting h2{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-1px;line-height:1.2;}
-.greeting p{font-size:14px;color:var(--t4);margin-top:6px;}
+/* ─── MAIN ─────────────────────────────────────── */
+.main{margin-left:200px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* BRIEFING */
-.briefing{margin-bottom:32px;}
-.briefing-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.briefing-label{font-size:11px;font-weight:600;color:var(--t4);letter-spacing:2px;text-transform:uppercase;}
-.briefing-refresh{background:none;border:1px solid var(--borda);border-radius:8px;color:var(--t4);font-family:'Outfit',sans-serif;font-size:11px;padding:6px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
-.briefing-refresh:hover{border-color:var(--borda2);color:var(--t2);}
-.briefing-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:14px;padding:24px;line-height:1.7;font-size:15px;color:var(--t2);}
-.briefing-card p{margin-bottom:12px;}
-.briefing-card p:last-child{margin-bottom:0;}
-.briefing-card strong{color:var(--t1);font-weight:700;}
-.briefing-empty{text-align:center;padding:48px 24px;color:var(--t4);font-size:14px;}
-.briefing-empty button{margin-top:16px;background:#fff;color:#000;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:12px 28px;cursor:pointer;}
+/* ─── PAGE HEADER ─────────────────────────────── */
+.page-header{padding:28px 32px 20px;border-bottom:1px solid var(--borda);display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-size:24px;font-weight:800;letter-spacing:-0.5px;}
+.page-sub{font-size:12px;color:var(--t4);margin-top:2px;}
+.page-actions{display:flex;gap:8px;}
+.btn-primary{padding:9px 18px;background:#fff;color:#000;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;letter-spacing:.3px;}
+.btn-primary:hover{opacity:.85;}
+.btn-ghost{padding:9px 18px;background:none;border:1px solid var(--borda2);color:var(--t3);border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s;}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.25);color:var(--t2);}
 
-/* ACOES */
-.acoes{margin-bottom:40px;}
-.acoes-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.acoes-label{font-size:11px;font-weight:600;color:var(--t4);letter-spacing:2px;text-transform:uppercase;}
-.acoes-count{font-size:11px;color:var(--t4);}
-.acao{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;margin-bottom:8px;transition:all .2s;cursor:pointer;}
-.acao:hover{border-color:var(--borda2);background:rgba(255,255,255,0.04);}
-.acao.feito{opacity:0.25;}
-.acao.feito .acao-titulo{text-decoration:line-through;}
-.acao-check{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-radius:6px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.acao.feito .acao-check{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);}
-.acao.feito .acao-check::after{content:'\2713';font-size:12px;color:var(--t2);}
-.acao-body{flex:1;}
-.acao-titulo{font-size:14px;font-weight:600;color:var(--t2);line-height:1.4;}
-.acao-detalhe{font-size:12px;color:var(--t3);margin-top:3px;line-height:1.5;}
-.acao-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t4);margin-top:6px;}
+/* ─── VIEWS ───────────────────────────────────── */
+.view{display:none;padding:28px 32px;flex:1;}
+.view.active{display:block;}
 
-/* NUMEROS RAPIDOS */
-.numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:40px;}
-.num-card{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:12px;padding:16px;transition:border-color .2s;}
+/* ─── FILTROS ─────────────────────────────────── */
+.filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;}
+.filtro{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--borda);color:var(--t4);background:none;transition:all .15s;}
+.filtro:hover{border-color:var(--borda2);color:var(--t2);}
+.filtro.on{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);color:var(--t1);}
+.filtro-sep{width:1px;background:var(--borda);margin:0 4px;}
+
+/* ─── LISTA LINEAR ────────────────────────────── */
+.lista-header{display:grid;grid-template-columns:80px 1fr 90px 80px 70px;gap:12px;padding:0 16px 8px;border-bottom:1px solid var(--borda);margin-bottom:4px;}
+.lista-col{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;}
+.lista-item{display:grid;grid-template-columns:80px 1fr 90px 80px 70px;gap:12px;align-items:center;padding:11px 16px;border-radius:6px;cursor:pointer;transition:background .1s;border-bottom:1px solid rgba(255,255,255,0.03);}
+.lista-item:hover{background:var(--hover);}
+.lista-item.aging-warn .item-titulo{color:rgba(255,220,100,0.85);}
+.lista-item.aging-crit .item-titulo{color:rgba(255,140,100,0.9);}
+.item-titulo{font-size:13px;font-weight:500;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{font-size:11px;color:var(--t4);margin-top:1px;}
+.item-col{font-size:11px;color:var(--t3);}
+.lista-empty{padding:48px 16px;text-align:center;color:var(--t4);font-size:13px;}
+
+/* ─── BADGES ──────────────────────────────────── */
+.badge-sev{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;}
+.badge-sev.critico{background:rgba(255,255,255,0.12);color:#fff;}
+.badge-sev.medio{background:rgba(255,255,255,0.06);color:var(--t3);}
+.badge-sev.baixo{background:transparent;border:1px solid var(--borda);color:var(--t4);}
+.badge-status{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.5px;padding:2px 8px;border-radius:4px;background:var(--t5);color:var(--t4);}
+.badge-status.aberto{color:var(--t3);}
+.badge-status.em_andamento{background:rgba(255,255,255,0.08);color:var(--t2);}
+.badge-status.resolvido{color:var(--t4);}
+.badge-status.bloqueado{background:rgba(255,255,255,0.06);color:rgba(255,180,100,0.8);}
+.badge-ag{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);color:var(--t2);font-size:10px;font-weight:700;border:1px solid var(--borda2);}
+.badge-ag.duam{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;}
+
+/* ─── HOME ────────────────────────────────────── */
+.home-greeting{font-size:clamp(28px,3vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.home-date{font-size:13px;color:var(--t4);margin-bottom:32px;}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
+.home-numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:32px;}
+.num-card{padding:16px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);transition:border-color .2s;}
 .num-card:hover{border-color:var(--borda2);}
-.num-label{font-size:9px;font-weight:600;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
-.num-value{font-size:clamp(20px,2.5vw,32px);font-weight:800;letter-spacing:-1px;}
+.num-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.num-value{font-size:clamp(18px,2vw,28px);font-weight:800;letter-spacing:-1px;}
 .num-sub{font-size:10px;color:var(--t4);margin-top:4px;}
-.num-warn{border-left:2px solid rgba(255,255,255,0.4);}
+.num-warn{border-left:2px solid rgba(255,220,100,0.5);}
+.section-label{font-size:10px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.aguardando-list{margin-bottom:32px;}
+.ag-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:6px;cursor:pointer;transition:background .1s;border-bottom:1px solid rgba(255,255,255,0.03);}
+.ag-item:hover{background:var(--hover);}
+.ag-item-body{flex:1;}
+.ag-item-titulo{font-size:13px;font-weight:500;color:var(--t2);}
+.ag-item-meta{font-size:11px;color:var(--t4);margin-top:1px;}
+.ag-item-sistema{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:1px;}
 
-/* CHAT */
-.chat-area{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(transparent, #000 20%);padding:12px 24px 20px;z-index:100;}
-.chat-box{max-width:800px;margin:0 auto;display:flex;gap:10px;}
-.chat-input{flex:1;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid var(--borda2);border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
-.chat-input:focus{border-color:rgba(255,255,255,0.3);}
-.chat-input::placeholder{color:var(--t4);}
-.chat-send{background:#fff;color:#000;border:none;border-radius:12px;padding:0 24px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;transition:opacity .2s;}
-.chat-send:hover{opacity:0.85;}
+/* ─── SAUDE ───────────────────────────────────── */
+.saude-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.saude-card{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);}
+.saude-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.saude-nome{font-size:14px;font-weight:700;}
+.saude-status{font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;border-radius:4px;}
+.saude-status.ok{background:rgba(255,255,255,0.08);color:var(--t2);}
+.saude-status.warn{background:rgba(255,200,100,0.1);color:rgba(255,220,100,0.9);}
+.saude-status.off{background:rgba(255,255,255,0.04);color:var(--t4);}
+.saude-sub{font-size:12px;color:var(--t4);margin-bottom:14px;}
+.saude-link{font-size:11px;color:var(--t4);cursor:pointer;transition:color .2s;}
+.saude-link:hover{color:var(--t2);}
 
-/* CHAT MSGS */
-.chat-msgs{max-width:800px;margin:0 auto 16px;display:none;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto;padding:0 4px;}
-.chat-msgs.has-msgs{display:flex;}
-.chat-msgs::-webkit-scrollbar{width:3px;}
-.chat-msgs::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px;}
-.chat-msg{font-size:13px;line-height:1.6;padding:12px 16px;border-radius:12px;max-width:85%;animation:fadeIn .2s;}
-.chat-msg.bot{background:rgba(255,255,255,0.04);color:var(--t2);align-self:flex-start;border:1px solid var(--borda);}
-.chat-msg.user{background:rgba(255,255,255,0.1);color:var(--t1);align-self:flex-end;}
-.chat-msg.loading{color:var(--t4);font-style:italic;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+/* ─── BRIEFING ────────────────────────────────── */
+.briefing-card{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);line-height:1.7;font-size:14px;color:var(--t2);margin-bottom:24px;}
+.briefing-card p{margin-bottom:10px;}
+.briefing-card p:last-child{margin-bottom:0;}
+.briefing-card strong{color:var(--t1);}
+.briefing-empty{padding:32px;text-align:center;color:var(--t4);font-size:13px;border:1px solid var(--borda);border-radius:10px;margin-bottom:24px;}
+.briefing-footer{font-size:10px;color:var(--t4);margin-top:12px;text-align:right;}
 
-/* MOBILE */
-@media(max-width:640px){
-  .topbar{padding:14px 16px;}
-  .content{padding:20px 16px 120px;}
-  .numeros{grid-template-columns:1fr 1fr;gap:8px;}
-  .num-card{padding:12px;}
-  .briefing-card{padding:18px;font-size:14px;}
-  .chat-area{padding:10px 16px 16px;}
-}
+/* ─── MODAL ───────────────────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:#0e0e16;border:1px solid var(--borda2);border-radius:12px;width:100%;max-width:480px;padding:28px;}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:20px;}
+.modal-field{margin-bottom:14px;}
+.modal-label{font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.modal-input{width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--borda2);border-radius:7px;color:#fff;font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.modal-input:focus{border-color:rgba(255,255,255,0.25);}
+.modal-select{appearance:none;width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--borda2);border-radius:7px;color:#fff;font-family:'Outfit',sans-serif;font-size:13px;outline:none;cursor:pointer;}
+.modal-select option{background:#0e0e16;}
+.modal-textarea{width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--borda2);border-radius:7px;color:#fff;font-family:'Outfit',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:80px;transition:border-color .2s;}
+.modal-textarea:focus{border-color:rgba(255,255,255,0.25);}
+.modal-actions{display:flex;gap:8px;margin-top:20px;}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ─── DETAIL PANEL ─────────────────────────────── */
+.detail-bg{position:fixed;top:0;right:-480px;width:480px;height:100vh;background:#0e0e16;border-left:1px solid var(--borda2);z-index:200;transition:right .25s;overflow-y:auto;padding:28px;}
+.detail-bg.open{right:0;}
+.detail-close{background:none;border:1px solid var(--borda);color:var(--t4);font-size:11px;padding:6px 14px;border-radius:6px;cursor:pointer;margin-bottom:20px;transition:all .2s;}
+.detail-close:hover{border-color:var(--borda2);color:var(--t2);}
+.detail-titulo{font-size:18px;font-weight:700;margin-bottom:8px;line-height:1.3;}
+.detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.detail-section{margin-bottom:16px;}
+.detail-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.detail-value{font-size:13px;color:var(--t2);line-height:1.6;}
+.status-select-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.status-opt{padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--borda);color:var(--t4);background:none;transition:all .15s;}
+.status-opt:hover{border-color:var(--borda2);color:var(--t2);}
+.status-opt.sel{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25);color:#fff;}
+.ag-select-row{display:flex;gap:6px;margin-top:8px;}
+.ag-opt{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--borda);color:var(--t4);background:none;transition:all .15s;}
+.ag-opt:hover{border-color:var(--borda2);color:var(--t2);}
+.ag-opt.sel{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;}
+.detail-delete{margin-top:24px;padding-top:16px;border-top:1px solid var(--borda);}
+.btn-danger{padding:9px 18px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s;}
+.btn-danger:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);}
+
+/* ─── SCROLL ──────────────────────────────────── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ══ LOGIN ══ -->
 <div class="login-wrap" id="tela-login">
   <div class="login-box">
     <div class="login-logo">
-      <h1>DM<span>.</span>Stack</h1>
-      <p>COMMAND CENTER</p>
+      <h1>DM<em>.</em>STACK</h1>
+      <p>CTO OS PESSOAL</p>
     </div>
-    <input class="login-input" id="login-email" type="email" placeholder="Email" autocomplete="email">
-    <input class="login-input" id="login-senha" type="password" placeholder="Senha" autocomplete="current-password">
-    <button class="login-btn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-field">
+      <label>Identidade</label>
+      <input class="login-input" id="login-email" type="email" placeholder="email@dmstack.com" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label>Chave de acesso</label>
+      <input class="login-input" id="login-senha" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="fazerLogin()">ENTRAR</button>
     <div class="login-erro" id="login-erro"></div>
+    <div class="login-footer">ZERO OPERATOR ENCRYPTED SESSION</div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══ APP ══ -->
 <div class="app" id="app">
-  <div class="topbar">
-    <div class="topbar-logo">DM<span>.</span>Stack</div>
-    <div class="topbar-right">
-      <div class="topbar-status" id="app-status">CARREGANDO</div>
-      <div class="topbar-time" id="app-time"></div>
-      <button class="topbar-sair" onclick="fazerLogout()">Sair</button>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <h1>DM<em>.</em>STACK</h1>
+      <p>CTO OS</p>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-item active" data-view="home" onclick="irPara('home')">
+        Home
+      </div>
+      <div class="sb-section">Projetos</div>
+      <div class="nav-item" data-view="bugs" onclick="irPara('bugs')">
+        Bugs
+        <span class="badge" id="badge-bugs"></span>
+      </div>
+      <div class="nav-item" data-view="features" onclick="irPara('features')">
+        Demandas
+        <span class="badge" id="badge-features"></span>
+      </div>
+      <div class="nav-item" data-view="deploys" onclick="irPara('deploys')">
+        Deploys
+      </div>
+      <div class="sb-section">Sistema</div>
+      <div class="nav-item" data-view="saude" onclick="irPara('saude')">
+        Saúde
+      </div>
+      <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">
+        Insights IA
+      </div>
+    </nav>
+    <div class="sb-bottom">
+      <div class="sb-dot"></div>
+      <span class="sb-status" id="sb-status">LIVE</span>
+      <button class="sb-sair" onclick="fazerLogout()" title="Sair">↩</button>
     </div>
   </div>
 
-  <div class="content">
-    <!-- SAUDACAO -->
-    <div class="greeting">
-      <h2 id="app-greeting">Bom dia, Duam.</h2>
-      <p id="app-date"></p>
-    </div>
+  <!-- MAIN -->
+  <div class="main">
 
-    <!-- NUMEROS RAPIDOS -->
-    <div class="numeros" id="app-numeros">
-      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
-      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
-      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
-      <div class="num-card"><div class="num-label">Carregando</div><div class="num-value">—</div></div>
-    </div>
+    <!-- ── VIEW: HOME ── -->
+    <div id="view-home" class="view active">
+      <div class="home-greeting" id="app-greeting">Bom dia, Duam.</div>
+      <div class="home-date" id="app-date"></div>
 
-    <!-- BRIEFING DO DIA -->
-    <div class="briefing">
-      <div class="briefing-header">
-        <div class="briefing-label">Briefing do dia</div>
-        <button class="briefing-refresh" onclick="gerarBriefing()">&#8635; Atualizar</button>
+      <!-- Aguardando você -->
+      <div class="section-label">Aguardando você</div>
+      <div class="aguardando-list" id="home-aguardando">
+        <div class="lista-empty">Carregando...</div>
+      </div>
+
+      <!-- Números rápidos -->
+      <div class="section-label">Visão geral</div>
+      <div class="home-numeros" id="app-numeros">
+        <div class="num-card"><div class="num-label">EDR</div><div class="num-value">—</div></div>
+        <div class="num-card"><div class="num-label">RPM OS</div><div class="num-value">—</div></div>
+        <div class="num-card"><div class="num-label">Bugs abertos</div><div class="num-value" id="num-bugs">—</div></div>
+        <div class="num-card"><div class="num-label">Demandas</div><div class="num-value" id="num-features">—</div></div>
+      </div>
+
+      <!-- Briefing IA -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div class="section-label" style="margin-bottom:0;">Briefing do dia</div>
+        <button class="btn-ghost" style="font-size:11px;padding:6px 14px;" onclick="gerarBriefing()">↻ Atualizar</button>
       </div>
       <div id="app-briefing">
-        <div class="briefing-empty">
-          <div>Nenhum briefing gerado hoje</div>
-          <button onclick="gerarBriefing()">Gerar briefing com IA</button>
+        <div class="briefing-empty">Nenhum briefing gerado hoje.<br><br><button class="btn-primary" style="font-size:12px;" onclick="gerarBriefing()">Gerar com IA</button></div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: BUGS ── -->
+    <div id="view-bugs" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Bugs</div>
+          <div class="page-sub" id="bugs-sub">Carregando...</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" onclick="abrirModalBug()">+ Novo bug</button>
         </div>
       </div>
-    </div>
 
-    <!-- ACOES DO DIA -->
-    <div class="acoes">
-      <div class="acoes-header">
-        <div class="acoes-label">Acoes do dia</div>
-        <div class="acoes-count" id="app-acoes-count"></div>
+      <div style="padding:20px 32px 0;">
+        <div class="filtros" id="filtros-bugs">
+          <button class="filtro on" data-f="sistema" data-v="">Todos</button>
+          <button class="filtro" data-f="sistema" data-v="EDR">EDR</button>
+          <button class="filtro" data-f="sistema" data-v="RPM">RPM</button>
+          <button class="filtro" data-f="sistema" data-v="NAREGUA">NaRegua</button>
+          <button class="filtro" data-f="sistema" data-v="LOADPRO">LoadPro</button>
+          <div class="filtro-sep"></div>
+          <button class="filtro on" data-f="status" data-v="">Todos</button>
+          <button class="filtro" data-f="status" data-v="aberto">Aberto</button>
+          <button class="filtro" data-f="status" data-v="em_andamento">Em andamento</button>
+          <button class="filtro" data-f="status" data-v="bloqueado">Bloqueado</button>
+          <button class="filtro" data-f="status" data-v="resolvido">Resolvido</button>
+        </div>
+
+        <div class="lista-header">
+          <div class="lista-col">Severidade</div>
+          <div class="lista-col">Título</div>
+          <div class="lista-col">Sistema</div>
+          <div class="lista-col">Status</div>
+          <div class="lista-col">Aging</div>
+        </div>
+        <div id="lista-bugs"><div class="lista-empty">Carregando...</div></div>
       </div>
-      <div id="app-acoes"><div style="text-align:center;padding:24px;color:var(--t4);font-size:13px;">Carregando...</div></div>
     </div>
-  </div>
 
-  <!-- CHAT FIXO NO FUNDO -->
-  <div class="chat-area">
-    <div class="chat-msgs" id="chat-msgs"></div>
-    <div class="chat-box">
-      <input class="chat-input" id="chat-input" placeholder="Pergunta sobre seus negocios..." onkeydown="if(event.key==='Enter')enviarChat()">
-      <button class="chat-send" onclick="enviarChat()">&#8594;</button>
+    <!-- ── VIEW: FEATURES ── -->
+    <div id="view-features" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Demandas</div>
+          <div class="page-sub" id="features-sub">Carregando...</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" onclick="abrirModalFeature()">+ Nova demanda</button>
+        </div>
+      </div>
+
+      <div style="padding:20px 32px 0;">
+        <div class="filtros" id="filtros-features">
+          <button class="filtro on" data-f="sistema" data-v="">Todos</button>
+          <button class="filtro" data-f="sistema" data-v="EDR">EDR</button>
+          <button class="filtro" data-f="sistema" data-v="RPM">RPM</button>
+          <button class="filtro" data-f="sistema" data-v="NAREGUA">NaRegua</button>
+          <button class="filtro" data-f="sistema" data-v="LOADPRO">LoadPro</button>
+          <div class="filtro-sep"></div>
+          <button class="filtro on" data-f="status" data-v="">Todos</button>
+          <button class="filtro" data-f="status" data-v="backlog">Backlog</button>
+          <button class="filtro" data-f="status" data-v="em_andamento">Em andamento</button>
+          <button class="filtro" data-f="status" data-v="concluido">Concluído</button>
+        </div>
+
+        <div class="lista-header">
+          <div class="lista-col">Prioridade</div>
+          <div class="lista-col">Título</div>
+          <div class="lista-col">Sistema</div>
+          <div class="lista-col">Status</div>
+          <div class="lista-col">Aging</div>
+        </div>
+        <div id="lista-features"><div class="lista-empty">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: DEPLOYS ── -->
+    <div id="view-deploys" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Deploys</div>
+          <div class="page-sub">Histórico de deploys e bugs vinculados</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" onclick="abrirModalDeploy()">+ Registrar deploy</button>
+        </div>
+      </div>
+
+      <div style="padding:20px 32px 0;">
+        <div class="lista-header" style="grid-template-columns:100px 80px 1fr 100px 80px;">
+          <div class="lista-col">Versão</div>
+          <div class="lista-col">Sistema</div>
+          <div class="lista-col">Mensagem</div>
+          <div class="lista-col">Status</div>
+          <div class="lista-col">Data</div>
+        </div>
+        <div id="lista-deploys"><div class="lista-empty">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: SAUDE ── -->
+    <div id="view-saude" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Saúde dos Sistemas</div>
+          <div class="page-sub" id="saude-update">Atualização manual por enquanto</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-ghost" onclick="carregarSaude()">↻ Atualizar</button>
+        </div>
+      </div>
+
+      <div style="padding:24px 32px;">
+        <div class="saude-grid" id="saude-grid">
+          <div class="saude-card">
+            <div class="saude-card-header">
+              <div class="saude-nome">EDR System</div>
+              <span class="saude-status ok">OPERACIONAL</span>
+            </div>
+            <div class="saude-sub">sistema.edreng.com.br</div>
+            <div class="saude-link" onclick="window.open('https://sistema.edreng.com.br','_blank')">Acessar →</div>
+          </div>
+          <div class="saude-card">
+            <div class="saude-card-header">
+              <div class="saude-nome">RPM Pro</div>
+              <span class="saude-status ok">OPERACIONAL</span>
+            </div>
+            <div class="saude-sub">rpmpro.com.br</div>
+            <div class="saude-link" onclick="window.open('https://rpmpro.com.br/v2/kanban-v2.html','_blank')">Acessar →</div>
+          </div>
+          <div class="saude-card">
+            <div class="saude-card-header">
+              <div class="saude-nome">NaRegua</div>
+              <span class="saude-status ok">OPERACIONAL</span>
+            </div>
+            <div class="saude-sub">usenaregua.com.br</div>
+            <div class="saude-link" onclick="window.open('https://usenaregua.com.br','_blank')">Acessar →</div>
+          </div>
+          <div class="saude-card">
+            <div class="saude-card-header">
+              <div class="saude-nome">LoadPro</div>
+              <span class="saude-status off">INATIVO</span>
+            </div>
+            <div class="saude-sub">sem dados recentes</div>
+            <div class="saude-link" style="color:var(--t4);">—</div>
+          </div>
+        </div>
+
+        <!-- Bugs críticos por sistema -->
+        <div class="section-label" style="margin-top:8px;">Bugs críticos ativos</div>
+        <div id="saude-criticos"><div class="lista-empty" style="border:1px solid var(--borda);border-radius:8px;">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: MELHORIAS ── -->
+    <div id="view-melhorias" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Insights IA</div>
+          <div class="page-sub">Diagnósticos e recomendações geradas por IA</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" onclick="gerarBriefingMelhorias()">↻ Gerar diagnóstico</button>
+        </div>
+      </div>
+      <div style="padding:24px 32px;" id="melhorias-content">
+        <div class="briefing-empty">Carregando...</div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ MODAL BUG ══ -->
+<div class="modal-bg" id="modal-bug">
+  <div class="modal">
+    <div class="modal-title" id="mbug-title">Novo bug</div>
+    <div class="modal-field">
+      <div class="modal-label">Título</div>
+      <input class="modal-input" id="mbug-titulo" placeholder="Descreva o bug brevemente">
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="modal-label">Sistema</div>
+        <select class="modal-select" id="mbug-sistema">
+          <option value="EDR">EDR System</option>
+          <option value="RPM">RPM Pro</option>
+          <option value="NAREGUA">NaRegua</option>
+          <option value="LOADPRO">LoadPro</option>
+          <option value="DMSTACK">DM Stack</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Severidade</div>
+        <select class="modal-select" id="mbug-sev">
+          <option value="critico">Crítico</option>
+          <option value="medio" selected>Médio</option>
+          <option value="baixo">Baixo</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="modal-label">Status</div>
+        <select class="modal-select" id="mbug-status">
+          <option value="aberto">Aberto</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="bloqueado">Bloqueado</option>
+          <option value="resolvido">Resolvido</option>
+          <option value="descartado">Descartado</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Aguardando</div>
+        <select class="modal-select" id="mbug-ag">
+          <option value="duam">Duam</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+          <option value="stitch">Stitch</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Descrição (opcional)</div>
+      <textarea class="modal-textarea" id="mbug-desc" placeholder="Contexto, passos para reproduzir, etc."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="salvarBug()" id="mbug-btn">Salvar bug</button>
+      <button class="btn-ghost" onclick="fecharModal('modal-bug')">Cancelar</button>
     </div>
   </div>
+</div>
+
+<!-- ══ MODAL FEATURE ══ -->
+<div class="modal-bg" id="modal-feature">
+  <div class="modal">
+    <div class="modal-title" id="mfeat-title">Nova demanda</div>
+    <div class="modal-field">
+      <div class="modal-label">Título</div>
+      <input class="modal-input" id="mfeat-titulo" placeholder="Descreva a funcionalidade">
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="modal-label">Sistema</div>
+        <select class="modal-select" id="mfeat-sistema">
+          <option value="EDR">EDR System</option>
+          <option value="RPM">RPM Pro</option>
+          <option value="NAREGUA">NaRegua</option>
+          <option value="LOADPRO">LoadPro</option>
+          <option value="DMSTACK">DM Stack</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Prioridade</div>
+        <select class="modal-select" id="mfeat-pri">
+          <option value="alta">Alta</option>
+          <option value="media" selected>Média</option>
+          <option value="baixo">Baixa</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="modal-label">Status</div>
+        <select class="modal-select" id="mfeat-status">
+          <option value="backlog">Backlog</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="concluido">Concluído</option>
+          <option value="descartado">Descartado</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Aguardando</div>
+        <select class="modal-select" id="mfeat-ag">
+          <option value="duam">Duam</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+          <option value="stitch">Stitch</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Descrição (opcional)</div>
+      <textarea class="modal-textarea" id="mfeat-desc" placeholder="Contexto e detalhes"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="salvarFeature()" id="mfeat-btn">Salvar demanda</button>
+      <button class="btn-ghost" onclick="fecharModal('modal-feature')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DEPLOY ══ -->
+<div class="modal-bg" id="modal-deploy">
+  <div class="modal">
+    <div class="modal-title">Registrar deploy</div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="modal-label">Versão</div>
+        <input class="modal-input" id="mdep-versao" placeholder="v04101530">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Sistema</div>
+        <select class="modal-select" id="mdep-sistema">
+          <option value="EDR">EDR System</option>
+          <option value="RPM">RPM Pro</option>
+          <option value="NAREGUA">NaRegua</option>
+          <option value="LOADPRO">LoadPro</option>
+          <option value="DMSTACK">DM Stack</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Mensagem</div>
+      <input class="modal-input" id="mdep-msg" placeholder="O que foi alterado">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="salvarDeploy()">Registrar</button>
+      <button class="btn-ghost" onclick="fecharModal('modal-deploy')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DETAIL PANEL ══ -->
+<div class="detail-bg" id="detail-panel">
+  <button class="detail-close" onclick="fecharDetail()">← Fechar</button>
+  <div id="detail-content"></div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// DM.STACK v2 — AGENTE, NAO DASHBOARD
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+// DM STACK V2 — CTO OS PESSOAL
+// ══════════════════════════════════════════════════
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
 
 let _token = null;
+let _bugs = [];
+let _features = [];
+let _deploys = [];
+let _editId = null;
+let _editTipo = null;
 
-// ── Helpers ──
-function fmtR(v) { return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-function fmtK(v) { const n=Number(v)||0; return Math.abs(n)>=1000?'R$ '+(n/1000).toFixed(1)+'k':fmtR(n); }
-function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+// Filtros ativos
+let _fBugSistema = '', _fBugStatus = '';
+let _fFeatSistema = '', _fFeatStatus = '';
+
+// ── Helpers ──────────────────────────────────────
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s||''); return d.innerHTML; }
 function hoje() { return new Date().toISOString().split('T')[0]; }
 
-function dmsGet(t,q='') {
-  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
-    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Accept':'application/json'}
-  }).then(r=>r.json()).catch(()=>[]);
-}
-function dmsPost(t,b) {
-  return fetch(`${DMS_URL}/rest/v1/${t}`, {
-    method:'POST',
-    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json', 'Prefer':'return=representation'},
-    body: JSON.stringify(b)
-  }).then(r=>r.json()).catch(()=>[]);
-}
-function dmsPatch(t,q='',b={}) {
-  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
-    method:'PATCH',
-    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json', 'Prefer':'return=minimal'},
-    body: JSON.stringify(b)
-  }).catch(()=>{});
+function fmtK(v) {
+  const n = Number(v) || 0;
+  if (Math.abs(n) >= 1000) return 'R$ ' + (n/1000).toFixed(1) + 'k';
+  return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:0});
 }
 
-function callEdge(fn, body={}) {
+function aging(dateStr) {
+  const days = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+  if (days === 0) return 'hoje';
+  if (days === 1) return '1 dia';
+  return days + ' dias';
+}
+
+function agingDays(dateStr) {
+  return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+}
+
+function agingClass(dateStr) {
+  const d = agingDays(dateStr);
+  if (d >= 7) return 'aging-crit';
+  if (d >= 3) return 'aging-warn';
+  return '';
+}
+
+function agLabel(ag) {
+  const map = {duam:'D', claude:'C', gemini:'G', stitch:'S'};
+  return map[ag] || ag;
+}
+
+// ── Supabase ──────────────────────────────────────
+function dmsGet(t, q = '') {
+  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
+    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Accept': 'application/json' }
+  }).then(r => r.json()).catch(() => []);
+}
+
+function dmsPost(t, b) {
+  return fetch(`${DMS_URL}/rest/v1/${t}`, {
+    method: 'POST',
+    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    body: JSON.stringify(b)
+  }).then(r => r.json()).catch(() => null);
+}
+
+function dmsPatch(t, q, b) {
+  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
+    method: 'PATCH',
+    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify(b)
+  }).catch(() => {});
+}
+
+function dmsDelete(t, q) {
+  return fetch(`${DMS_URL}/rest/v1/${t}${q}`, {
+    method: 'DELETE',
+    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY) }
+  }).catch(() => {});
+}
+
+function callEdge(fn, body = {}) {
   return fetch(`${DMS_URL}/functions/v1/${fn}`, {
     method: 'POST',
-    headers: {'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json'},
+    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
-  }).then(r => r.json()).catch(e => ({ok:false, erro:e.message}));
+  }).then(r => r.json()).catch(e => ({ ok: false, erro: e.message }));
 }
 
-// ── Clock & Greeting ──
-function updateUI() {
+// ── Navegação ─────────────────────────────────────
+function irPara(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelector(`[data-view="${view}"]`).classList.add('active');
+
+  if (view === 'bugs') renderBugs();
+  if (view === 'features') renderFeatures();
+  if (view === 'deploys') renderDeploys();
+  if (view === 'saude') renderSaude();
+  if (view === 'melhorias') carregarMelhorias();
+}
+
+// ── Clock ──────────────────────────────────────────
+function updateClock() {
   const n = new Date();
   const h = n.getHours();
   const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  document.getElementById('app-greeting').textContent = saudacao + ', Duam.';
+  const el = document.getElementById('app-greeting');
+  if (el) el.textContent = saudacao + ', Duam.';
 
-  const dias = ['Domingo','Segunda-feira','Terca-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sabado'];
-  const meses = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-  document.getElementById('app-date').textContent = dias[n.getDay()] + ', ' + n.getDate() + ' de ' + meses[n.getMonth()] + ' de ' + n.getFullYear();
-  document.getElementById('app-time').textContent = String(h).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+  const dias = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const dateEl = document.getElementById('app-date');
+  if (dateEl) dateEl.textContent = dias[n.getDay()] + ', ' + n.getDate() + ' de ' + meses[n.getMonth()];
 }
 
-// ── Dados ──
-let _dados = null; // { edr: {...}, rpm: {...} }
-
-async function carregarDados() {
-  const st = document.getElementById('app-status');
-  try {
-    const r = await callEdge('get-dashboard-data');
-    if (r.ok) {
-      _dados = r;
-      st.textContent = 'LIVE';
-      renderNumeros();
-      gerarAcoesLocais();
-    } else {
-      st.textContent = 'OFFLINE';
-      st.style.color = 'rgba(255,255,255,0.2)';
-    }
-  } catch(e) {
-    st.textContent = 'ERRO';
-    st.style.color = 'rgba(255,255,255,0.2)';
-  }
+// ── Bugs ───────────────────────────────────────────
+async function carregarBugs() {
+  _bugs = await dmsGet('bugs', '?order=created_at.desc&select=*') || [];
+  const abertos = _bugs.filter(b => b.status !== 'resolvido' && b.status !== 'descartado').length;
+  const el = document.getElementById('badge-bugs');
+  if (el) el.textContent = abertos || '';
+  if (document.getElementById('num-bugs')) document.getElementById('num-bugs').textContent = abertos;
+  renderBugs();
+  renderAguardando();
 }
 
-function renderNumeros() {
-  if (!_dados) return;
-  const edr = _dados.edr || {};
-  const rpm = _dados.rpm || {};
-  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const mm = meses[new Date().getMonth()];
+function renderBugs() {
+  const lista = document.getElementById('lista-bugs');
+  const sub = document.getElementById('bugs-sub');
+  if (!lista) return;
 
-  document.getElementById('app-numeros').innerHTML = `
-    <div class="num-card ${(edr.saldo||0)<0?'num-warn':''}">
-      <div class="num-label">Saldo EDR ${mm}</div>
-      <div class="num-value">${fmtK(edr.saldo||0)}</div>
-      <div class="num-sub">Ent ${fmtK(edr.total_entrada||0)} · Sai ${fmtK(edr.total_saida||0)}</div>
-    </div>
-    <div class="num-card ${(edr.pct_mao||0)>40?'num-warn':''}">
-      <div class="num-label">Mao de Obra</div>
-      <div class="num-value">${edr.pct_mao||0}%</div>
-      <div class="num-sub">${fmtK(edr.mao_obra||0)} de ${fmtK(edr.total_saida||0)}</div>
-    </div>
-    <div class="num-card">
-      <div class="num-label">RPM — OS Abertas</div>
-      <div class="num-value">${rpm.os_abertas||0}</div>
-      <div class="num-sub">${rpm.os_hoje||0} hoje · ${rpm.entregues_mes||0} entregas ${mm}</div>
-    </div>
-    <div class="num-card">
-      <div class="num-label">RPM — Faturado ${mm}</div>
-      <div class="num-value">${fmtK(rpm.faturamento_mes||0)}</div>
-      <div class="num-sub">Ticket ${fmtR(rpm.ticket_medio||0)}</div>
-    </div>
-  `;
-}
+  let items = _bugs;
+  if (_fBugSistema) items = items.filter(b => b.sistema === _fBugSistema);
+  if (_fBugStatus) items = items.filter(b => b.status === _fBugStatus);
 
-// ── Acoes do dia (geradas localmente a partir dos dados) ──
-function gerarAcoesLocais() {
-  if (!_dados) return;
-  const edr = _dados.edr || {};
-  const rpm = _dados.rpm || {};
-  const acoes = [];
+  const abertos = items.filter(b => b.status !== 'resolvido' && b.status !== 'descartado').length;
+  if (sub) sub.textContent = `${abertos} aberto${abertos !== 1 ? 's' : ''} · ${items.length} total`;
 
-  // EDR
-  (edr.obras||[]).forEach(o => {
-    if ((o.pct||0) > 85) acoes.push({pri:1, tag:'edr', titulo:`${o.nome} em ${o.pct}% do orcamento`, detalhe:`Gasto ${fmtK(o.gasto_total)} de ${fmtK(o.receita)}`});
-  });
-  if ((edr.saldo||0) < 0) acoes.push({pri:1, tag:'edr', titulo:`Saldo negativo: ${fmtR(edr.saldo)}`, detalhe:'Conferir repasses pendentes'});
-  if ((edr.pct_mao||0) > 40) acoes.push({pri:2, tag:'edr', titulo:`Mao de obra em ${edr.pct_mao}%`, detalhe:'Ideal abaixo de 35-40%'});
+  if (!items.length) { lista.innerHTML = '<div class="lista-empty">Nenhum bug encontrado.</div>'; return; }
 
-  // RPM
-  if ((rpm.entregue_sem_pgto||0) > 0) acoes.push({pri:1, tag:'rpm', titulo:`${rpm.entregue_sem_pgto} OS sem pagamento — ${fmtR(rpm.valor_sem_pgto)}`, detalhe:'Cobrar do Marcondes/Rafael'});
-  if ((rpm.sem_mecanico||0) > 0) acoes.push({pri:2, tag:'rpm', titulo:`${rpm.sem_mecanico} OS sem mecanico`, detalhe:'Fluxo travado'});
-  if ((rpm.peca_sem_custo||0) > 0) acoes.push({pri:2, tag:'rpm', titulo:`${rpm.peca_sem_custo} pecas sem custo`, detalhe:'Margem impossivel de calcular'});
-  if ((rpm.dias_com_os||0) < 3) acoes.push({pri:2, tag:'rpm', titulo:`Carbon usou RPM so ${rpm.dias_com_os}/7 dias`, detalhe:'Frequencia baixa'});
-
-  // Quinzena
-  const dia = new Date().getDate();
-  if ([14,15,16,30,31].includes(dia)) acoes.push({pri:1, tag:'edr', titulo:'Quinzena fecha — conferir diarias', detalhe:'Revisar faltas e valores'});
-
-  acoes.sort((a,b) => a.pri - b.pri);
-
-  const el = document.getElementById('app-acoes');
-  const countEl = document.getElementById('app-acoes-count');
-
-  if (!acoes.length) {
-    el.innerHTML = '<div style="text-align:center;padding:32px;"><div style="font-size:20px;margin-bottom:8px;">&#10003;</div><div style="font-size:13px;color:var(--t3);">Nenhuma acao pendente.</div></div>';
-    countEl.textContent = '';
-    return;
-  }
-
-  countEl.textContent = acoes.length + ' pendente' + (acoes.length!==1?'s':'');
-  el.innerHTML = acoes.map((a,i) => `
-    <div class="acao" onclick="this.classList.toggle('feito')">
-      <div class="acao-check"></div>
-      <div class="acao-body">
-        <div class="acao-titulo">${esc(a.titulo)}</div>
-        ${a.detalhe ? `<div class="acao-detalhe">${esc(a.detalhe)}</div>` : ''}
-        <div class="acao-tag">${a.tag}</div>
+  lista.innerHTML = items.map(b => `
+    <div class="lista-item ${agingClass(b.created_at)}" onclick="abrirDetail('bug', '${b.id}')">
+      <div><span class="badge-sev ${b.severidade}">${b.severidade}</span></div>
+      <div>
+        <div class="item-titulo">${esc(b.titulo)}</div>
+      </div>
+      <div class="item-col">${b.sistema}</div>
+      <div><span class="badge-status ${b.status}">${statusLabel(b.status)}</span></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="badge-ag ${b.aguardando}" title="Aguardando ${b.aguardando}">${agLabel(b.aguardando)}</span>
+        <span style="font-size:10px;color:var(--t4);">${aging(b.created_at)}</span>
       </div>
     </div>
   `).join('');
 }
 
-// ── Briefing IA ──
+// ── Features ───────────────────────────────────────
+async function carregarFeatures() {
+  _features = await dmsGet('demandas', '?order=created_at.desc&select=*') || [];
+  const ativos = _features.filter(f => f.status !== 'concluido' && f.status !== 'descartado').length;
+  const el = document.getElementById('badge-features');
+  if (el) el.textContent = ativos || '';
+  if (document.getElementById('num-features')) document.getElementById('num-features').textContent = ativos;
+  renderFeatures();
+  renderAguardando();
+}
+
+function renderFeatures() {
+  const lista = document.getElementById('lista-features');
+  const sub = document.getElementById('features-sub');
+  if (!lista) return;
+
+  let items = _features;
+  if (_fFeatSistema) items = items.filter(f => f.sistema === _fFeatSistema);
+  if (_fFeatStatus) items = items.filter(f => f.status === _fFeatStatus);
+
+  const ativos = items.filter(f => f.status !== 'concluido' && f.status !== 'descartado').length;
+  if (sub) sub.textContent = `${ativos} ativo${ativos !== 1 ? 's' : ''} · ${items.length} total`;
+
+  if (!items.length) { lista.innerHTML = '<div class="lista-empty">Nenhuma demanda encontrada.</div>'; return; }
+
+  lista.innerHTML = items.map(f => `
+    <div class="lista-item ${agingClass(f.created_at)}" onclick="abrirDetail('feature', '${f.id}')">
+      <div><span class="badge-sev ${f.prioridade === 'alta' ? 'critico' : f.prioridade === 'media' ? 'medio' : 'baixo'}">${f.prioridade}</span></div>
+      <div>
+        <div class="item-titulo">${esc(f.titulo)}</div>
+      </div>
+      <div class="item-col">${f.sistema}</div>
+      <div><span class="badge-status ${f.status}">${statusLabel(f.status)}</span></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="badge-ag ${f.aguardando}" title="Aguardando ${f.aguardando}">${agLabel(f.aguardando)}</span>
+        <span style="font-size:10px;color:var(--t4);">${aging(f.created_at)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Deploys ────────────────────────────────────────
+async function carregarDeploys() {
+  _deploys = await dmsGet('deploys', '?order=created_at.desc&select=*') || [];
+  renderDeploys();
+}
+
+function renderDeploys() {
+  const lista = document.getElementById('lista-deploys');
+  if (!lista) return;
+  if (!_deploys.length) { lista.innerHTML = '<div class="lista-empty">Nenhum deploy registrado ainda.</div>'; return; }
+
+  lista.innerHTML = _deploys.map(d => `
+    <div class="lista-item" style="grid-template-columns:100px 80px 1fr 100px 80px;">
+      <div style="font-size:12px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums;">${esc(d.versao)}</div>
+      <div class="item-col">${esc(d.sistema)}</div>
+      <div class="item-titulo">${esc(d.mensagem||'—')}</div>
+      <div><span class="badge-status ${d.status === 'ok' ? 'resolvido' : 'bloqueado'}">${d.status === 'ok' ? 'OK' : '⚠ Bug'}</span></div>
+      <div style="font-size:10px;color:var(--t4);">${aging(d.created_at)}</div>
+    </div>
+  `).join('');
+}
+
+// ── Saúde ──────────────────────────────────────────
+function renderSaude() {
+  const criticos = document.getElementById('saude-criticos');
+  if (!criticos) return;
+  const bugs = _bugs.filter(b => b.severidade === 'critico' && b.status !== 'resolvido' && b.status !== 'descartado');
+  if (!bugs.length) {
+    criticos.innerHTML = '<div class="lista-empty" style="border:1px solid var(--borda);border-radius:8px;">Nenhum bug crítico ativo.</div>';
+    return;
+  }
+  criticos.innerHTML = bugs.map(b => `
+    <div class="lista-item" onclick="abrirDetail('bug', '${b.id}')">
+      <div><span class="badge-sev critico">CRÍTICO</span></div>
+      <div class="item-titulo">${esc(b.titulo)}</div>
+      <div class="item-col">${b.sistema}</div>
+      <div><span class="badge-status ${b.status}">${statusLabel(b.status)}</span></div>
+      <div style="font-size:10px;color:var(--t4);">${aging(b.created_at)}</div>
+    </div>
+  `).join('');
+}
+
+function carregarSaude() {
+  document.getElementById('saude-update').textContent = 'Atualizado agora';
+  renderSaude();
+}
+
+// ── Home: Aguardando você ──────────────────────────
+function renderAguardando() {
+  const el = document.getElementById('home-aguardando');
+  if (!el) return;
+
+  const bugsDuam = _bugs.filter(b => b.aguardando === 'duam' && b.status !== 'resolvido' && b.status !== 'descartado');
+  const featDuam = _features.filter(f => f.aguardando === 'duam' && f.status !== 'concluido' && f.status !== 'descartado');
+  const tudo = [
+    ...bugsDuam.map(b => ({...b, tipo:'bug'})),
+    ...featDuam.map(f => ({...f, tipo:'feature'}))
+  ].sort((a,b) => {
+    const sev = {critico:0,alta:0,medio:1,media:1,baixo:2,baixa:2};
+    return (sev[a.severidade||a.prioridade]||1) - (sev[b.severidade||b.prioridade]||1);
+  });
+
+  if (!tudo.length) {
+    el.innerHTML = '<div class="lista-empty" style="border:1px solid var(--borda);border-radius:8px;padding:24px;">Nada aguardando você no momento.</div>';
+    return;
+  }
+
+  el.innerHTML = tudo.map(item => `
+    <div class="ag-item ${agingClass(item.created_at)}" onclick="irPara('${item.tipo === 'bug' ? 'bugs' : 'features'}');setTimeout(()=>abrirDetail('${item.tipo}','${item.id}'),50)">
+      <span class="badge-sev ${item.severidade || (item.prioridade === 'alta' ? 'critico' : 'medio')}" style="flex-shrink:0;">${item.severidade || item.prioridade}</span>
+      <div class="ag-item-body">
+        <div class="ag-item-titulo">${esc(item.titulo)}</div>
+        <div class="ag-item-meta">${item.sistema} · ${item.tipo === 'bug' ? 'Bug' : 'Demanda'} · ${aging(item.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Melhorias/Briefing ─────────────────────────────
+async function carregarMelhorias() {
+  const el = document.getElementById('melhorias-content');
+  if (!el) return;
+  el.innerHTML = '<div class="briefing-empty">Carregando diagnósticos...</div>';
+
+  const diags = await dmsGet('dmstack_diagnosticos', '?order=created_at.desc&limit=5');
+  if (!Array.isArray(diags) || !diags.length) {
+    el.innerHTML = '<div class="briefing-empty">Nenhum diagnóstico ainda.<br><br><button class="btn-primary" onclick="gerarBriefingMelhorias()">Gerar agora</button></div>';
+    return;
+  }
+
+  el.innerHTML = diags.map(d => {
+    const date = new Date(d.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+    let txt = d.briefing || d.resumo || '';
+    if (!txt) { try { const raw = typeof d.raw_analysis === 'string' ? JSON.parse(d.raw_analysis) : d.raw_analysis; txt = raw?.analise?.briefing || ''; } catch(e){} }
+    const probs = d.problemas || [];
+    const recs = d.recomendacoes || [];
+
+    return `<div class="briefing-card" style="margin-bottom:16px;">
+      <div style="font-size:10px;color:var(--t4);letter-spacing:1px;margin-bottom:12px;">${date}</div>
+      ${txt ? `<p>${esc(txt)}</p>` : ''}
+      ${probs.map(p => `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`).join('')}
+      ${recs.length ? `<p style="margin-top:8px;"><strong>Recomendações:</strong></p>${recs.map(r => `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`).join('')}` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function gerarBriefingMelhorias() {
+  const el = document.getElementById('melhorias-content');
+  if (el) el.innerHTML = '<div class="briefing-empty">Gerando diagnóstico com IA... (30s)</div>';
+  const r = await callEdge('agente-diario');
+  if (r && r.ok) carregarMelhorias();
+  else if (el) el.innerHTML = '<div class="briefing-empty">Falha ao gerar. Tente novamente.</div>';
+}
+
 async function carregarBriefing() {
   const diags = await dmsGet('dmstack_diagnosticos', '?order=created_at.desc&limit=1');
   if (!Array.isArray(diags) || !diags.length) return;
-
   const d = diags[0];
-  const hj = hoje();
-  const dData = (d.data || d.created_at || '').substring(0, 10);
-  const diasAtras = Math.floor((Date.now() - new Date(dData+'T12:00:00').getTime()) / 864e5);
-  const freshLabel = diasAtras === 0 ? 'Hoje' : diasAtras === 1 ? 'Ontem' : diasAtras + ' dias atras';
+  let txt = d.briefing || d.resumo || '';
+  if (!txt) { try { const raw = typeof d.raw_analysis === 'string' ? JSON.parse(d.raw_analysis) : d.raw_analysis; txt = raw?.analise?.briefing || ''; } catch(e){} }
+  if (!txt) return;
 
-  // Briefing direto ou fallback pro resumo
-  let briefingText = d.briefing || '';
-  if (!briefingText) {
-    try { const raw = typeof d.raw_analysis === 'string' ? JSON.parse(d.raw_analysis) : d.raw_analysis; briefingText = raw?.analise?.briefing || d.resumo || ''; } catch(e) { briefingText = d.resumo || ''; }
-  }
+  const date = new Date(d.created_at);
+  const diasAtras = Math.floor((Date.now() - date) / 86400000);
+  const label = diasAtras === 0 ? 'Hoje' : diasAtras === 1 ? 'Ontem' : diasAtras + ' dias atrás';
 
-  // Problemas + recomendacoes
-  const problemas = d.problemas || [];
+  const probs = d.problemas || [];
   const recs = d.recomendacoes || [];
-
-  if (!briefingText && !problemas.length && !recs.length) return;
-
-  let html = '<div class="briefing-card">';
-  if (briefingText) html += `<p>${esc(briefingText)}</p>`;
-  if (problemas.length) {
-    html += '<p><strong>Atencao:</strong></p>';
-    problemas.forEach(p => { html += `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`; });
-  }
-  if (recs.length) {
-    html += '<p><strong>Recomendacoes:</strong></p>';
-    recs.forEach(r => { html += `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`; });
-  }
-  html += `<div style="text-align:right;font-size:10px;color:var(--t4);margin-top:12px;">${freshLabel} — gerado por IA</div>`;
-  html += '</div>';
-
+  let html = `<div class="briefing-card"><p>${esc(txt)}</p>`;
+  if (probs.length) html += `<p><strong>Atenção:</strong></p>${probs.map(p=>`<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`).join('')}`;
+  if (recs.length) html += `<p><strong>Recomendações:</strong></p>${recs.map(r=>`<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`).join('')}`;
+  html += `<div class="briefing-footer">${label} — gerado por IA</div></div>`;
   document.getElementById('app-briefing').innerHTML = html;
 }
 
 async function gerarBriefing() {
   const el = document.getElementById('app-briefing');
-  el.innerHTML = '<div class="briefing-empty" style="padding:24px;"><div style="font-size:13px;color:var(--t3);">Gerando briefing com IA... (30s)</div></div>';
-
+  if (el) el.innerHTML = '<div class="briefing-empty">Gerando... (30s)</div>';
   const r = await callEdge('agente-diario');
-  if (r.ok) {
-    await carregarBriefing();
-  } else {
-    el.innerHTML = `<div class="briefing-empty"><div>Erro: ${esc(r.erro || 'falha na Edge Function')}</div><button onclick="gerarBriefing()" style="margin-top:12px;">Tentar de novo</button></div>`;
+  if (r && r.ok) carregarBriefing();
+}
+
+// ── Dados do dashboard (EDR/RPM) ───────────────────
+async function carregarDadosDash() {
+  try {
+    const r = await callEdge('get-dashboard-data');
+    if (!r || !r.ok) return;
+    const edr = r.edr || {};
+    const rpm = r.rpm || {};
+    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const mm = meses[new Date().getMonth()];
+
+    document.getElementById('app-numeros').innerHTML = `
+      <div class="num-card ${(edr.saldo||0)<0?'num-warn':''}">
+        <div class="num-label">Saldo EDR ${mm}</div>
+        <div class="num-value">${fmtK(edr.saldo||0)}</div>
+        <div class="num-sub">Ent ${fmtK(edr.total_entrada||0)} · Sai ${fmtK(edr.total_saida||0)}</div>
+      </div>
+      <div class="num-card">
+        <div class="num-label">RPM — OS Abertas</div>
+        <div class="num-value">${rpm.os_abertas||0}</div>
+        <div class="num-sub">${rpm.os_hoje||0} hoje · ${rpm.entregues_mes||0} entregas ${mm}</div>
+      </div>
+      <div class="num-card">
+        <div class="num-label">Bugs abertos</div>
+        <div class="num-value" id="num-bugs">${_bugs.filter(b=>b.status!=='resolvido'&&b.status!=='descartado').length}</div>
+      </div>
+      <div class="num-card">
+        <div class="num-label">Demandas ativas</div>
+        <div class="num-value" id="num-features">${_features.filter(f=>f.status!=='concluido'&&f.status!=='descartado').length}</div>
+      </div>
+    `;
+    document.getElementById('sb-status').textContent = 'LIVE';
+  } catch(e) {
+    document.getElementById('sb-status').textContent = 'OFFLINE';
   }
 }
 
-// ── Chat Interativo ──
-function addMsg(text, tipo) {
-  const el = document.getElementById('chat-msgs');
-  el.classList.add('has-msgs');
-  const div = document.createElement('div');
-  div.className = 'chat-msg ' + tipo;
-  div.innerHTML = text;
-  el.appendChild(div);
-  el.scrollTop = el.scrollHeight;
+// ── Modal helpers ──────────────────────────────────
+function abrirModalBug(bug = null) {
+  _editId = bug ? bug.id : null;
+  _editTipo = 'bug';
+  document.getElementById('mbug-title').textContent = bug ? 'Editar bug' : 'Novo bug';
+  document.getElementById('mbug-titulo').value = bug ? bug.titulo : '';
+  document.getElementById('mbug-sistema').value = bug ? bug.sistema : 'EDR';
+  document.getElementById('mbug-sev').value = bug ? bug.severidade : 'medio';
+  document.getElementById('mbug-status').value = bug ? bug.status : 'aberto';
+  document.getElementById('mbug-ag').value = bug ? bug.aguardando : 'duam';
+  document.getElementById('mbug-desc').value = bug ? (bug.descricao||'') : '';
+  document.getElementById('mbug-btn').textContent = bug ? 'Salvar alterações' : 'Salvar bug';
+  document.getElementById('modal-bug').classList.add('open');
+  setTimeout(() => document.getElementById('mbug-titulo').focus(), 100);
 }
 
-async function enviarChat() {
-  const inp = document.getElementById('chat-input');
-  const texto = inp.value.trim();
-  if (!texto) return;
-  inp.value = '';
+function abrirModalFeature(feat = null) {
+  _editId = feat ? feat.id : null;
+  _editTipo = 'feature';
+  document.getElementById('mfeat-title').textContent = feat ? 'Editar demanda' : 'Nova demanda';
+  document.getElementById('mfeat-titulo').value = feat ? feat.titulo : '';
+  document.getElementById('mfeat-sistema').value = feat ? feat.sistema : 'EDR';
+  document.getElementById('mfeat-pri').value = feat ? feat.prioridade : 'media';
+  document.getElementById('mfeat-status').value = feat ? feat.status : 'backlog';
+  document.getElementById('mfeat-ag').value = feat ? feat.aguardando : 'duam';
+  document.getElementById('mfeat-desc').value = feat ? (feat.descricao||'') : '';
+  document.getElementById('mfeat-btn').textContent = feat ? 'Salvar alterações' : 'Salvar demanda';
+  document.getElementById('modal-feature').classList.add('open');
+  setTimeout(() => document.getElementById('mfeat-titulo').focus(), 100);
+}
 
-  addMsg(esc(texto), 'user');
-  addMsg('Pensando...', 'bot loading');
+function abrirModalDeploy() {
+  const agora = new Date();
+  const ver = 'v' + String(agora.getMonth()+1).padStart(2,'0') + String(agora.getDate()).padStart(2,'0') + String(agora.getHours()).padStart(2,'0') + String(agora.getMinutes()).padStart(2,'0');
+  document.getElementById('mdep-versao').value = ver;
+  document.getElementById('modal-deploy').classList.add('open');
+}
 
-  const r = await callEdge('agente-chat', { pergunta: texto });
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('open');
+  _editId = null;
+}
 
-  // Remove "Pensando..."
-  const msgs = document.getElementById('chat-msgs');
-  const loading = msgs.querySelector('.loading');
-  if (loading) loading.remove();
+async function salvarBug() {
+  const titulo = document.getElementById('mbug-titulo').value.trim();
+  if (!titulo) { document.getElementById('mbug-titulo').focus(); return; }
+  const payload = {
+    titulo,
+    sistema: document.getElementById('mbug-sistema').value,
+    severidade: document.getElementById('mbug-sev').value,
+    status: document.getElementById('mbug-status').value,
+    aguardando: document.getElementById('mbug-ag').value,
+    descricao: document.getElementById('mbug-desc').value.trim() || null,
+    updated_at: new Date().toISOString()
+  };
 
-  if (r.ok && r.resposta) {
-    addMsg(esc(r.resposta), 'bot');
+  const btn = document.getElementById('mbug-btn');
+  btn.textContent = 'Salvando...';
+  btn.disabled = true;
+
+  if (_editId) {
+    await dmsPatch('bugs', `?id=eq.${_editId}`, payload);
   } else {
-    addMsg('Nao consegui processar. Tenta de novo.', 'bot');
+    await dmsPost('bugs', payload);
   }
+
+  fecharModal('modal-bug');
+  btn.textContent = 'Salvar bug';
+  btn.disabled = false;
+  await carregarBugs();
+  fecharDetail();
 }
 
-// ── Auth ──
+async function salvarFeature() {
+  const titulo = document.getElementById('mfeat-titulo').value.trim();
+  if (!titulo) { document.getElementById('mfeat-titulo').focus(); return; }
+  const payload = {
+    titulo,
+    sistema: document.getElementById('mfeat-sistema').value,
+    prioridade: document.getElementById('mfeat-pri').value,
+    status: document.getElementById('mfeat-status').value,
+    aguardando: document.getElementById('mfeat-ag').value,
+    descricao: document.getElementById('mfeat-desc').value.trim() || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const btn = document.getElementById('mfeat-btn');
+  btn.textContent = 'Salvando...';
+  btn.disabled = true;
+
+  if (_editId) {
+    await dmsPatch('demandas', `?id=eq.${_editId}`, payload);
+  } else {
+    await dmsPost('demandas', payload);
+  }
+
+  fecharModal('modal-feature');
+  btn.textContent = 'Salvar demanda';
+  btn.disabled = false;
+  await carregarFeatures();
+  fecharDetail();
+}
+
+async function salvarDeploy() {
+  const versao = document.getElementById('mdep-versao').value.trim();
+  if (!versao) return;
+  await dmsPost('deploys', {
+    versao,
+    sistema: document.getElementById('mdep-sistema').value,
+    mensagem: document.getElementById('mdep-msg').value.trim() || null
+  });
+  fecharModal('modal-deploy');
+  await carregarDeploys();
+  renderDeploys();
+}
+
+// ── Detail panel ───────────────────────────────────
+function abrirDetail(tipo, id) {
+  const item = tipo === 'bug' ? _bugs.find(b => b.id === id) : _features.find(f => f.id === id);
+  if (!item) return;
+
+  const statusOpts = tipo === 'bug'
+    ? ['aberto','em_andamento','resolvido','bloqueado','descartado']
+    : ['backlog','em_andamento','concluido','bloqueado','descartado'];
+
+  const agOpts = ['duam','claude','gemini','stitch'];
+  const sevLabel = tipo === 'bug' ? item.severidade : item.prioridade;
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-titulo">${esc(item.titulo)}</div>
+    <div class="detail-meta">
+      <span class="badge-sev ${sevLabel}">${sevLabel}</span>
+      <span class="badge-status ${item.status}">${statusLabel(item.status)}</span>
+      <span style="font-size:11px;color:var(--t4);">${item.sistema}</span>
+      <span style="font-size:11px;color:var(--t4);">${aging(item.created_at)}</span>
+    </div>
+
+    ${item.descricao ? `<div class="detail-section"><div class="detail-label">Descrição</div><div class="detail-value">${esc(item.descricao)}</div></div>` : ''}
+
+    <div class="detail-section">
+      <div class="detail-label">Status</div>
+      <div class="status-select-row">
+        ${statusOpts.map(s => `<button class="status-opt ${item.status === s ? 'sel' : ''}" onclick="atualizarCampo('${tipo}','${id}','status','${s}',this)">${statusLabel(s)}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-label">Aguardando</div>
+      <div class="ag-select-row">
+        ${agOpts.map(a => `<button class="ag-opt ${item.aguardando === a ? 'sel' : ''}" title="${a}" onclick="atualizarCampo('${tipo}','${id}','aguardando','${a}',this)">${agLabel(a)}</button>`).join('')}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:20px;">
+      <button class="btn-primary" onclick="${tipo === 'bug' ? `abrirModalBug(_bugs.find(b=>b.id==='${id}'))` : `abrirModalFeature(_features.find(f=>f.id==='${id}'))`}">Editar</button>
+    </div>
+
+    <div class="detail-delete">
+      <button class="btn-danger" onclick="excluirItem('${tipo}','${id}')">Excluir</button>
+    </div>
+  `;
+
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+async function atualizarCampo(tipo, id, campo, valor, btn) {
+  const tabela = tipo === 'bug' ? 'bugs' : 'demandas';
+  await dmsPatch(tabela, `?id=eq.${id}`, { [campo]: valor, updated_at: new Date().toISOString() });
+
+  // Atualiza local
+  const arr = tipo === 'bug' ? _bugs : _features;
+  const item = arr.find(i => i.id === id);
+  if (item) item[campo] = valor;
+
+  // Atualiza visual dos botões
+  const row = btn.parentElement;
+  row.querySelectorAll('button').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+
+  if (tipo === 'bug') renderBugs();
+  else renderFeatures();
+  renderAguardando();
+}
+
+async function excluirItem(tipo, id) {
+  if (!confirm('Excluir este item?')) return;
+  const tabela = tipo === 'bug' ? 'bugs' : 'demandas';
+  await dmsDelete(tabela, `?id=eq.${id}`);
+  fecharDetail();
+  if (tipo === 'bug') await carregarBugs();
+  else await carregarFeatures();
+}
+
+function fecharDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+// ── Filtros ────────────────────────────────────────
+function initFiltros(containerId, tipo) {
+  document.getElementById(containerId).addEventListener('click', e => {
+    const btn = e.target.closest('.filtro');
+    if (!btn) return;
+    const f = btn.dataset.f;
+    const v = btn.dataset.v;
+    const grupo = document.querySelectorAll(`#${containerId} [data-f="${f}"]`);
+    grupo.forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    if (tipo === 'bug') { if (f === 'sistema') _fBugSistema = v; else _fBugStatus = v; renderBugs(); }
+    else { if (f === 'sistema') _fFeatSistema = v; else _fFeatStatus = v; renderFeatures(); }
+  });
+}
+
+// ── Labels ─────────────────────────────────────────
+function statusLabel(s) {
+  const map = { aberto:'Aberto', em_andamento:'Andamento', resolvido:'Resolvido', bloqueado:'Bloqueado', descartado:'Descartado', backlog:'Backlog', concluido:'Concluído' };
+  return map[s] || s;
+}
+
+// ── Auth ───────────────────────────────────────────
 async function fazerLogin() {
   const email = document.getElementById('login-email').value.trim();
   const senha = document.getElementById('login-senha').value;
   const erroEl = document.getElementById('login-erro');
   if (!email || !senha) { erroEl.textContent = 'Preencha email e senha.'; return; }
-  erroEl.textContent = 'Entrando...';
+  erroEl.textContent = 'Verificando...';
 
   try {
     const r = await fetch(DMS_URL + '/auth/v1/token?grant_type=password', {
       method: 'POST',
-      headers: {'apikey': DMS_KEY, 'Content-Type': 'application/json'},
-      body: JSON.stringify({email, password: senha})
+      headers: { 'apikey': DMS_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: senha })
     });
     const d = await r.json();
     if (!r.ok) { erroEl.textContent = d.error_description || 'Email ou senha incorretos.'; return; }
@@ -459,7 +1239,7 @@ async function fazerLogin() {
     localStorage.setItem('dms_token', d.access_token);
     localStorage.setItem('dms_refresh', d.refresh_token);
     iniciarApp();
-  } catch(e) { erroEl.textContent = 'Erro de conexao.'; }
+  } catch(e) { erroEl.textContent = 'Erro de conexão.'; }
 }
 
 async function refreshToken() {
@@ -468,8 +1248,8 @@ async function refreshToken() {
   try {
     const r = await fetch(DMS_URL + '/auth/v1/token?grant_type=refresh_token', {
       method: 'POST',
-      headers: {'apikey': DMS_KEY, 'Content-Type': 'application/json'},
-      body: JSON.stringify({refresh_token: rt})
+      headers: { 'apikey': DMS_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: rt })
     });
     const d = await r.json();
     if (!r.ok) return false;
@@ -484,32 +1264,42 @@ function fazerLogout() {
   _token = null;
   localStorage.removeItem('dms_token');
   localStorage.removeItem('dms_refresh');
-  document.getElementById('app').style.display = 'none';
+  document.getElementById('app').classList.remove('show');
   document.getElementById('tela-login').style.display = 'flex';
 }
 
-// ── Init ──
+// ── Init ───────────────────────────────────────────
 async function iniciarApp() {
   document.getElementById('tela-login').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  updateUI();
-  setInterval(updateUI, 30000);
+  document.getElementById('app').classList.add('show');
+
+  updateClock();
+  setInterval(updateClock, 60000);
+
+  initFiltros('filtros-bugs', 'bug');
+  initFiltros('filtros-features', 'feature');
+
+  // Fecha detail ao clicar fora
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { fecharDetail(); document.querySelectorAll('.modal-bg.open').forEach(m => m.classList.remove('open')); } });
 
   // Carrega tudo em paralelo
   await Promise.all([
-    carregarDados(),
-    carregarBriefing()
+    carregarBugs(),
+    carregarFeatures(),
+    carregarDeploys(),
+    carregarBriefing(),
+    carregarDadosDash()
   ]);
 
   // Refresh a cada 5 min
   setInterval(async () => {
     await refreshToken();
-    await carregarDados();
+    carregarDadosDash();
   }, 5 * 60 * 1000);
 }
 
 // Service Worker
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 // Auto-login
 (async () => {
@@ -518,14 +1308,15 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
     if (await refreshToken()) { iniciarApp(); return; }
     _token = saved;
     const r = await fetch(DMS_URL + '/auth/v1/user', {
-      headers: {'apikey': DMS_KEY, 'Authorization': 'Bearer ' + saved}
-    }).catch(() => ({ok:false}));
+      headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + saved }
+    }).catch(() => ({ ok: false }));
     if (r.ok) { iniciarApp(); return; }
   }
   document.getElementById('tela-login').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-senha').addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
-  document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-senha').focus(); });
+
+  const enter = e => { if (e.key === 'Enter') fazerLogin(); };
+  document.getElementById('login-senha').addEventListener('keydown', enter);
+  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-senha').focus(); });
 })();
 </script>
 </body>
