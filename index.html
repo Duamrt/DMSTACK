@@ -124,6 +124,24 @@ button{font-family:'Outfit',sans-serif;}
 .badge-ag{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);color:var(--t2);font-size:10px;font-weight:700;border:1px solid var(--borda2);}
 .badge-ag.duam{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;}
 
+/* ─── KANBAN ──────────────────────────────────── */
+.kanban-board{display:flex;gap:14px;padding:0 32px 32px;overflow-x:auto;}
+.kanban-col{flex:0 0 210px;min-height:200px;}
+.kanban-col-header{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t4);padding:0 0 10px;display:flex;align-items:center;justify-content:space-between;}
+.kanban-col-count{background:var(--t5);border-radius:10px;padding:2px 7px;font-size:10px;color:var(--t3);}
+.kanban-card{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:background .15s;}
+.kanban-card:hover{background:rgba(255,255,255,0.06);}
+.kanban-card-title{font-size:12px;font-weight:500;color:var(--t2);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.kanban-card-footer{display:flex;align-items:center;justify-content:space-between;}
+.kanban-card-sistema{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:.5px;}
+.view-toggle{display:flex;gap:4px;}
+.view-toggle button{padding:4px 12px;border:1px solid var(--borda);background:transparent;color:var(--t4);border-radius:6px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;}
+.view-toggle button.active{background:rgba(255,255,255,0.08);color:var(--t2);border-color:var(--borda2);}
+.rec-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.rec-row p{flex:1;padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;}
+.btn-rec{flex-shrink:0;padding:3px 9px;border:1px solid var(--borda2);background:transparent;color:var(--t3);border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.btn-rec:hover{background:rgba(255,255,255,0.06);color:var(--t2);}
+
 /* ─── HOME ────────────────────────────────────── */
 .home-greeting{font-size:clamp(28px,3vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
 .home-date{font-size:13px;color:var(--t4);margin-bottom:32px;}
@@ -276,7 +294,11 @@ button{font-family:'Outfit',sans-serif;}
           <div class="page-title">Bugs</div>
           <div class="page-sub" id="bugs-sub">Carregando...</div>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" style="display:flex;gap:8px;align-items:center;">
+          <div class="view-toggle">
+            <button id="bug-toggle-lista" class="active" onclick="setBugView('lista')">Lista</button>
+            <button id="bug-toggle-kanban" onclick="setBugView('kanban')">Kanban</button>
+          </div>
           <button class="btn-primary" onclick="abrirModalBug()">+ Novo bug</button>
         </div>
       </div>
@@ -306,6 +328,7 @@ button{font-family:'Outfit',sans-serif;}
         </div>
         <div id="lista-bugs"><div class="lista-empty">Carregando...</div></div>
       </div>
+      <div id="kanban-bugs" style="display:none;margin-top:16px;"></div>
     </div>
 
     <!-- ── VIEW: FEATURES ── -->
@@ -315,7 +338,11 @@ button{font-family:'Outfit',sans-serif;}
           <div class="page-title">Demandas</div>
           <div class="page-sub" id="features-sub">Carregando...</div>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" style="display:flex;gap:8px;align-items:center;">
+          <div class="view-toggle">
+            <button id="feat-toggle-lista" class="active" onclick="setFeatView('lista')">Lista</button>
+            <button id="feat-toggle-kanban" onclick="setFeatView('kanban')">Kanban</button>
+          </div>
           <button class="btn-primary" onclick="abrirModalFeature()">+ Nova demanda</button>
         </div>
       </div>
@@ -344,6 +371,7 @@ button{font-family:'Outfit',sans-serif;}
         </div>
         <div id="lista-features"><div class="lista-empty">Carregando...</div></div>
       </div>
+      <div id="kanban-features" style="display:none;margin-top:16px;"></div>
     </div>
 
     <!-- ── VIEW: SAUDE ── -->
@@ -779,6 +807,12 @@ function renderBugs() {
   const abertos = items.filter(b => b.status !== 'resolvido' && b.status !== 'descartado').length;
   if (sub) sub.textContent = `${abertos} aberto${abertos !== 1 ? 's' : ''} · ${items.length} total`;
 
+  if (_bugKanban) {
+    const cols = [{status:'aberto',label:'ABERTO'},{status:'em_andamento',label:'EM ANDAMENTO'},{status:'bloqueado',label:'BLOQUEADO'},{status:'resolvido',label:'RESOLVIDO'}];
+    renderKanban('kanban-bugs', items, cols, 'bug');
+    return;
+  }
+
   if (!items.length) { lista.innerHTML = '<div class="lista-empty">Nenhum bug encontrado.</div>'; return; }
 
   lista.innerHTML = items.map(b => `
@@ -819,6 +853,12 @@ function renderFeatures() {
 
   const ativos = items.filter(f => f.status !== 'concluido' && f.status !== 'descartado').length;
   if (sub) sub.textContent = `${ativos} ativo${ativos !== 1 ? 's' : ''} · ${items.length} total`;
+
+  if (_featKanban) {
+    const cols = [{status:'backlog',label:'BACKLOG'},{status:'em_andamento',label:'EM ANDAMENTO'},{status:'concluido',label:'CONCLUÍDO'}];
+    renderKanban('kanban-features', items, cols, 'feature');
+    return;
+  }
 
   if (!items.length) { lista.innerHTML = '<div class="lista-empty">Nenhuma demanda encontrada.</div>'; return; }
 
@@ -1009,6 +1049,7 @@ async function carregarMelhorias() {
     return;
   }
 
+  _insightRecs = [];
   el.innerHTML = diags.map(d => {
     const date = new Date(d.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
     let txt = d.briefing || d.resumo || '';
@@ -1016,11 +1057,17 @@ async function carregarMelhorias() {
     const probs = d.problemas || [];
     const recs = d.recomendacoes || [];
 
+    const recsHtml = recs.map(r => {
+      const idx = _insightRecs.length;
+      _insightRecs.push(r);
+      return `<div class="rec-row"><p>${esc(r)}</p><button class="btn-rec" onclick="virarDemanda(${idx})">→ Demanda</button></div>`;
+    }).join('');
+
     return `<div class="briefing-card" style="margin-bottom:16px;">
       <div style="font-size:10px;color:var(--t4);letter-spacing:1px;margin-bottom:12px;">${date}</div>
       ${txt ? `<p>${esc(txt)}</p>` : ''}
       ${probs.map(p => `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.15);margin-left:4px;">${esc(p)}</p>`).join('')}
-      ${recs.length ? `<p style="margin-top:8px;"><strong>Recomendações:</strong></p>${recs.map(r => `<p style="padding-left:12px;border-left:2px solid rgba(255,255,255,0.08);margin-left:4px;">${esc(r)}</p>`).join('')}` : ''}
+      ${recs.length ? `<p style="margin-top:12px;margin-bottom:6px;"><strong>Recomendações:</strong></p>${recsHtml}` : ''}
     </div>`;
   }).join('');
 }
@@ -1318,8 +1365,63 @@ function initFiltros(containerId, tipo) {
 
 // ── Labels ─────────────────────────────────────────
 function statusLabel(s) {
-  const map = { aberto:'Aberto', em_andamento:'Andamento', resolvido:'Resolvido', bloqueado:'Bloqueado', descartado:'Descartado', backlog:'Backlog', concluido:'Concluído' };
+  const map = { aberto:'Aberto', em_andamento:'Andamento', resolvido:'Resolvido', bloqueado:'Bloqueado', descartado:'Descartado', backlog:'Backlog', concluido:'Concluído', pausado:'Pausado' };
   return map[s] || s;
+}
+
+// ── View toggle ────────────────────────────────────
+let _bugKanban = false, _featKanban = false;
+function setBugView(v) {
+  _bugKanban = v === 'kanban';
+  document.getElementById('bug-toggle-lista').classList.toggle('active', !_bugKanban);
+  document.getElementById('bug-toggle-kanban').classList.toggle('active', _bugKanban);
+  document.getElementById('lista-bugs').style.display = _bugKanban ? 'none' : '';
+  document.querySelector('.lista-header')?.style && (() => {
+    const lh = document.getElementById('view-bugs').querySelector('.lista-header');
+    if (lh) lh.style.display = _bugKanban ? 'none' : '';
+  })();
+  document.getElementById('kanban-bugs').style.display = _bugKanban ? '' : 'none';
+  renderBugs();
+}
+function setFeatView(v) {
+  _featKanban = v === 'kanban';
+  document.getElementById('feat-toggle-lista').classList.toggle('active', !_featKanban);
+  document.getElementById('feat-toggle-kanban').classList.toggle('active', _featKanban);
+  document.getElementById('lista-features').style.display = _featKanban ? 'none' : '';
+  document.getElementById('kanban-features').style.display = _featKanban ? '' : 'none';
+  const lh = document.getElementById('view-features').querySelector('.lista-header');
+  if (lh) lh.style.display = _featKanban ? 'none' : '';
+  renderFeatures();
+}
+
+// ── Kanban render ──────────────────────────────────
+function renderKanban(containerId, items, colunas, tipo) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="kanban-board">${colunas.map(col => {
+    const cards = items.filter(i => i.status === col.status);
+    return `<div class="kanban-col">
+      <div class="kanban-col-header">
+        <span>${col.label}</span>
+        <span class="kanban-col-count">${cards.length}</span>
+      </div>
+      ${cards.length ? cards.map(i => `
+        <div class="kanban-card" onclick="abrirDetail('${tipo}','${i.id}')">
+          <div class="kanban-card-title">${esc(i.titulo)}</div>
+          <div class="kanban-card-footer">
+            <span class="kanban-card-sistema">${i.sistema}</span>
+            <span class="badge-ag ${i.aguardando}" title="${i.aguardando||''}">${agLabel(i.aguardando)}</span>
+          </div>
+        </div>`).join('') : `<div style="font-size:11px;color:var(--t4);padding:8px 0;">Vazio</div>`}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Insight recs global ────────────────────────────
+let _insightRecs = [];
+function virarDemanda(i) {
+  const txt = _insightRecs[i] || '';
+  abrirModalFeature({ titulo: txt.substring(0, 120), sistema: 'DMSTACK', status: 'backlog', prioridade: 'media', aguardando: 'duam', descricao: txt });
 }
 
 // ── Auth ───────────────────────────────────────────
