@@ -54,14 +54,15 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body / Item título | 13px | 500 | 1.5 |
-| Label / Meta / Badge | 9–11px | 600–700 | 1.4 |
+| Label / Meta / Badge | 11px | 500 | 1.4 |
 | Heading de view | 24px | 800 | 1.2 |
-| Display (home greeting / login logo) | 28–38px (clamp) | 800–900 | 1.1 |
+| Display (home greeting / login logo) | 28px | 800 | 1.1 |
 
 Regras adicionais:
 - Letter-spacing negativo obrigatório em displays: `-0.5px` a `-2px` conforme tamanho
 - Labels e seções uppercase com `letter-spacing: 2px`
 - Font-family sempre `'Outfit', sans-serif` — aplicada em `body` e `button` explicitamente
+- Apenas 2 pesos permitidos: `500` (body, labels, meta, badges) e `800` (headings, display, valores destacados)
 
 **Fonte:** extraído do CSS existente em `index.html`.
 
@@ -93,6 +94,19 @@ Accent `#EF4444` reservado para: futuro indicador de saúde vermelho. Nesta fase
 **Regra crítica (CORE-04):** A paleta desta fase é estritamente preto/branco/opacidades. Qualquer cor cromática (verde, vermelho, amarelo) só entra via `rgba` com baixa saturação ou reservada para estados semânticos funcionais.
 
 **Fonte:** variáveis `:root` do `index.html` + additional_context da configuração da fase.
+
+---
+
+## Visuals
+
+**Focal point — home view:** Os blocos `.num-card` no topo da view home são o ponto focal principal. O card de bugs abertos (primeiro da grade) deve ter destaque visual imediato ao carregar — é o elemento que o olhar do usuário deve atingir primeiro. Implementar posicionamento no topo da grade, tamanho de `.num-value` em 28px peso 800, sem decoração extra além do estabelecido no component inventory.
+
+Hierarquia visual da home view (do mais para o menos proeminente):
+1. Grade `.num-card` (bugs abertos, demandas, saúde) — topo
+2. Lista `.lista-item` mais recente — meio
+3. Seção `.saude-card` de conexões — base
+
+Não reordenar esta hierarquia sem instrução explícita.
 
 ---
 
