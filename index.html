@@ -296,6 +296,20 @@ button{font-family:'Outfit',sans-serif;}
 .proxima-empty{font-size:12px;color:var(--t4);padding:14px 0;}
 @media(max-width:700px){.proximas-grid{grid-template-columns:1fr;}}
 
+/* ─── EDGE FUNCTIONS ─────────────────────────────── */
+.edge-wrap{margin-bottom:28px;}
+.edge-table{width:100%;border-collapse:collapse;}
+.edge-table th{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase;padding:0 12px 10px;text-align:left;white-space:nowrap;}
+.edge-table td{font-size:12px;color:var(--t2);padding:10px 12px;border-top:1px solid var(--borda);}
+.edge-table tr:hover td{background:var(--hover);}
+.edge-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.8px;}
+.edge-badge.ok{background:rgba(80,220,160,0.1);color:rgba(80,220,160,0.9);border:1px solid rgba(80,220,160,0.2);}
+.edge-badge.error{background:rgba(255,80,80,0.1);color:rgba(255,110,110,0.9);border:1px solid rgba(255,80,80,0.2);}
+.edge-badge.nunca{background:var(--t5);color:var(--t4);border:1px solid var(--borda);}
+.edge-badge.cron{background:rgba(130,160,255,0.1);color:rgba(160,180,255,0.9);border:1px solid rgba(130,160,255,0.2);}
+.edge-nome{font-weight:600;font-size:13px;color:var(--t1);}
+.edge-origem{font-size:10px;color:var(--t4);margin-top:2px;}
+
 /* ─── SUGESTÃO DE AGENTE ────────────────────────── */
 .agente-sugestao-wrap{margin-top:20px;padding-top:16px;border-top:1px solid var(--borda);}
 .agente-sugestao-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);margin-bottom:10px;}
@@ -556,6 +570,12 @@ button{font-family:'Outfit',sans-serif;}
         <div class="proximas-wrap">
           <div class="section-label" style="margin-bottom:12px;">Próximas 3 ações</div>
           <div class="proximas-grid" id="proximas-acoes"></div>
+        </div>
+
+        <!-- Edge Functions -->
+        <div class="edge-wrap">
+          <div class="section-label" style="margin-bottom:12px;">Edge Functions</div>
+          <div id="edge-logs-wrap"><div style="font-size:12px;color:var(--t4);">Carregando...</div></div>
         </div>
 
         <div class="saude-grid" id="saude-grid">
@@ -903,7 +923,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110427';
+const _DMS_VER = 'dmstack-04110434';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1040,12 +1060,23 @@ function dmsDelete(t, q) {
   }).catch(() => {});
 }
 
-function callEdge(fn, body = {}) {
-  return fetch(`${DMS_URL}/functions/v1/${fn}`, {
-    method: 'POST',
-    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(r => r.json()).catch(e => ({ ok: false, erro: e.message }));
+async function callEdge(fn, body = {}) {
+  const t0 = Date.now();
+  let status = 'ok', result;
+  try {
+    result = await fetch(`${DMS_URL}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(r => r.json());
+    if (result && result.ok === false) status = 'error';
+  } catch(e) {
+    status = 'error';
+    result = { ok: false, erro: e.message };
+  }
+  const ms = Date.now() - t0;
+  dmsPost('edge_logs', { funcao: fn, status, duracao_ms: ms }).catch(() => {});
+  return result;
 }
 
 function edrGet(t, q = '') {
@@ -1956,6 +1987,88 @@ async function checarRPM() {
   }
 }
 
+// ── Edge Function Logs ─────────────────────────────
+async function renderEdgeLogs() {
+  const el = document.getElementById('edge-logs-wrap');
+  if (!el) return;
+
+  // diagnostico-diario: usa dmstack_diagnosticos como proxy do cron
+  const [diagRows, logRows] = await Promise.all([
+    dmsGet('dmstack_diagnosticos', '?produto=eq.dmstack&order=created_at.desc&limit=1'),
+    dmsGet('edge_logs', '?order=created_at.desc&limit=100')
+  ]);
+
+  const fmtTs = ts => {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    const agora = new Date();
+    const diffMs = agora - d;
+    const h = Math.floor(diffMs / 3600000);
+    if (h < 1) return 'há menos de 1h';
+    if (h < 24) return `há ${h}h`;
+    const dias = Math.floor(h / 24);
+    return `há ${dias}d`;
+  };
+
+  // Dados do cron (diagnostico-diario via dmstack_diagnosticos)
+  const ultimoDiag = Array.isArray(diagRows) && diagRows[0];
+  const diagTs    = ultimoDiag?.created_at || null;
+  const diagStatus = ultimoDiag ? 'ok' : 'nunca';
+
+  // Dados do edge_logs por função
+  const logs = Array.isArray(logRows) ? logRows : [];
+  const byFn = {};
+  for (const l of logs) {
+    if (!byFn[l.funcao]) byFn[l.funcao] = [];
+    byFn[l.funcao].push(l);
+  }
+
+  const funcoes = [
+    { fn: 'diagnostico-diario', label: 'diagnostico-diario', origem: 'Cron (pg_cron dia 1 e 16)', cron: true },
+    { fn: 'triagem-ia',         label: 'triagem-ia',         origem: 'Front-end (triagem manual)',  cron: false }
+  ];
+
+  const rows = funcoes.map(f => {
+    let ultimaTs, lastStatus, avgMs;
+
+    if (f.cron) {
+      ultimaTs   = diagTs;
+      lastStatus = diagStatus;
+      avgMs      = null;
+    } else {
+      const fLogs   = byFn[f.fn] || [];
+      const ultimo  = fLogs[0];
+      ultimaTs      = ultimo?.created_at || null;
+      lastStatus    = ultimo?.status || 'nunca';
+      const comMs   = fLogs.filter(l => l.duracao_ms > 0);
+      avgMs         = comMs.length ? Math.round(comMs.reduce((s, l) => s + l.duracao_ms, 0) / comMs.length) : null;
+    }
+
+    const badgeCls = f.cron && lastStatus === 'ok' ? 'cron'
+                   : lastStatus === 'ok'    ? 'ok'
+                   : lastStatus === 'error' ? 'error' : 'nunca';
+    const badgeTxt = lastStatus === 'ok' ? (f.cron ? 'CRON OK' : 'OK')
+                   : lastStatus === 'error' ? 'ERRO' : 'NUNCA';
+
+    return `<tr>
+      <td><div class="edge-nome">${f.label}</div><div class="edge-origem">${f.origem}</div></td>
+      <td>${fmtTs(ultimaTs)}</td>
+      <td><span class="edge-badge ${badgeCls}">${badgeTxt}</span></td>
+      <td>${avgMs != null ? avgMs + ' ms' : f.cron ? '—' : '<span style="color:var(--t4)">sem dados</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<table class="edge-table">
+    <thead><tr>
+      <th>Função</th>
+      <th>Última execução</th>
+      <th>Status</th>
+      <th>Tempo médio</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
 async function carregarSaude() {
   document.getElementById('saude-update').textContent = 'Verificando...';
   _saudeData = {
@@ -1975,6 +2088,7 @@ async function carregarSaude() {
   renderProximas3Acoes();
   renderReceita();
   renderCustos();
+  renderEdgeLogs();
   document.getElementById('saude-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 }
 
