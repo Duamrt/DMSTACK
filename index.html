@@ -1111,7 +1111,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110453';
+const _DMS_VER = 'dmstack-04110456';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -3218,7 +3218,7 @@ async function renderCTOScore() {
   const label = cls === 'excelente' ? 'EXCELENTE' : cls === 'bom' ? 'BOM' : cls === 'regular' ? 'REGULAR' : 'CRÍTICO';
 
   // Salva semana atual (upsert)
-  fetch(`${DMS_URL}/rest/v1/cto_scores`, {
+  fetch(`${DMS_URL}/rest/v1/cto_scores?on_conflict=semana`, {
     method: 'POST',
     headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
     body: JSON.stringify({ score: s.score, criticos: s.criticos, medios: s.medios, deploys_7d: s.deploys7d, concluidos_7d: s.concluidos7d, semana })
