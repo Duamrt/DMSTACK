@@ -490,6 +490,20 @@ button{font-family:'Outfit',sans-serif;}
 .sessao-banner-close{background:none;border:none;color:var(--t4);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color .15s;}
 .sessao-banner-close:hover{color:var(--t2);}
 .sessao-banner-tag{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--t3);white-space:nowrap;}
+.sessao-banner-nova{padding:5px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:var(--t2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit;}
+.sessao-banner-nova:hover{background:rgba(255,255,255,0.14);color:var(--t1);}
+/* Floating context prompt */
+.ctx-toast{position:fixed;bottom:24px;right:24px;background:#16161f;border:1px solid #2e2e42;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:8500;box-shadow:0 8px 32px rgba(0,0,0,.7);max-width:340px;transition:opacity .3s,transform .3s;}
+.ctx-toast.oculto{opacity:0;transform:translateY(10px);pointer-events:none;}
+.ctx-toast-txt{font-size:13px;color:var(--t2);flex:1;line-height:1.4;}
+.ctx-toast-txt small{display:block;font-size:11px;color:var(--t4);margin-top:2px;}
+.ctx-toast-btn{padding:6px 13px;background:#fff;color:#000;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.ctx-toast-close{background:none;border:none;color:var(--t4);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;flex-shrink:0;}
+.ctx-toast-close:hover{color:var(--t2);}
+/* Última sessão no modal */
+.diario-modal-ctx{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-radius:7px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;}
+.diario-modal-ctx-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--t4);white-space:nowrap;margin-top:1px;}
+.diario-modal-ctx-txt{font-size:12px;color:var(--t3);flex:1;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .diario-entry{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-radius:8px;padding:14px 16px;margin-bottom:8px;}
 .diario-entry:hover{background:rgba(255,255,255,0.05);border-color:var(--borda2);}
 .diario-entry-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
@@ -570,6 +584,7 @@ button{font-family:'Outfit',sans-serif;}
       <span id="sessao-banner-tag" class="sessao-banner-tag">GERAL</span>
       <span id="sessao-banner-txt" class="sessao-banner-txt"></span>
       <span id="sessao-banner-time" class="sessao-banner-time"></span>
+      <button class="sessao-banner-nova" onclick="abrirModalDiario()" title="Registrar nova sessão">📝 Nova sessão</button>
       <button class="sessao-banner-close" onclick="fecharBannerSessao()" title="Fechar">×</button>
     </div>
 
@@ -935,9 +950,14 @@ button{font-family:'Outfit',sans-serif;}
 <div class="modal-bg" id="modal-diario" onclick="if(event.target===this)fecharModal('modal-diario')">
   <div class="modal">
     <div class="modal-title">Registrar sessão</div>
+    <div id="mdiario-ctx" class="diario-modal-ctx" style="display:none;">
+      <span class="diario-modal-ctx-label">ANTERIOR</span>
+      <span class="diario-modal-ctx-txt" id="mdiario-ctx-txt"></span>
+      <span style="font-size:10px;color:var(--t4);white-space:nowrap;margin-left:6px;" id="mdiario-ctx-time"></span>
+    </div>
     <div class="modal-field">
       <div class="modal-label">O que você está trabalhando?</div>
-      <textarea class="modal-textarea" id="mdiario-nota" placeholder="Ex: Corrigindo bug de duplicata de diárias no EDR..." style="min-height:90px;" onkeydown="if((e.metaKey||e.ctrlKey)&&e.key==='Enter')salvarSessao()"></textarea>
+      <textarea class="modal-textarea" id="mdiario-nota" placeholder="Ex: Corrigindo bug de duplicata de diárias no EDR..." style="min-height:90px;" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')salvarSessao()"></textarea>
     </div>
     <div class="modal-field">
       <div class="modal-label">Sistema</div>
@@ -955,6 +975,17 @@ button{font-family:'Outfit',sans-serif;}
       <button class="btn-ghost" onclick="fecharModal('modal-diario')">Cancelar</button>
     </div>
   </div>
+</div>
+
+<!-- ══ CONTEXT TOAST ══ -->
+<div id="ctx-toast" class="ctx-toast oculto">
+  <span style="font-size:20px;flex-shrink:0;">📝</span>
+  <div class="ctx-toast-txt">
+    <span id="ctx-toast-msg">Trocando de contexto?</span>
+    <small id="ctx-toast-sub">Última sessão há X min</small>
+  </div>
+  <button class="ctx-toast-btn" onclick="abrirModalDiario();fecharCtxToast(true)">Registrar</button>
+  <button class="ctx-toast-close" onclick="fecharCtxToast(true)">×</button>
 </div>
 
 <!-- ══ COMMAND PALETTE ══ -->
@@ -1195,7 +1226,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110516';
+const _DMS_VER = 'dmstack-04110521';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -2079,6 +2110,9 @@ function irPara(view) {
   if (view === 'sprint') carregarSprint();
   if (view === 'diario') carregarDiario();
   if (view === 'roadmap') carregarRoadmap();
+
+  // Prompt de contexto ao trocar de view se >45 min sem registrar
+  if (view !== 'diario') _verificarCtxToast();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
@@ -3553,24 +3587,45 @@ async function salvarSessao() {
   fecharModal('modal-diario');
   document.getElementById('mdiario-nota').value = '';
   btn.textContent = 'Registrar'; btn.disabled = false;
-  // Atualiza banner e lista se estiver na view
+  // Atualiza estado
+  const now = new Date().toISOString();
+  _ultimaSessao = { nota, sistema, created_at: now };
+  _ultimaSessaoTs = Date.now();
+  sessionStorage.removeItem('dms-banner-dismissed');
+  fecharCtxToast(false); // esconde toast sem bloquear nova aparição
   mostrarBannerSessao(nota, sistema);
   if (document.querySelector('[data-view="diario"].active')) carregarDiario();
 }
 
 function abrirModalDiario(sistemaDefault) {
   if (sistemaDefault) document.getElementById('mdiario-sistema').value = sistemaDefault;
+  // Mostrar última sessão como contexto
+  const ctx = document.getElementById('mdiario-ctx');
+  const ctxTxt = document.getElementById('mdiario-ctx-txt');
+  const ctxTime = document.getElementById('mdiario-ctx-time');
+  if (_ultimaSessao && _ultimaSessao.nota) {
+    ctxTxt.textContent = _ultimaSessao.nota;
+    ctxTime.textContent = _ultimaSessao.created_at ? aging(_ultimaSessao.created_at) + ' atrás' : '';
+    ctx.style.display = 'flex';
+  } else {
+    ctx.style.display = 'none';
+  }
   document.getElementById('modal-diario').classList.add('open');
   setTimeout(() => document.getElementById('mdiario-nota').focus(), 60);
 }
 
+let _ultimaSessao = null;
+let _ultimaSessaoTs = 0;
+
 async function carregarUltimaSessao() {
-  if (sessionStorage.getItem('dms-banner-dismissed')) return;
   const { data } = await dmsGet('sessoes?order=created_at.desc&limit=1');
   if (!data || !data.length) return;
   const entry = data[0];
-  const ageMs = Date.now() - new Date(entry.created_at).getTime();
-  if (ageMs < 10 * 60 * 1000) return; // Muito recente, não mostrar
+  _ultimaSessao = entry;
+  _ultimaSessaoTs = new Date(entry.created_at).getTime();
+  if (sessionStorage.getItem('dms-banner-dismissed')) return;
+  const ageMs = Date.now() - _ultimaSessaoTs;
+  if (ageMs < 10 * 60 * 1000) return;
   mostrarBannerSessao(entry.nota, entry.sistema || 'GERAL', entry.created_at);
 }
 
@@ -3584,6 +3639,39 @@ function mostrarBannerSessao(nota, sistema, created_at) {
 function fecharBannerSessao() {
   document.getElementById('sessao-banner').style.display = 'none';
   sessionStorage.setItem('dms-banner-dismissed', '1');
+}
+
+// ── Context toast (troca de contexto) ─────────────
+let _ctxToastDismissed = false;
+let _ctxToastAutoTimer = null;
+
+function _verificarCtxToast() {
+  if (_ctxToastDismissed) return;
+  if (!_ultimaSessaoTs) return;
+  const elapsed = Date.now() - _ultimaSessaoTs;
+  if (elapsed < 45 * 60 * 1000) return; // < 45 min: não incomoda
+  // Só mostra 1x por página por intervalo de 45 min
+  const lastShown = parseInt(sessionStorage.getItem('dms-ctx-toast-ts') || '0');
+  if (Date.now() - lastShown < 45 * 60 * 1000) return;
+  sessionStorage.setItem('dms-ctx-toast-ts', String(Date.now()));
+  _mostrarCtxToast(elapsed);
+}
+
+function _mostrarCtxToast(elapsedMs) {
+  const mins = Math.round(elapsedMs / 60000);
+  const label = mins >= 60 ? Math.round(mins/60) + 'h' : mins + 'min';
+  document.getElementById('ctx-toast-sub').textContent = 'Última sessão registrada há ' + label;
+  const toast = document.getElementById('ctx-toast');
+  toast.classList.remove('oculto');
+  // Auto-hide após 12s
+  clearTimeout(_ctxToastAutoTimer);
+  _ctxToastAutoTimer = setTimeout(() => fecharCtxToast(false), 12000);
+}
+
+function fecharCtxToast(dismiss) {
+  clearTimeout(_ctxToastAutoTimer);
+  document.getElementById('ctx-toast').classList.add('oculto');
+  if (dismiss) _ctxToastDismissed = true;
 }
 
 // Service Worker
