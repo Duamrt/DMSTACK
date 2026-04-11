@@ -245,6 +245,20 @@ button{font-family:'Outfit',sans-serif;}
 .saude-metric span{color:var(--t4);}
 .saude-chevron{font-size:10px;color:var(--t4);margin-top:8px;}
 
+/* ─── PRÓXIMAS 3 AÇÕES ───────────────────────── */
+.proximas-wrap{margin-bottom:28px;}
+.proximas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.proxima-card{padding:16px 18px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);display:flex;flex-direction:column;gap:6px;cursor:default;transition:border-color .2s;}
+.proxima-card:hover{border-color:var(--borda2);}
+.proxima-tag{font-size:9px;font-weight:700;letter-spacing:1.5px;padding:2px 7px;border-radius:4px;align-self:flex-start;}
+.proxima-tag.bug{background:rgba(255,80,80,0.1);color:rgba(255,120,100,0.9);border:1px solid rgba(255,80,80,0.2);}
+.proxima-tag.demanda{background:rgba(100,180,255,0.1);color:rgba(130,200,255,0.9);border:1px solid rgba(100,180,255,0.2);}
+.proxima-tag.alerta{background:rgba(255,170,40,0.1);color:rgba(255,200,80,0.9);border:1px solid rgba(255,170,40,0.2);}
+.proxima-titulo{font-size:13px;font-weight:600;color:var(--t1);line-height:1.4;}
+.proxima-meta{font-size:11px;color:var(--t4);}
+.proxima-empty{font-size:12px;color:var(--t4);padding:14px 0;}
+@media(max-width:700px){.proximas-grid{grid-template-columns:1fr;}}
+
 /* ─── BRIEFING ────────────────────────────────── */
 .briefing-card{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);line-height:1.7;font-size:14px;color:var(--t2);margin-bottom:24px;}
 .briefing-card p{margin-bottom:10px;}
@@ -453,6 +467,13 @@ button{font-family:'Outfit',sans-serif;}
       </div>
 
       <div style="padding:24px 32px;">
+
+        <!-- Próximas 3 ações -->
+        <div class="proximas-wrap">
+          <div class="section-label" style="margin-bottom:12px;">Próximas 3 ações</div>
+          <div class="proximas-grid" id="proximas-acoes"></div>
+        </div>
+
         <div class="saude-grid" id="saude-grid">
           <div class="saude-card">
             <div class="saude-card-header">
@@ -797,7 +818,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04101222';
+const _DMS_VER = 'dmstack-04110338';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -986,6 +1007,60 @@ function gerarAlertas() {
   });
 
   return alertas;
+}
+
+// ── Próximas 3 ações ───────────────────────────
+function renderProximas3Acoes() {
+  const el = document.getElementById('proximas-acoes');
+  if (!el) return;
+
+  const PRIO = { alta: 3, media: 2, baixa: 1 };
+
+  // 1. Bug crítico mais antigo
+  const bug = _bugs
+    .filter(b => b.severidade === 'critico' && b.status !== 'resolvido' && b.status !== 'descartado' && b.status !== 'fechado')
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0] || null;
+
+  // 2. Demanda em andamento de maior prioridade
+  const demanda = _features
+    .filter(f => f.status === 'em_andamento')
+    .sort((a, b) => (PRIO[b.prioridade] || 0) - (PRIO[a.prioridade] || 0))[0] || null;
+
+  // 3. Alerta que exige ação manual (bug bloqueado > sistema off > deploy com bug)
+  const alertas = gerarAlertas();
+  const alerta = alertas.find(a => a.tipo === 'bug_bloqueado') ||
+                 alertas.find(a => a.tipo === 'sistema_off') ||
+                 alertas.find(a => a.tipo === 'deploy_bug') || null;
+
+  const acoes = [
+    bug ? {
+      tag: 'BUG CRÍTICO', tagClass: 'bug',
+      titulo: bug.titulo,
+      meta: `${bug.sistema} · ${aging(bug.created_at)}`
+    } : null,
+    demanda ? {
+      tag: 'DEMANDA', tagClass: 'demanda',
+      titulo: demanda.titulo,
+      meta: `${demanda.sistema} · prioridade ${demanda.prioridade}`
+    } : null,
+    alerta ? {
+      tag: 'ALERTA', tagClass: 'alerta',
+      titulo: alerta.descricao,
+      meta: `${alerta.sistema} · requer ação manual`
+    } : null
+  ].filter(Boolean);
+
+  if (!acoes.length) {
+    el.innerHTML = '<div class="proxima-empty">Nenhuma ação pendente no momento.</div>';
+    return;
+  }
+
+  el.innerHTML = acoes.map(a => `
+    <div class="proxima-card">
+      <span class="proxima-tag ${a.tagClass}">${a.tag}</span>
+      <div class="proxima-titulo">${a.titulo}</div>
+      <div class="proxima-meta">${a.meta}</div>
+    </div>`).join('');
 }
 
 function atualizarBadgeAlertas() {
@@ -1572,6 +1647,7 @@ async function carregarSaude() {
   _saudeData.NAREGUA = { status:'ok', metricas:'usenaregua.com.br', ultimaAtividade:'Sem Supabase conectado', checado:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) };
   renderSaudeGrid();
   renderSaudeCriticos();
+  renderProximas3Acoes();
   document.getElementById('saude-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 }
 
