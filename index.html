@@ -329,6 +329,40 @@ button{font-family:'Outfit',sans-serif;}
 .proxima-empty{font-size:12px;color:var(--t4);padding:14px 0;}
 @media(max-width:700px){.proximas-grid{grid-template-columns:1fr;}}
 
+/* ─── MOBILE + TOAST ──────────────────────────── */
+.sb-hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--sidebar);border:1px solid var(--borda2);border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+.sb-overlay.show{display:block;}
+.app-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#16161f;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 20px;font-size:13px;color:var(--t2);z-index:9000;box-shadow:0 6px 24px rgba(0,0,0,.7);transition:opacity .3s,transform .3s;max-width:420px;text-align:center;white-space:nowrap;}
+.app-toast.error{border-color:rgba(255,80,80,0.4);color:rgba(255,150,130,0.95);}
+.app-toast.success{border-color:rgba(40,190,100,0.3);color:rgba(70,210,120,0.95);}
+.app-toast.oculto{opacity:0;transform:translateX(-50%) translateY(8px);pointer-events:none;}
+@media(max-width:768px){
+  .sb-hamburger{display:flex;}
+  .sidebar{transform:translateX(-200px)!important;}
+  .sidebar.mobile-open{transform:translateX(0)!important;}
+  .sb-toggle{display:none;}
+  .main{margin-left:0!important;}
+  .view{padding:16px;}
+  .page-header{padding:60px 16px 12px;flex-direction:column;align-items:flex-start;gap:10px;}
+  .page-actions{width:100%;flex-wrap:wrap;gap:6px;}
+  .btn-primary,.btn-ghost{padding:8px 14px;font-size:11px;}
+  .home-numeros{grid-template-columns:repeat(2,1fr);}
+  .home-grid{grid-template-columns:1fr;}
+  .saude-grid{grid-template-columns:1fr;}
+  .receita-grid{grid-template-columns:1fr;}
+  .custo-wrap{grid-template-columns:1fr;}
+  .roadmap-board{grid-template-columns:1fr;padding:16px;}
+  .kanban-board{padding:0 16px 16px;}
+  .lista-header{grid-template-columns:70px 1fr 70px;gap:8px;padding:0 8px 8px;}
+  .lista-item{grid-template-columns:70px 1fr 70px;gap:8px;padding:10px 8px;}
+  .lista-item > :nth-child(4),.lista-item > :nth-child(5),.lista-header > :nth-child(4),.lista-header > :nth-child(5){display:none;}
+  .agente-item{grid-template-columns:60px 1fr 60px;gap:8px;padding:10px 8px;}
+  .agente-item > .agente-ultima{display:none;}
+  .sessao-banner{flex-wrap:wrap;padding:10px 16px;}
+  .detail-bg{width:100%!important;}
+}
+
 /* ─── SPRINT ─────────────────────────────────────── */
 .sprint-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;}
 .sprint-meta{flex:1;}
@@ -576,6 +610,10 @@ button{font-family:'Outfit',sans-serif;}
   <button class="sb-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Recolher sidebar">
     <svg width="8" height="12" viewBox="0 0 8 12" fill="none"><path d="M6 1L1 6L6 11" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
+  <button class="sb-hamburger" id="sb-hamburger" onclick="toggleMobileSidebar()" title="Menu">
+    <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M0 1h16M0 6h16M0 11h16" stroke="rgba(255,255,255,0.65)" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+  <div class="sb-overlay" id="sb-overlay" onclick="toggleMobileSidebar()"></div>
 
   <!-- MAIN -->
   <div class="main">
@@ -1236,7 +1274,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110707';
+const _DMS_VER = 'dmstack-04111427';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1826,6 +1864,8 @@ async function salvarUsoAgente() {
 
   const payload = { status, ultima_acao: acao, ultima_acao_ts: new Date().toISOString(), updated_at: new Date().toISOString() };
   await dmsPatch('agentes', `?id=eq.${_agEditId}`, payload);
+  // Registra histórico acumulado
+  dmsPost('agentes_uso', { agente_id: _agEditId, acao, status, sistema: _agItemCtx?.sistema || null, created_at: new Date().toISOString() }).catch(() => {});
 
   fecharModal('modal-agente');
   _agItemCtx = null;
@@ -1853,7 +1893,7 @@ function voltarTriagem() {
 
 async function processarTriagem() {
   const texto = document.getElementById('triagem-texto').value.trim();
-  if (texto.length < 20) { alert('Cole um texto mais longo para a IA analisar.'); return; }
+  if (texto.length < 20) { showToast('Cole um texto mais longo para a IA analisar.', 'error'); return; }
 
   const btn = document.getElementById('triagem-btn');
   btn.textContent = 'Processando...'; btn.disabled = true;
@@ -1865,7 +1905,7 @@ async function processarTriagem() {
 
     _triagemItens = data.itens || [];
     if (_triagemItens.length === 0) {
-      alert('A IA não encontrou itens acionáveis neste texto. Tente um texto com bugs ou pendências mais claros.');
+      showToast('A IA não encontrou itens acionáveis. Tente um texto com bugs ou pendências mais claros.', 'error');
       btn.textContent = 'Processar com IA'; btn.disabled = false;
       return;
     }
@@ -1874,7 +1914,7 @@ async function processarTriagem() {
     document.getElementById('triagem-step-input').style.display = 'none';
     document.getElementById('triagem-step-resultado').style.display = '';
   } catch (e) {
-    alert('Erro ao processar: ' + e.message);
+    showToast('Erro ao processar: ' + e.message, 'error');
     btn.textContent = 'Processar com IA'; btn.disabled = false;
   }
 }
@@ -1911,7 +1951,7 @@ async function confirmarTriagem() {
     return chk && chk.checked;
   });
 
-  if (selecionados.length === 0) { alert('Selecione pelo menos um item para importar.'); return; }
+  if (selecionados.length === 0) { showToast('Selecione pelo menos um item para importar.', 'error'); return; }
 
   const btn = document.getElementById('triagem-confirmar-btn');
   btn.textContent = `Importando ${selecionados.length}...`; btn.disabled = true;
@@ -1939,12 +1979,12 @@ async function confirmarTriagem() {
       });
     }
     if (res && res.code) { erros++; console.warn('Falha ao importar:', res.message, item.titulo); }
-    else { ok++; if (item.tipo === 'bug' && (item.prioridade === 'critico' || item.severidade === 'critico')) tgCritico(item.titulo, item.sistema); }
+    else { ok++; if (item.tipo === 'bug' && item.prioridade === 'critico') tgCritico(item.titulo, item.sistema); }
   }
 
   fecharModal('modal-triagem');
   btn.textContent = 'Importar selecionados'; btn.disabled = false;
-  if (erros > 0) alert(`${ok} importados, ${erros} falharam. Veja o console para detalhes.`);
+  if (erros > 0) showToast(`${ok} importados, ${erros} falharam. Veja o console.`, 'error');
 
   // Recarregar lista relevante e navegar pra ela
   const temBugs = selecionados.some(i => i.tipo === 'bug');
@@ -1964,22 +2004,33 @@ function toggleSidebar() {
   localStorage.setItem('dms-sb-collapsed', sb.classList.contains('collapsed') ? '1' : '0');
 }
 
+function toggleMobileSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sb-overlay');
+  const open = sb.classList.toggle('mobile-open');
+  ov.classList.toggle('show', open);
+}
+
+let _toastTimer = null;
+function showToast(msg, tipo = 'info') {
+  const el = document.getElementById('app-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'app-toast' + (tipo !== 'info' ? ' ' + tipo : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.add('oculto'), 4000);
+}
+
 // ── Navegação ─────────────────────────────────────
 // ── ROADMAP ────────────────────────────────────────
 let _rdDragging = null;
 
 // ── TELEGRAM NOTIFICAÇÕES ──────────────────────────
-const _TG_TOKEN = '8289297380:AAGPqcQ70PsCB5VND7XEsGO625md43HeqAk';
-const _TG_CHAT  = '1444151060';
 let _tgScoreTimer = null;
 let _tgLastScore  = null;
 
 function tgEnviar(msg) {
-  fetch(`https://api.telegram.org/bot${_TG_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: _TG_CHAT, text: msg, parse_mode: 'HTML' })
-  }).catch(() => {});
+  callEdge('notificar-telegram', { text: msg }).catch(() => {});
 }
 
 function tgCritico(titulo, sistema) {
@@ -2110,6 +2161,11 @@ function irPara(view) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  localStorage.setItem('dms-last-view', view);
+
+  // Fecha sidebar mobile ao navegar
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sb-overlay')?.classList.remove('show');
 
   if (view === 'bugs') renderBugs();
   if (view === 'features') renderFeatures();
@@ -2438,6 +2494,26 @@ async function checarEDR() {
   }
 }
 
+async function checarNaRegua() {
+  const t = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  try {
+    const r = await fetch('https://usenaregua.com.br', { signal: AbortSignal.timeout(6000), mode: 'no-cors' });
+    return { status:'ok', metricas:'usenaregua.com.br', ultimaAtividade:'Site respondendo', checado:t };
+  } catch(e) {
+    return { status:'off', metricas:'usenaregua.com.br', ultimaAtividade:'Site inacessível', checado:t };
+  }
+}
+
+async function checarLoadPro() {
+  const t = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  try {
+    const r = await fetch('https://loadpro.com.br', { signal: AbortSignal.timeout(6000), mode: 'no-cors' });
+    return { status:'ok', metricas:'loadpro.com.br', ultimaAtividade:'Site respondendo', checado:t };
+  } catch(e) {
+    return { status:'off', metricas:'loadpro.com.br', ultimaAtividade:'Site inacessível', checado:t };
+  }
+}
+
 async function checarRPM() {
   try {
     const oficinas = await rpmGet('oficinas', '?select=id,nome');
@@ -2702,10 +2778,10 @@ function atualizarSelCount() {
 
 async function criarSprint() {
   const titulo = document.getElementById('msprint-titulo').value.trim();
-  if (!titulo) { alert('Digite o nome do sprint.'); return; }
+  if (!titulo) { showToast('Digite o nome do sprint.', 'error'); return; }
 
   const checks = document.querySelectorAll('#sprint-select-list input:checked');
-  if (!checks.length) { alert('Selecione pelo menos 1 item.'); return; }
+  if (!checks.length) { showToast('Selecione pelo menos 1 item.', 'error'); return; }
 
   const itens = Array.from(checks).map(c => ({ tipo: c.dataset.tipo, id: c.value, concluido: false }));
 
@@ -2719,7 +2795,7 @@ async function criarSprint() {
   const result = await dmsPost('sprints', { titulo, data_inicio: dataIni, data_fim: dataFim, status: 'ativo', itens });
   btn.textContent = 'Iniciar sprint'; btn.disabled = false;
 
-  if (!result || result.error) { alert('Erro ao criar sprint.'); return; }
+  if (!result || result.error) { showToast('Erro ao criar sprint.', 'error'); return; }
 
   fecharModal('modal-sprint');
   _sprintAtivo = Array.isArray(result) ? result[0] : result;
@@ -2816,14 +2892,15 @@ async function carregarSaude() {
     EDR: { status:'checking' },
     RPM: { status:'checking' },
     NAREGUA: { status:'checking' },
-    LOADPRO: { status:'off', metricas:'sem dados recentes', ultimaAtividade:'Sistema inativo', checado:'—' }
+    LOADPRO: { status:'checking' }
   };
   renderSaudeGrid();
 
-  const [edr, rpm] = await Promise.all([checarEDR(), checarRPM()]);
+  const [edr, rpm, naregua, loadpro] = await Promise.all([checarEDR(), checarRPM(), checarNaRegua(), checarLoadPro()]);
   _saudeData.EDR = edr;
   _saudeData.RPM = rpm;
-  _saudeData.NAREGUA = { status:'ok', metricas:'usenaregua.com.br', ultimaAtividade:'Sem Supabase conectado', checado:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) };
+  _saudeData.NAREGUA = naregua;
+  _saudeData.LOADPRO = loadpro;
   renderCTOScore();
   renderSaudeGrid();
   renderSaudeCriticos();
@@ -3441,6 +3518,10 @@ async function iniciarApp() {
   carregarUltimaSessao();
   tgResumoDiario();
 
+  // Restaura última view visitada
+  const _lastView = localStorage.getItem('dms-last-view');
+  if (_lastView && _lastView !== 'saude') irPara(_lastView);
+
   // Refresh a cada 5 min
   setInterval(async () => {
     await refreshToken();
@@ -3575,8 +3656,7 @@ async function renderCTOScore() {
 async function carregarDiario() {
   const el = document.getElementById('diario-content');
   if (el) el.innerHTML = '<div class="lista-empty">Carregando...</div>';
-  const { data } = await dmsGet('sessoes?order=created_at.desc&limit=60');
-  const entries = data || [];
+  const entries = await dmsGet('sessoes?order=created_at.desc&limit=60') || [];
   const sub = document.getElementById('diario-sub');
   if (sub) sub.textContent = entries.length + ' registros';
   if (!el) return;
@@ -3636,7 +3716,7 @@ let _ultimaSessao = null;
 let _ultimaSessaoTs = 0;
 
 async function carregarUltimaSessao() {
-  const { data } = await dmsGet('sessoes?order=created_at.desc&limit=1');
+  const data = await dmsGet('sessoes?order=created_at.desc&limit=1');
   if (!data || !data.length) return;
   const entry = data[0];
   _ultimaSessao = entry;
@@ -3694,6 +3774,7 @@ function fecharCtxToast(dismiss) {
 
 // Service Worker
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+document.body.insertAdjacentHTML('beforeend', '<div id="app-toast" class="app-toast oculto"></div>');
 
 // Auto-login
 (async () => {
