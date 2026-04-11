@@ -265,6 +265,18 @@ button{font-family:'Outfit',sans-serif;}
 .proxima-empty{font-size:12px;color:var(--t4);padding:14px 0;}
 @media(max-width:700px){.proximas-grid{grid-template-columns:1fr;}}
 
+/* ─── SUGESTÃO DE AGENTE ────────────────────────── */
+.agente-sugestao-wrap{margin-top:20px;padding-top:16px;border-top:1px solid var(--borda);}
+.agente-sugestao-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);margin-bottom:10px;}
+.agente-sugestao-list{display:flex;flex-direction:column;gap:6px;}
+.agente-sug-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--borda);border-radius:8px;background:var(--t5);cursor:default;}
+.agente-sug-info{flex:1;min-width:0;}
+.agente-sug-nome{font-size:12px;font-weight:600;color:var(--t1);}
+.agente-sug-quando{font-size:11px;color:var(--t4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.agente-sug-badge{font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 7px;border-radius:4px;background:rgba(140,100,255,0.1);color:rgba(170,140,255,0.85);border:1px solid rgba(140,100,255,0.18);white-space:nowrap;}
+.agente-sug-badge.principal{background:rgba(100,180,255,0.1);color:rgba(130,200,255,0.9);border-color:rgba(100,180,255,0.2);}
+.mag-ctx-line{font-size:11px;color:var(--t4);padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:6px;margin-bottom:12px;border-left:2px solid rgba(255,255,255,0.12);}
+
 /* ─── SCORE EXECUÇÃO ────────────────────────────── */
 .score-wrap{display:flex;align-items:center;gap:20px;padding:20px 24px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);margin-bottom:24px;}
 .score-num{font-size:48px;font-weight:800;line-height:1;color:var(--t1);}
@@ -773,6 +785,7 @@ button{font-family:'Outfit',sans-serif;}
 <div class="modal-bg" id="modal-agente">
   <div class="modal">
     <div class="modal-title" id="mag-title">Registrar uso</div>
+    <div id="mag-ctx-display" class="mag-ctx-line" style="display:none;"></div>
     <div class="modal-field">
       <div class="modal-label">O que foi feito</div>
       <textarea class="modal-textarea" id="mag-acao" placeholder="Ex: Mapeou codebase do RPM antes de refatorar financeiro"></textarea>
@@ -839,7 +852,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110344';
+const _DMS_VER = 'dmstack-04110348';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1313,28 +1326,108 @@ function renderAgentes() {
   lista.innerHTML = html;
 }
 
+// Contexto do item vinculado ao uso do agente (bug ou demanda)
+let _agItemCtx = null; // { tipo, id, titulo, sistema }
+
+// Mapeamento contextual: dado tipo + situação do item → agentes sugeridos
+function sugerirAgentes(tipo, item) {
+  // Retorna [{id, razao, principal}]
+  const sev = item.severidade || item.prioridade || '';
+  const status = item.status || '';
+
+  if (tipo === 'bug') {
+    if (status === 'bloqueado') return [
+      { id: 'gsd-assumptions-analyzer', razao: 'Bug bloqueado — analisa premissas antes de desbloquear', principal: true },
+      { id: 'gsd-debugger',             razao: 'Investigação sistemática do bloqueio', principal: false },
+    ];
+    if (sev === 'critico' || sev === 'alto') return [
+      { id: 'gsd-debugger',   razao: 'Bug crítico — método científico de investigação', principal: true },
+      { id: 'reality-checker', razao: 'Certifica que a correção de fato resolveu', principal: false },
+    ];
+    return [
+      { id: 'gsd-debugger',        razao: 'Debug sistemático com persistência de sessão', principal: true },
+      { id: 'gsd-codebase-mapper', razao: 'Mapeie o código afetado antes de mexer',       principal: false },
+    ];
+  }
+
+  // demanda
+  if (status === 'backlog') {
+    if (sev === 'alta') return [
+      { id: 'software-architect', razao: 'Feature de alta prioridade — design antes de codar', principal: true },
+      { id: 'gsd-planner',        razao: 'Quebra a demanda em tarefas executáveis',            principal: false },
+      { id: 'gsd-ui-researcher',  razao: 'Se tiver interface — gera spec de design',           principal: false },
+    ];
+    return [
+      { id: 'gsd-planner',       razao: 'Planeja execução da demanda',              principal: true },
+      { id: 'gsd-ui-researcher', razao: 'Gera spec de design se houver interface',  principal: false },
+    ];
+  }
+  if (status === 'em_andamento') return [
+    { id: 'gsd-executor',    razao: 'Executa o plano com commits atômicos',      principal: true },
+    { id: 'code-reviewer',   razao: 'Revisão antes de subir',                    principal: false },
+    { id: 'gsd-verifier',    razao: 'Confere se entregou o que foi prometido',   principal: false },
+  ];
+  if (status === 'concluido') return [
+    { id: 'reality-checker', razao: 'Certifica que está realmente pronto',       principal: true },
+    { id: 'gsd-verifier',    razao: 'Valida entrega contra o que foi prometido', principal: false },
+  ];
+
+  return [{ id: 'gsd-planner', razao: 'Planejamento geral da demanda', principal: true }];
+}
+
+function abrirAgenteComContexto(agenteId, itemTipo, itemId) {
+  const item = itemTipo === 'bug' ? _bugs.find(b => b.id === itemId) : _features.find(f => f.id === itemId);
+  _agItemCtx = item ? { tipo: itemTipo, id: itemId, titulo: item.titulo, sistema: item.sistema } : null;
+  _agEditId = agenteId;
+  const a = _agentes.length ? _agentes.find(x => x.id === agenteId) : _AGENTES_STATIC.find(x => x.id === agenteId);
+  if (!a) return;
+
+  document.getElementById('mag-title').textContent = a.nome;
+  document.getElementById('mag-acao').value = '';
+  document.getElementById('mag-status').value = 'em_execucao';
+
+  const ctxEl = document.getElementById('mag-ctx-display');
+  if (_agItemCtx) {
+    ctxEl.textContent = `Vinculado: ${_agItemCtx.tipo === 'bug' ? 'Bug' : 'Demanda'} — ${_agItemCtx.titulo}`;
+    ctxEl.style.display = '';
+  } else {
+    ctxEl.style.display = 'none';
+  }
+
+  document.getElementById('modal-agente').classList.add('open');
+  setTimeout(() => document.getElementById('mag-acao').focus(), 100);
+}
+
 function abrirRegistrarAgente(id) {
+  _agItemCtx = null;
   _agEditId = id;
   const a = _agentes.find(x => x.id === id);
   if (!a) return;
   document.getElementById('mag-title').textContent = a.nome;
   document.getElementById('mag-acao').value = '';
   document.getElementById('mag-status').value = 'ativo';
+  document.getElementById('mag-ctx-display').style.display = 'none';
   document.getElementById('modal-agente').classList.add('open');
   setTimeout(() => document.getElementById('mag-acao').focus(), 100);
 }
 
 async function salvarUsoAgente() {
-  const acao = document.getElementById('mag-acao').value.trim();
-  if (!acao) { document.getElementById('mag-acao').focus(); return; }
+  const acaoRaw = document.getElementById('mag-acao').value.trim();
+  if (!acaoRaw) { document.getElementById('mag-acao').focus(); return; }
   const status = document.getElementById('mag-status').value;
   const btn = document.getElementById('mag-btn');
   btn.textContent = 'Salvando...'; btn.disabled = true;
+
+  // Inclui referência ao item se vier de contexto
+  const acao = _agItemCtx
+    ? `[${_agItemCtx.tipo.toUpperCase()}:${_agItemCtx.id.slice(0,8)}] ${acaoRaw}`
+    : acaoRaw;
 
   const payload = { status, ultima_acao: acao, ultima_acao_ts: new Date().toISOString(), updated_at: new Date().toISOString() };
   await dmsPatch('agentes', `?id=eq.${_agEditId}`, payload);
 
   fecharModal('modal-agente');
+  _agItemCtx = null;
   btn.textContent = 'Registrar'; btn.disabled = false;
   await carregarAgentes();
 }
@@ -2047,6 +2140,29 @@ async function salvarDeploy() {
 }
 
 // ── Detail panel ───────────────────────────────────
+function renderSugestaoAgentes(tipo, item, id) {
+  const sugestoes = sugerirAgentes(tipo, item);
+  if (!sugestoes.length) return '';
+
+  const cards = sugestoes.map(s => {
+    const ag = _AGENTES_STATIC.find(a => a.id === s.id);
+    if (!ag) return '';
+    return `<div class="agente-sug-card">
+      <div class="agente-sug-info">
+        <div class="agente-sug-nome">${ag.nome}</div>
+        <div class="agente-sug-quando">${s.razao}</div>
+      </div>
+      <span class="agente-sug-badge${s.principal ? ' principal' : ''}">${s.principal ? 'Principal' : 'Alternativo'}</span>
+      <button class="btn-ghost" style="font-size:11px;padding:5px 10px;white-space:nowrap;" onclick="abrirAgenteComContexto('${ag.id}','${tipo}','${id}')">▶ Ativar</button>
+    </div>`;
+  }).join('');
+
+  return `<div class="agente-sugestao-wrap">
+    <div class="agente-sugestao-label">AGENTES SUGERIDOS</div>
+    <div class="agente-sugestao-list">${cards}</div>
+  </div>`;
+}
+
 function abrirDetail(tipo, id) {
   const item = tipo === 'bug' ? _bugs.find(b => b.id === id) : _features.find(f => f.id === id);
   if (!item) return;
@@ -2086,6 +2202,8 @@ function abrirDetail(tipo, id) {
     <div style="display:flex;gap:8px;margin-top:20px;">
       <button class="btn-primary" onclick="${tipo === 'bug' ? `abrirModalBug(_bugs.find(b=>b.id==='${id}'))` : `abrirModalFeature(_features.find(f=>f.id==='${id}'))`}">Editar</button>
     </div>
+
+    ${renderSugestaoAgentes(tipo, item, id)}
 
     <div class="detail-delete">
       <button class="btn-danger" onclick="excluirItem('${tipo}','${id}')">Excluir</button>
