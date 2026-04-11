@@ -266,6 +266,22 @@ button{font-family:'Outfit',sans-serif;}
 .receita-novo{font-size:11px;color:rgba(100,200,255,0.7);margin-top:6px;}
 .receita-loading{font-size:12px;color:var(--t4);padding:20px 0;}
 
+/* ─── CUSTO INFRA ─────────────────────────────── */
+.custo-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.custo-breakdown{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);}
+.custo-breakdown-title{font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+.custo-linha{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;}
+.custo-linha:last-child{border-bottom:none;}
+.custo-linha-nome{color:var(--t3);}
+.custo-linha-val{color:var(--t2);font-weight:600;}
+.custo-linha-val.custo-total-val{color:var(--t1);font-size:14px;font-weight:800;}
+.custo-por-sistema{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);}
+.custo-sistema-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
+.custo-sistema-item:last-child{border-bottom:none;padding-top:12px;margin-top:4px;border-top:1px solid var(--borda2);}
+.custo-sistema-nome{color:var(--t2);font-weight:500;}
+.custo-sistema-val{color:var(--t1);font-weight:700;}
+.custo-sistema-val.destaque{font-size:15px;}
+
 /* ─── PRÓXIMAS 3 AÇÕES ───────────────────────── */
 .proximas-wrap{margin-bottom:28px;}
 .proximas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
@@ -520,6 +536,20 @@ button{font-family:'Outfit',sans-serif;}
         <div class="receita-section">
           <div class="section-label" style="margin-bottom:12px;">Receita recorrente (MRR)</div>
           <div class="receita-grid" id="receita-grid"><div class="receita-loading">Carregando...</div></div>
+        </div>
+
+        <!-- Custo de Infraestrutura -->
+        <div style="margin-bottom:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="section-label" style="margin-bottom:0;">Custo de infraestrutura</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t4);">
+              Imposto USD:
+              <input id="custo-imposto" type="number" min="0" max="30" step="0.5" value="5"
+                style="width:44px;background:rgba(255,255,255,0.05);border:1px solid var(--borda2);border-radius:5px;color:var(--t2);font-size:11px;padding:2px 6px;text-align:center;outline:none;"
+                oninput="renderCustos()">%
+            </div>
+          </div>
+          <div id="custo-grid"></div>
         </div>
 
         <!-- Próximas 3 ações -->
@@ -873,7 +903,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110407';
+const _DMS_VER = 'dmstack-04110427';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1798,6 +1828,49 @@ function toggleSaudeCard(id) {
   renderSaudeGrid();
 }
 
+// ── Custo de Infraestrutura ────────────────────────
+function renderCustos() {
+  const el = document.getElementById('custo-grid');
+  if (!el) return;
+
+  const imp = parseFloat(document.getElementById('custo-imposto')?.value || 5) / 100;
+  const fmtR = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const claude   = 689 * (1 + imp);
+  const gemini   = 96.99;                // cobrado em BRL, sem IOF
+  const supabase = 145 * (1 + imp);
+  const totalComp = claude + gemini + supabase;
+  const dominio  = 130 / 36;            // R$130 / 3 anos / 12 meses
+  const porSistema = totalComp / 4;
+  const totalSistema = porSistema + dominio;
+
+  const sistemas = ['EDR System', 'RPM Pro', 'NaRegua', 'DM Stack'];
+
+  el.innerHTML = `
+    <div class="custo-wrap">
+      <div class="custo-breakdown">
+        <div class="custo-breakdown-title">Composição mensal</div>
+        <div class="custo-linha"><span class="custo-linha-nome">Claude (c/ imposto)</span><span class="custo-linha-val">${fmtR(claude)}</span></div>
+        <div class="custo-linha"><span class="custo-linha-nome">Gemini</span><span class="custo-linha-val">${fmtR(gemini)}</span></div>
+        <div class="custo-linha"><span class="custo-linha-nome">Supabase (c/ imposto)</span><span class="custo-linha-val">${fmtR(supabase)}</span></div>
+        <div class="custo-linha"><span class="custo-linha-nome">Total compartilhado</span><span class="custo-linha-val custo-total-val">${fmtR(totalComp)}</span></div>
+        <div class="custo-linha" style="margin-top:8px;"><span class="custo-linha-nome">Domínio (R$130/3 anos)</span><span class="custo-linha-val">${fmtR(dominio)}/mês por sistema</span></div>
+      </div>
+      <div class="custo-por-sistema">
+        <div class="custo-breakdown-title">Por sistema</div>
+        ${sistemas.map(s => `
+        <div class="custo-sistema-item">
+          <span class="custo-sistema-nome">${s}</span>
+          <span class="custo-sistema-val">${fmtR(totalSistema)}<span style="font-size:10px;font-weight:400;color:var(--t4);">/mês</span></span>
+        </div>`).join('')}
+        <div class="custo-sistema-item">
+          <span class="custo-sistema-nome" style="font-weight:700;color:var(--t1);">Total portfólio</span>
+          <span class="custo-sistema-val destaque">${fmtR(totalComp + dominio * 4)}<span style="font-size:10px;font-weight:400;color:var(--t4);">/mês</span></span>
+        </div>
+      </div>
+    </div>`;
+}
+
 // ── Receita / MRR ──────────────────────────────────
 const _EDR_PRECOS = { essencial: 397, profissional: 697, construtora: 997 };
 const _RPM_PRECO = 399;
@@ -1901,6 +1974,7 @@ async function carregarSaude() {
   renderSaudeCriticos();
   renderProximas3Acoes();
   renderReceita();
+  renderCustos();
   document.getElementById('saude-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 }
 
