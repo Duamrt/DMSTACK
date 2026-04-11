@@ -209,6 +209,37 @@ button{font-family:'Outfit',sans-serif;}
 .triagem-tipo-demanda{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(100,180,255,0.1);color:rgba(130,200,255,0.9);border:1px solid rgba(100,180,255,0.2);text-transform:uppercase;letter-spacing:.8px;}
 .triagem-loading{text-align:center;padding:32px;color:var(--t4);font-size:13px;}
 
+/* ─── ROADMAP ─────────────────────────────────── */
+.roadmap-board{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px 32px 0;}
+.roadmap-col{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:10px;min-height:260px;transition:background .15s,border-color .15s;}
+.roadmap-col.drag-over{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.25);}
+.roadmap-col-header{padding:12px 16px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:8px;}
+.roadmap-col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.roadmap-col-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t3);}
+.roadmap-col-count{font-size:10px;color:var(--t4);margin-left:auto;background:rgba(255,255,255,0.06);padding:1px 7px;border-radius:10px;}
+.roadmap-col-body{padding:10px;min-height:180px;}
+.roadmap-col-empty{font-size:11px;color:var(--t4);text-align:center;padding:24px 8px;opacity:.6;}
+.roadmap-card{background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-left:3px solid transparent;border-radius:7px;padding:10px 12px;margin-bottom:8px;cursor:grab;user-select:none;transition:border-color .15s,opacity .15s;}
+.roadmap-card:hover{border-color:var(--borda2);}
+.roadmap-card.dragging{opacity:.35;}
+.roadmap-card-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.roadmap-card-title{font-size:12px;color:var(--t1);line-height:1.4;}
+.roadmap-card-meta{font-size:10px;color:var(--t4);margin-top:3px;}
+.roadmap-pri{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-left:auto;}
+.roadmap-sys{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.8px;text-transform:uppercase;}
+.roadmap-sys.EDR{background:rgba(80,220,160,.12);color:rgba(80,220,160,.9);}
+.roadmap-sys.RPM{background:rgba(80,150,255,.12);color:rgba(80,150,255,.9);}
+.roadmap-sys.NAREGUA{background:rgba(180,80,220,.12);color:rgba(180,80,220,.9);}
+.roadmap-sys.DMSTACK{background:rgba(255,160,50,.12);color:rgba(255,160,50,.9);}
+.roadmap-sys.LOADPRO{background:rgba(50,220,220,.12);color:rgba(50,220,220,.9);}
+.roadmap-sys.GERAL{background:rgba(150,150,150,.1);color:rgba(150,150,150,.8);}
+.roadmap-backlog{padding:16px 32px 28px;}
+.roadmap-backlog-header{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--t4);margin-bottom:10px;}
+.roadmap-backlog-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.roadmap-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--borda);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--t3);cursor:grab;user-select:none;transition:background .15s;}
+.roadmap-chip:hover{background:rgba(255,255,255,0.08);}
+.roadmap-chip.dragging{opacity:.35;}
+
 /* ─── HOME ────────────────────────────────────── */
 .home-greeting{font-size:clamp(28px,3vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
 .home-date{font-size:13px;color:var(--t4);margin-bottom:32px;}
@@ -511,6 +542,7 @@ button{font-family:'Outfit',sans-serif;}
       <div class="nav-item" data-view="bugs" onclick="irPara('bugs')"><span>Bugs</span><span class="badge" id="badge-bugs"></span></div>
       <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
       <div class="nav-item" data-view="sprint" onclick="irPara('sprint')"><span>Sprint</span><span class="badge" id="badge-sprint"></span></div>
+      <div class="nav-item" data-view="roadmap" onclick="irPara('roadmap')"><span>Roadmap</span></div>
       <div class="nav-item" data-view="diario" onclick="irPara('diario')"><span>Diário</span></div>
       <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
       <div class="nav-item" data-view="alertas" onclick="irPara('alertas')"><span>Alertas</span><span class="badge" id="badge-alertas"></span></div>
@@ -584,6 +616,52 @@ button{font-family:'Outfit',sans-serif;}
         <div id="lista-bugs"><div class="lista-empty">Carregando...</div></div>
       </div>
       <div id="kanban-bugs" style="display:none;margin-top:16px;"></div>
+    </div>
+
+    <!-- ── VIEW: ROADMAP ── -->
+    <div id="view-roadmap" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Roadmap</div>
+          <div class="page-sub">Timeline relativa — arraste para priorizar</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-ghost" onclick="carregarRoadmap()" style="font-size:12px;">↺ Atualizar</button>
+        </div>
+      </div>
+      <div class="roadmap-board" id="roadmap-board">
+        <div class="roadmap-col" id="rm-col-este_mes"
+          ondragover="rdDragOver(event)" ondrop="rdDrop(event,'este_mes')" ondragleave="rdDragLeave(event)">
+          <div class="roadmap-col-header">
+            <span class="roadmap-col-dot" style="background:rgba(80,220,160,.8);"></span>
+            <span class="roadmap-col-label">ESTE MÊS</span>
+            <span class="roadmap-col-count" id="rm-count-este_mes">0</span>
+          </div>
+          <div class="roadmap-col-body" id="rm-body-este_mes"><div class="roadmap-col-empty">Solte aqui</div></div>
+        </div>
+        <div class="roadmap-col" id="rm-col-proximo_mes"
+          ondragover="rdDragOver(event)" ondrop="rdDrop(event,'proximo_mes')" ondragleave="rdDragLeave(event)">
+          <div class="roadmap-col-header">
+            <span class="roadmap-col-dot" style="background:rgba(80,150,255,.8);"></span>
+            <span class="roadmap-col-label">PRÓXIMO MÊS</span>
+            <span class="roadmap-col-count" id="rm-count-proximo_mes">0</span>
+          </div>
+          <div class="roadmap-col-body" id="rm-body-proximo_mes"><div class="roadmap-col-empty">Solte aqui</div></div>
+        </div>
+        <div class="roadmap-col" id="rm-col-futuro"
+          ondragover="rdDragOver(event)" ondrop="rdDrop(event,'futuro')" ondragleave="rdDragLeave(event)">
+          <div class="roadmap-col-header">
+            <span class="roadmap-col-dot" style="background:rgba(255,160,50,.8);"></span>
+            <span class="roadmap-col-label">FUTURO</span>
+            <span class="roadmap-col-count" id="rm-count-futuro">0</span>
+          </div>
+          <div class="roadmap-col-body" id="rm-body-futuro"><div class="roadmap-col-empty">Solte aqui</div></div>
+        </div>
+      </div>
+      <div class="roadmap-backlog">
+        <div class="roadmap-backlog-header">SEM PRAZO — arraste para o roadmap</div>
+        <div id="rm-backlog-chips" class="roadmap-backlog-chips"></div>
+      </div>
     </div>
 
     <!-- ── VIEW: FEATURES ── -->
@@ -1111,7 +1189,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110456';
+const _DMS_VER = 'dmstack-04110459';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1839,6 +1917,99 @@ function toggleSidebar() {
 }
 
 // ── Navegação ─────────────────────────────────────
+// ── ROADMAP ────────────────────────────────────────
+let _rdDragging = null;
+const _rdSysCols = { EDR:'#3',RPM:'#2',NAREGUA:'#5',DMSTACK:'#4',LOADPRO:'#1',GERAL:'#0' };
+
+function carregarRoadmap() {
+  const ativos = _features.filter(f => f.status !== 'concluido' && f.status !== 'descartado');
+  const cols = { este_mes:[], proximo_mes:[], futuro:[], backlog:[] };
+  ativos.forEach(f => {
+    const slot = (f.roadmap && cols[f.roadmap]) ? f.roadmap : 'backlog';
+    cols[slot].push(f);
+  });
+  ['este_mes','proximo_mes','futuro'].forEach(col => {
+    document.getElementById('rm-count-'+col).textContent = cols[col].length;
+    const body = document.getElementById('rm-body-'+col);
+    if (!cols[col].length) {
+      body.innerHTML = '<div class="roadmap-col-empty">Solte aqui</div>';
+    } else {
+      body.innerHTML = cols[col].map(f => _rdCardHtml(f, col)).join('');
+    }
+  });
+  const bl = document.getElementById('rm-backlog-chips');
+  if (!cols.backlog.length) {
+    bl.innerHTML = '<span style="font-size:11px;color:var(--t4);">Todas as demandas têm prazo definido ✓</span>';
+  } else {
+    bl.innerHTML = cols.backlog.map(f => {
+      const sys = (f.sistema||'GERAL').toUpperCase();
+      return `<div class="roadmap-chip" draggable="true"
+        data-rdid="${f.id}"
+        ondragstart="rdDragStart(event,'${f.id}',this)"
+        ondragend="rdDragEnd(event,this)">
+        <span class="roadmap-sys ${sys}">${sys}</span>
+        <span>${_esc(f.titulo)}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function _rdCardHtml(f, col) {
+  const sys = (f.sistema||'GERAL').toUpperCase();
+  const priCor = f.prioridade === 'alta' ? 'rgba(255,100,80,.8)' : f.prioridade === 'media' ? 'rgba(255,180,50,.8)' : 'rgba(100,100,100,.5)';
+  const borderCols = { este_mes:'rgba(80,220,160,.5)', proximo_mes:'rgba(80,150,255,.5)', futuro:'rgba(255,160,50,.5)' };
+  return `<div class="roadmap-card" draggable="true"
+    id="rm-card-${f.id}"
+    style="border-left-color:${borderCols[col]||'transparent'};"
+    data-rdid="${f.id}"
+    ondragstart="rdDragStart(event,'${f.id}',this)"
+    ondragend="rdDragEnd(event,this)">
+    <div class="roadmap-card-top">
+      <span class="roadmap-sys ${sys}">${sys}</span>
+      <span class="roadmap-pri" style="background:${priCor};" title="${f.prioridade||'normal'}"></span>
+    </div>
+    <div class="roadmap-card-title">${_esc(f.titulo)}</div>
+    <div class="roadmap-card-meta">${f.prioridade||'normal'}</div>
+  </div>`;
+}
+
+function _esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function rdDragStart(e, id, el) {
+  _rdDragging = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+  setTimeout(() => el.classList.add('dragging'), 0);
+}
+
+function rdDragEnd(e, el) {
+  el.classList.remove('dragging');
+  document.querySelectorAll('.roadmap-col.drag-over').forEach(c => c.classList.remove('drag-over'));
+  _rdDragging = null;
+}
+
+function rdDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function rdDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+async function rdDrop(e, coluna) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const id = e.dataTransfer.getData('text/plain') || _rdDragging;
+  if (!id) return;
+  await dmsPatch('demandas', `?id=eq.${id}`, { roadmap: coluna });
+  const feat = _features.find(f => String(f.id) === String(id));
+  if (feat) feat.roadmap = coluna;
+  carregarRoadmap();
+}
+// ── /ROADMAP ───────────────────────────────────────
+
 function irPara(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1854,6 +2025,7 @@ function irPara(view) {
   if (view === 'deploys') carregarDeploys();
   if (view === 'sprint') carregarSprint();
   if (view === 'diario') carregarDiario();
+  if (view === 'roadmap') carregarRoadmap();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
@@ -3398,6 +3570,7 @@ const _CMDS = [
   { id:'agentes',   icon:'🧠', label:'/agentes',   desc:'Painel de agentes IA',               acao:() => irPara('agentes') },
   { id:'alertas',   icon:'🔔', label:'/alertas',   desc:'Feed de alertas',                    acao:() => irPara('alertas') },
   { id:'triagem',   icon:'✨', label:'/triagem',   desc:'Importar análise com IA',            acao:() => { fecharCmd(); abrirTriagem(); } },
+  { id:'roadmap',   icon:'🗺️', label:'/roadmap',   desc:'Roadmap — timeline por sistema',      acao:() => irPara('roadmap') },
   { id:'diario',    icon:'📓', label:'/diario',    desc:'Diário de sessões',                   acao:() => irPara('diario') },
   { id:'anotar',    icon:'📝', label:'/anotar',    desc:'Registrar contexto da sessão atual',  acao:() => { fecharCmd(); abrirModalDiario(); } },
 ];
