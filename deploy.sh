@@ -28,3 +28,15 @@ DMS_KW=$(echo "$MSG" | tr '[:upper:]' '[:lower:]' | \
 if [ -n "$DMS_KW" ]; then
   bash "$HOME/dms-resolve.sh" "$DMS_KW" "DMSTACK"
 fi
+
+# Registrar deploy no DM Stack
+source "$HOME/.dms-config" 2>/dev/null
+if [ -n "$DMS_SERVICE_KEY" ]; then
+  DEPLOY_JSON="{\"sistema\":\"DMSTACK\",\"versao\":\"$VER\",\"mensagem\":$(echo "$MSG" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))')}"
+  curl -s -X POST "$DMS_URL/rest/v1/deploys" \
+    -H "apikey: $DMS_SERVICE_KEY" \
+    -H "Authorization: Bearer $DMS_SERVICE_KEY" \
+    -H "Content-Type: application/json" \
+    -H "Prefer: return=minimal" \
+    -d "$DEPLOY_JSON" > /dev/null && echo "deploy registrado no DM Stack"
+fi
