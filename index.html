@@ -85,6 +85,8 @@ button{font-family:'Outfit',sans-serif;}
 .page-actions{display:flex;gap:8px;}
 .btn-primary{padding:9px 18px;background:#fff;color:#000;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;letter-spacing:.3px;}
 .btn-primary:hover{opacity:.85;}
+.deploy-filtro{padding:5px 12px;background:var(--card);color:var(--t3);border:1px solid var(--borda);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.deploy-filtro.active{background:#fff;color:#000;border-color:#fff;}
 .btn-ghost{padding:9px 18px;background:none;border:1px solid var(--borda2);color:var(--t3);border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s;}
 .btn-ghost:hover{border-color:rgba(255,255,255,0.25);color:var(--t2);}
 
@@ -877,6 +879,14 @@ button{font-family:'Outfit',sans-serif;}
           <button class="btn-primary" onclick="abrirModalDeploy()">+ Registrar deploy</button>
         </div>
       </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="deploy-filtro active" data-sis="" onclick="setDeployFiltro(this,'')">Todos</button>
+        <button class="deploy-filtro" data-sis="EDR" onclick="setDeployFiltro(this,'EDR')">EDR</button>
+        <button class="deploy-filtro" data-sis="RPM" onclick="setDeployFiltro(this,'RPM')">RPM</button>
+        <button class="deploy-filtro" data-sis="NAREGUA" onclick="setDeployFiltro(this,'NAREGUA')">NaRegua</button>
+        <button class="deploy-filtro" data-sis="DMSTACK" onclick="setDeployFiltro(this,'DMSTACK')">DM Stack</button>
+        <button class="deploy-filtro" data-sis="LOADPRO" onclick="setDeployFiltro(this,'LOADPRO')">LoadPro</button>
+      </div>
       <div class="lista-header" style="grid-template-columns:100px 80px 1fr 100px 80px;padding:0 32px;">
         <div>Versão</div><div>Sistema</div><div>Mensagem</div><div>Status</div><div>Aging</div>
       </div>
@@ -1226,7 +1236,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110521';
+const _DMS_VER = 'dmstack-04110707';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1239,6 +1249,7 @@ let _token = null;
 let _bugs = [];
 let _features = [];
 let _deploys = [];
+let _deployFiltro = '';
 let _editId = null;
 let _editTipo = null;
 let _saudeData = {};
@@ -2239,12 +2250,19 @@ async function carregarDeploys() {
   renderDeploys();
 }
 
+function setDeployFiltro(btn, sis) {
+  _deployFiltro = sis;
+  document.querySelectorAll('.deploy-filtro').forEach(b => b.classList.toggle('active', b === btn));
+  renderDeploys();
+}
+
 function renderDeploys() {
   const lista = document.getElementById('lista-deploys');
   if (!lista) return;
-  if (!_deploys.length) { lista.innerHTML = '<div class="lista-empty">Nenhum deploy registrado ainda.</div>'; return; }
+  const filtrados = _deployFiltro ? _deploys.filter(d => d.sistema === _deployFiltro) : _deploys;
+  if (!filtrados.length) { lista.innerHTML = '<div class="lista-empty">Nenhum deploy registrado ainda.</div>'; return; }
 
-  lista.innerHTML = _deploys.map(d => `
+  lista.innerHTML = filtrados.map(d => `
     <div class="lista-item" style="grid-template-columns:100px 80px 1fr 100px 80px;">
       <div style="font-size:12px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums;">${esc(d.versao)}</div>
       <div class="item-col">${esc(d.sistema)}</div>
