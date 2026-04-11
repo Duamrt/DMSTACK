@@ -296,6 +296,57 @@ button{font-family:'Outfit',sans-serif;}
 .proxima-empty{font-size:12px;color:var(--t4);padding:14px 0;}
 @media(max-width:700px){.proximas-grid{grid-template-columns:1fr;}}
 
+/* ─── SPRINT ─────────────────────────────────────── */
+.sprint-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;}
+.sprint-meta{flex:1;}
+.sprint-titulo-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase;margin-bottom:6px;}
+.sprint-titulo{font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;}
+.sprint-datas{font-size:12px;color:var(--t4);margin-bottom:14px;}
+.sprint-progress-wrap{margin-bottom:6px;}
+.sprint-progress-bar{height:4px;background:var(--borda);border-radius:2px;overflow:hidden;margin-bottom:6px;}
+.sprint-progress-fill{height:100%;background:rgba(255,255,255,0.7);border-radius:2px;transition:width .4s;}
+.sprint-progress-txt{font-size:11px;color:var(--t3);}
+.sprint-actions{display:flex;gap:8px;flex-shrink:0;}
+.sprint-itens-section{margin-bottom:20px;}
+.sprint-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase;margin-bottom:8px;}
+.sprint-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--borda);border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:6px;transition:border-color .15s;}
+.sprint-item:hover{border-color:var(--borda2);}
+.sprint-item.done{opacity:0.45;}
+.sprint-item.done .sprint-item-titulo{text-decoration:line-through;color:var(--t4);}
+.sprint-item-check{width:16px;height:16px;flex-shrink:0;accent-color:#fff;cursor:pointer;}
+.sprint-item-body{flex:1;min-width:0;}
+.sprint-item-titulo{font-size:13px;font-weight:600;line-height:1.3;}
+.sprint-item-meta{font-size:11px;color:var(--t4);margin-top:2px;display:flex;gap:8px;}
+.sprint-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;gap:16px;text-align:center;}
+.sprint-empty-title{font-size:18px;font-weight:700;letter-spacing:-0.5px;}
+.sprint-empty-sub{font-size:13px;color:var(--t4);max-width:320px;line-height:1.6;}
+.sprint-historico{margin-top:36px;}
+.sprint-hist-item{padding:14px 16px;border:1px solid var(--borda);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.sprint-hist-item:hover{border-color:var(--borda2);}
+.sprint-hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.sprint-hist-titulo{font-size:13px;font-weight:600;}
+.sprint-hist-meta{font-size:11px;color:var(--t4);}
+.sprint-hist-retro{font-size:12px;color:var(--t3);line-height:1.5;white-space:pre-wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--borda);display:none;}
+.sprint-hist-item.open .sprint-hist-retro{display:block;}
+.sprint-retro-card{padding:20px;border:1px solid var(--borda2);border-radius:10px;background:rgba(255,255,255,0.03);margin-bottom:20px;}
+.sprint-retro-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase;margin-bottom:12px;}
+.sprint-retro-body{font-size:13px;color:var(--t2);line-height:1.7;white-space:pre-wrap;}
+/* modal sprint */
+.modal-sprint{max-width:580px;}
+.sprint-select-list{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.sprint-select-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:var(--t5);border:1px solid var(--borda);cursor:pointer;transition:border-color .15s;}
+.sprint-select-item:hover{border-color:var(--borda2);}
+.sprint-select-item input[type=checkbox]{width:14px;height:14px;flex-shrink:0;accent-color:#fff;}
+.sprint-select-titulo{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sprint-select-meta{font-size:10px;color:var(--t4);white-space:nowrap;}
+.sprint-dur-btns{display:flex;gap:6px;margin-top:6px;}
+.sprint-dur-btn{padding:6px 14px;border:1px solid var(--borda2);border-radius:6px;background:none;color:var(--t3);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;}
+.sprint-dur-btn:hover,.sprint-dur-btn.sel{background:rgba(255,255,255,0.1);color:var(--t1);border-color:rgba(255,255,255,0.3);}
+.sprint-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--borda);}
+.sprint-tab{padding:8px 16px;font-size:12px;font-weight:600;color:var(--t4);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.sprint-tab:hover{color:var(--t2);}
+.sprint-tab.active{color:var(--t1);border-bottom-color:rgba(255,255,255,0.6);}
+
 /* ─── EDGE FUNCTIONS ─────────────────────────────── */
 .edge-wrap{margin-bottom:28px;}
 .edge-table{width:100%;border-collapse:collapse;}
@@ -424,6 +475,7 @@ button{font-family:'Outfit',sans-serif;}
       <div class="nav-item active" data-view="saude" onclick="irPara('saude')">Saude</div>
       <div class="nav-item" data-view="bugs" onclick="irPara('bugs')"><span>Bugs</span><span class="badge" id="badge-bugs"></span></div>
       <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
+      <div class="nav-item" data-view="sprint" onclick="irPara('sprint')"><span>Sprint</span><span class="badge" id="badge-sprint"></span></div>
       <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
       <div class="nav-item" data-view="alertas" onclick="irPara('alertas')"><span>Alertas</span><span class="badge" id="badge-alertas"></span></div>
       <div class="nav-item" data-view="agentes" onclick="irPara('agentes')">Agentes IA</div>
@@ -688,8 +740,50 @@ button{font-family:'Outfit',sans-serif;}
       </div>
     </div>
 
+    <!-- ── VIEW: SPRINT ── -->
+    <div id="view-sprint" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sprint</div>
+          <div class="page-sub" id="sprint-sub">Modo foco com comprometimento explícito</div>
+        </div>
+        <div class="page-actions" id="sprint-page-actions"></div>
+      </div>
+      <div style="padding:24px 32px;" id="sprint-content">
+        <div class="lista-empty">Carregando...</div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
+
+<!-- ══ MODAL SPRINT ══ -->
+<div class="modal-bg" id="modal-sprint" onclick="if(event.target===this)fecharModal('modal-sprint')">
+  <div class="modal modal-sprint">
+    <div class="modal-title">Novo Sprint</div>
+    <div class="modal-field">
+      <div class="modal-label">Nome do sprint</div>
+      <input class="modal-input" id="msprint-titulo" placeholder="Ex: Sprint #1 · Bugs críticos EDR">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Duração</div>
+      <div class="sprint-dur-btns" id="sprint-dur-btns">
+        <button class="sprint-dur-btn sel" data-d="2" onclick="selecionarDurSprint(2)">2 dias</button>
+        <button class="sprint-dur-btn" data-d="3" onclick="selecionarDurSprint(3)">3 dias</button>
+        <button class="sprint-dur-btn" data-d="4" onclick="selecionarDurSprint(4)">4 dias</button>
+        <button class="sprint-dur-btn" data-d="5" onclick="selecionarDurSprint(5)">5 dias</button>
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Selecionar itens <span id="sprint-sel-count" style="color:var(--t4);font-weight:400;">(0 selecionados)</span></div>
+      <div class="sprint-select-list" id="sprint-select-list"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="criarSprint()" id="msprint-btn">Iniciar sprint</button>
+      <button class="btn-ghost" onclick="fecharModal('modal-sprint')">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ COMMAND PALETTE ══ -->
 <div id="cmd-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:flex-start;justify-content:center;padding-top:120px;" onclick="fecharCmd(event)">
@@ -923,7 +1017,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110434';
+const _DMS_VER = 'dmstack-04110441';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1664,6 +1758,7 @@ function irPara(view) {
   if (view === 'alertas') renderAlertas();
   if (view === 'agentes') carregarAgentes();
   if (view === 'deploys') carregarDeploys();
+  if (view === 'sprint') carregarSprint();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
@@ -1985,6 +2080,280 @@ async function checarRPM() {
   } catch(e) {
     return { status:'off', metricas:'rpmpro.com.br', ultimaAtividade:'Falha na verificação', checado:'—' };
   }
+}
+
+// ── Sprint ─────────────────────────────────────────
+let _sprintAtivo   = null;
+let _sprintTab     = 'todos'; // bugs | demandas | todos
+let _sprintDuracao = 2;
+
+async function carregarSprint() {
+  const el = document.getElementById('sprint-content');
+  if (!el) return;
+
+  // Busca sprint ativo
+  const rows = await dmsGet('sprints', '?status=eq.ativo&order=created_at.desc&limit=1');
+  _sprintAtivo = Array.isArray(rows) && rows[0] ? rows[0] : null;
+
+  // Badge sidebar
+  const badge = document.getElementById('badge-sprint');
+  if (badge) badge.textContent = _sprintAtivo ? '●' : '';
+
+  if (_sprintAtivo) {
+    renderSprintAtivo();
+  } else {
+    renderSprintVazio();
+  }
+}
+
+function renderSprintVazio() {
+  const el = document.getElementById('sprint-content');
+  const actions = document.getElementById('sprint-page-actions');
+  if (actions) actions.innerHTML = '<button class="btn-primary" onclick="abrirModalNovoSprint()">+ Novo Sprint</button>';
+  document.getElementById('sprint-sub').textContent = 'Nenhum sprint ativo';
+
+  dmsGet('sprints', '?status=eq.encerrado&order=created_at.desc&limit=10').then(hist => {
+    const sprints = Array.isArray(hist) ? hist : [];
+    let histHtml = '';
+    if (sprints.length) {
+      histHtml = `<div class="sprint-historico">
+        <div class="section-label" style="margin-bottom:12px;">Sprints anteriores</div>
+        ${sprints.map(s => {
+          const itens = Array.isArray(s.itens) ? s.itens : [];
+          const total = itens.length;
+          const conc  = itens.filter(i => i.concluido).length;
+          const di = s.data_inicio ? new Date(s.data_inicio+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
+          const df = s.data_fim    ? new Date(s.data_fim+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
+          return `<div class="sprint-hist-item" onclick="this.classList.toggle('open')">
+            <div class="sprint-hist-header">
+              <div class="sprint-hist-titulo">${esc(s.titulo)}</div>
+              <div class="sprint-hist-meta">${di}–${df} · ${conc}/${total} concluídos</div>
+            </div>
+            ${s.retrospectiva ? `<div class="sprint-hist-retro">${esc(s.retrospectiva)}</div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+
+    el.innerHTML = `<div class="sprint-empty-state">
+      <div class="sprint-empty-title">Nenhum sprint ativo</div>
+      <div class="sprint-empty-sub">Selecione bugs e demandas do backlog, defina 2–5 dias e foque no que importa.</div>
+      <button class="btn-primary" onclick="abrirModalNovoSprint()">+ Iniciar novo sprint</button>
+    </div>${histHtml}`;
+  });
+}
+
+function renderSprintAtivo() {
+  const s = _sprintAtivo;
+  const itens = Array.isArray(s.itens) ? s.itens : [];
+  const total = itens.length;
+  const conc  = itens.filter(i => i.concluido).length;
+  const pct   = total ? Math.round(conc / total * 100) : 0;
+
+  const hoje  = new Date(); hoje.setHours(0,0,0,0);
+  const fim   = new Date(s.data_fim + 'T12:00:00');
+  const diasR = Math.max(0, Math.ceil((fim - hoje) / 86400000));
+  const di    = new Date(s.data_inicio+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const df    = new Date(s.data_fim+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+
+  const actions = document.getElementById('sprint-page-actions');
+  if (actions) actions.innerHTML = `<button class="btn-ghost" style="color:rgba(255,100,100,0.7);border-color:rgba(255,100,100,0.25);" onclick="encerrarSprint()">Encerrar Sprint</button>`;
+  document.getElementById('sprint-sub').textContent = diasR > 0 ? `${diasR} dia${diasR !== 1?'s':''} restante${diasR!==1?'s':''}` : 'Último dia';
+
+  const tabItens = itens.filter(i => _sprintTab === 'todos' || i.tipo === (_sprintTab === 'bugs' ? 'bug' : 'demanda'));
+
+  const renderItem = (item, idx) => {
+    const obj = item.tipo === 'bug'
+      ? (_bugs || []).find(b => b.id === item.id)
+      : (_features || []).find(f => f.id === item.id);
+    const titulo = obj ? obj.titulo : item.id;
+    const sistema = obj ? obj.sistema : '—';
+    const status  = obj ? obj.status : '—';
+    // auto-sync: bug resolvido / demanda concluida = done
+    const autoConc = obj && (obj.status === 'resolvido' || obj.status === 'concluido' || obj.status === 'descartado');
+    const done = item.concluido || autoConc;
+    return `<div class="sprint-item ${done ? 'done' : ''}">
+      <input type="checkbox" class="sprint-item-check" ${done?'checked':''} onchange="toggleSprintItem('${item.id}','${item.tipo}',this.checked)">
+      <div class="sprint-item-body">
+        <div class="sprint-item-titulo">${esc(titulo)}</div>
+        <div class="sprint-item-meta"><span>${sistema}</span><span>${item.tipo === 'bug' ? 'Bug' : 'Demanda'}</span><span>${status}</span></div>
+      </div>
+    </div>`;
+  };
+
+  const el = document.getElementById('sprint-content');
+  el.innerHTML = `
+    <div class="sprint-header">
+      <div class="sprint-meta">
+        <div class="sprint-titulo-label">Sprint ativo</div>
+        <div class="sprint-titulo">${esc(s.titulo)}</div>
+        <div class="sprint-datas">${di} → ${df}</div>
+        <div class="sprint-progress-wrap">
+          <div class="sprint-progress-bar"><div class="sprint-progress-fill" style="width:${pct}%"></div></div>
+          <div class="sprint-progress-txt">${conc}/${total} concluídos (${pct}%)</div>
+        </div>
+      </div>
+    </div>
+    <div class="sprint-tabs">
+      <div class="sprint-tab ${_sprintTab==='todos'?'active':''}" onclick="setSprintTab('todos')">Todos (${total})</div>
+      <div class="sprint-tab ${_sprintTab==='bugs'?'active':''}" onclick="setSprintTab('bugs')">Bugs (${itens.filter(i=>i.tipo==='bug').length})</div>
+      <div class="sprint-tab ${_sprintTab==='demandas'?'active':''}" onclick="setSprintTab('demandas')">Demandas (${itens.filter(i=>i.tipo==='demanda').length})</div>
+    </div>
+    <div class="sprint-itens-section" id="sprint-itens-list">
+      ${tabItens.length ? tabItens.map(renderItem).join('') : '<div class="lista-empty">Nenhum item nesta categoria.</div>'}
+    </div>`;
+}
+
+function setSprintTab(tab) {
+  _sprintTab = tab;
+  renderSprintAtivo();
+}
+
+async function toggleSprintItem(itemId, tipo, checked) {
+  if (!_sprintAtivo) return;
+  const itens = (_sprintAtivo.itens || []).map(i =>
+    (i.id === itemId && i.tipo === tipo) ? {...i, concluido: checked} : i
+  );
+  await dmsPatch('sprints', `?id=eq.${_sprintAtivo.id}`, { itens });
+  _sprintAtivo.itens = itens;
+  renderSprintAtivo();
+}
+
+async function encerrarSprint() {
+  if (!_sprintAtivo) return;
+  if (!confirm('Encerrar este sprint e gerar retrospectiva?')) return;
+
+  const itens = Array.isArray(_sprintAtivo.itens) ? _sprintAtivo.itens : [];
+  const total = itens.length;
+  const conc  = itens.filter(i => i.concluido).length;
+  const pend  = itens.filter(i => !i.concluido);
+  const concl = itens.filter(i => i.concluido);
+
+  const di = new Date(_sprintAtivo.data_inicio+'T12:00:00');
+  const df = new Date(_sprintAtivo.data_fim+'T12:00:00');
+  const dias = Math.max(1, Math.ceil((df - di) / 86400000) + 1);
+  const vel  = (conc / dias).toFixed(1);
+  const taxa = total ? Math.round(conc / total * 100) : 0;
+
+  const linhaItem = i => {
+    const obj = i.tipo === 'bug'
+      ? (_bugs || []).find(b => b.id === i.id)
+      : (_features || []).find(f => f.id === i.id);
+    return `• [${i.tipo}] ${obj ? obj.titulo : i.id} — ${obj ? obj.sistema : ''}`;
+  };
+
+  const retro = [
+    `Sprint "${_sprintAtivo.titulo}" encerrado`,
+    `─────────────────────────────`,
+    `Taxa de conclusão: ${conc}/${total} (${taxa}%)`,
+    `Velocidade: ${vel} itens/dia`,
+    '',
+    conc > 0 ? `✓ Concluídos (${conc}):\n${concl.map(linhaItem).join('\n')}` : '✓ Nenhum item concluído.',
+    '',
+    pend.length > 0 ? `✗ Pendentes (${pend.length}):\n${pend.map(linhaItem).join('\n')}` : '✗ Tudo concluído!',
+    '',
+    `Análise IA: abrindo Insights IA...`
+  ].join('\n');
+
+  await dmsPatch('sprints', `?id=eq.${_sprintAtivo.id}`, { status: 'encerrado', retrospectiva: retro });
+  _sprintAtivo = null;
+
+  // Atualiza badge
+  const badge = document.getElementById('badge-sprint');
+  if (badge) badge.textContent = '';
+
+  // Dispara diagnóstico IA em background
+  callEdge('diagnostico-diario').then(() => {}).catch(() => {});
+
+  // Mostra retro e redireciona pro Insights IA em 3s
+  const el = document.getElementById('sprint-content');
+  const actions = document.getElementById('sprint-page-actions');
+  if (actions) actions.innerHTML = '<button class="btn-primary" onclick="abrirModalNovoSprint()">+ Novo Sprint</button>';
+  document.getElementById('sprint-sub').textContent = 'Sprint encerrado';
+
+  el.innerHTML = `<div class="sprint-retro-card">
+    <div class="sprint-retro-title">Retrospectiva</div>
+    <div class="sprint-retro-body">${esc(retro)}</div>
+  </div>
+  <div style="font-size:12px;color:var(--t4);margin-bottom:20px;">
+    Diagnóstico IA sendo gerado... <a href="#" onclick="irPara('melhorias');return false;" style="color:var(--t2);">Ver Insights IA →</a>
+  </div>`;
+
+  renderSprintVazio();
+}
+
+function abrirModalNovoSprint() {
+  _sprintDuracao = 2;
+  document.querySelectorAll('.sprint-dur-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.d === '2');
+  });
+  document.getElementById('msprint-titulo').value = '';
+
+  // Monta lista de itens disponíveis
+  const listEl = document.getElementById('sprint-select-list');
+  const ativos = b => b.status !== 'resolvido' && b.status !== 'descartado';
+  const bugs    = (_bugs    || []).filter(ativos);
+  const feats   = (_features|| []).filter(f => f.status !== 'concluido' && f.status !== 'descartado');
+
+  const item = (tipo, obj) => {
+    const tag = tipo === 'bug'
+      ? `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:rgba(255,80,80,0.1);color:rgba(255,120,100,0.9);">BUG</span>`
+      : `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:rgba(100,180,255,0.1);color:rgba(130,200,255,0.9);">DEM</span>`;
+    return `<label class="sprint-select-item">
+      <input type="checkbox" value="${obj.id}" data-tipo="${tipo}" onchange="atualizarSelCount()">
+      ${tag}
+      <span class="sprint-select-titulo">${esc(obj.titulo)}</span>
+      <span class="sprint-select-meta">${obj.sistema}</span>
+    </label>`;
+  };
+
+  listEl.innerHTML =
+    bugs.map(b => item('bug', b)).join('') +
+    feats.map(f => item('demanda', f)).join('');
+
+  atualizarSelCount();
+  document.getElementById('modal-sprint').classList.add('open');
+}
+
+function selecionarDurSprint(d) {
+  _sprintDuracao = d;
+  document.querySelectorAll('.sprint-dur-btn').forEach(b => {
+    b.classList.toggle('sel', parseInt(b.dataset.d) === d);
+  });
+}
+
+function atualizarSelCount() {
+  const n = document.querySelectorAll('#sprint-select-list input:checked').length;
+  const el = document.getElementById('sprint-sel-count');
+  if (el) el.textContent = `(${n} selecionado${n !== 1 ? 's' : ''})`;
+}
+
+async function criarSprint() {
+  const titulo = document.getElementById('msprint-titulo').value.trim();
+  if (!titulo) { alert('Digite o nome do sprint.'); return; }
+
+  const checks = document.querySelectorAll('#sprint-select-list input:checked');
+  if (!checks.length) { alert('Selecione pelo menos 1 item.'); return; }
+
+  const itens = Array.from(checks).map(c => ({ tipo: c.dataset.tipo, id: c.value, concluido: false }));
+
+  const hoje    = new Date();
+  const dataIni = hoje.toISOString().split('T')[0];
+  const dataFim = new Date(hoje.getTime() + (_sprintDuracao - 1) * 86400000).toISOString().split('T')[0];
+
+  const btn = document.getElementById('msprint-btn');
+  btn.textContent = 'Criando...'; btn.disabled = true;
+
+  const result = await dmsPost('sprints', { titulo, data_inicio: dataIni, data_fim: dataFim, status: 'ativo', itens });
+  btn.textContent = 'Iniciar sprint'; btn.disabled = false;
+
+  if (!result || result.error) { alert('Erro ao criar sprint.'); return; }
+
+  fecharModal('modal-sprint');
+  _sprintAtivo = Array.isArray(result) ? result[0] : result;
+  const badge = document.getElementById('badge-sprint');
+  if (badge) badge.textContent = '●';
+  renderSprintAtivo();
 }
 
 // ── Edge Function Logs ─────────────────────────────
