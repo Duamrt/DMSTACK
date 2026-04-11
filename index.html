@@ -1189,7 +1189,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110459';
+const _DMS_VER = 'dmstack-04110509';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1891,7 +1891,7 @@ async function confirmarTriagem() {
       });
     }
     if (res && res.code) { erros++; console.warn('Falha ao importar:', res.message, item.titulo); }
-    else ok++;
+    else { ok++; if (item.tipo === 'bug' && (item.prioridade === 'critico' || item.severidade === 'critico')) tgCritico(item.titulo, item.sistema); }
   }
 
   fecharModal('modal-triagem');
@@ -1919,6 +1919,53 @@ function toggleSidebar() {
 // ── Navegação ─────────────────────────────────────
 // ── ROADMAP ────────────────────────────────────────
 let _rdDragging = null;
+
+// ── TELEGRAM NOTIFICAÇÕES ──────────────────────────
+const _TG_TOKEN = '8289297380:AAGPqcQ70PsCB5VND7XEsGO625md43HeqAk';
+const _TG_CHAT  = '1444151060';
+let _tgScoreTimer = null;
+let _tgLastScore  = null;
+
+function tgEnviar(msg) {
+  fetch(`https://api.telegram.org/bot${_TG_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: _TG_CHAT, text: msg, parse_mode: 'HTML' })
+  }).catch(() => {});
+}
+
+function tgCritico(titulo, sistema) {
+  tgEnviar(`🔴 <b>BUG CRÍTICO</b> — ${sistema}\n${titulo}`);
+}
+
+function tgBloqueado(titulo, sistema) {
+  tgEnviar(`🔒 <b>BUG BLOQUEADO</b> — ${sistema}\n${titulo}`);
+}
+
+function tgScoreDegradado(score) {
+  if (_tgScoreTimer) return;
+  _tgScoreTimer = setTimeout(() => {
+    const criticos = _bugs.filter(b => b.status !== 'resolvido' && b.status !== 'descartado' && b.severidade === 'critico').length;
+    const label = score >= 40 ? 'REGULAR' : 'CRÍTICO';
+    tgEnviar(`⚠️ <b>CTO Score ${label}: ${score}</b>\n${criticos} crítico${criticos !== 1 ? 's' : ''} aberto${criticos !== 1 ? 's' : ''} · Portfolio`);
+    _tgScoreTimer = null;
+  }, 5 * 60 * 1000);
+}
+
+function tgResumoDiario() {
+  const key = 'dms-tg-daily-' + hoje();
+  if (localStorage.getItem(key)) return;
+  const bloqueadas = [
+    ..._bugs.filter(b => b.status === 'bloqueado'),
+    ..._features.filter(f => f.status === 'bloqueado')
+  ];
+  if (!bloqueadas.length) return;
+  localStorage.setItem(key, '1');
+  const lista = bloqueadas.slice(0, 8).map(i => `• ${i.sistema} · ${i.titulo}`).join('\n');
+  const extra = bloqueadas.length > 8 ? ` (+${bloqueadas.length - 8} mais)` : '';
+  tgEnviar(`📋 <b>Resumo — ${bloqueadas.length} item${bloqueadas.length !== 1 ? 's' : ''} bloqueado${bloqueadas.length !== 1 ? 's' : ''}${extra}</b>\n${lista}`);
+}
+// ── /TELEGRAM ──────────────────────────────────────
 const _rdSysCols = { EDR:'#3',RPM:'#2',NAREGUA:'#5',DMSTACK:'#4',LOADPRO:'#1',GERAL:'#0' };
 
 function carregarRoadmap() {
@@ -2991,8 +3038,10 @@ async function salvarBug() {
 
   if (_editId) {
     await dmsPatch('bugs', `?id=eq.${_editId}`, payload);
+    if (payload.status === 'bloqueado') tgBloqueado(titulo, payload.sistema);
   } else {
     await dmsPost('bugs', payload);
+    if (payload.severidade === 'critico') tgCritico(titulo, payload.sistema);
   }
 
   fecharModal('modal-bug');
@@ -3332,6 +3381,7 @@ async function iniciarApp() {
   atualizarBadgeAlertas();
   verificarConexoes();
   carregarUltimaSessao();
+  tgResumoDiario();
 
   // Refresh a cada 5 min
   setInterval(async () => {
@@ -3385,6 +3435,8 @@ async function renderCTOScore() {
   if (!el) return;
 
   const s = calcCTOScore();
+  if (s.score < 60 && (_tgLastScore === null || _tgLastScore >= 60)) tgScoreDegradado(s.score);
+  _tgLastScore = s.score;
   const semana = getWeekMonday();
   const cls = s.score >= 80 ? 'excelente' : s.score >= 60 ? 'bom' : s.score >= 40 ? 'regular' : 'critico';
   const label = cls === 'excelente' ? 'EXCELENTE' : cls === 'bom' ? 'BOM' : cls === 'regular' ? 'REGULAR' : 'CRÍTICO';
