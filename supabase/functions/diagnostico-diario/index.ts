@@ -117,22 +117,69 @@ async function coletarDadosProdutos() {
   }
 }
 
+// ═══ BUSCAR HISTÓRICO + CALCULAR SCORE ═══
+async function buscarHistoricoEScore(dadosHoje: any) {
+  // Últimos 7 diagnósticos (excluindo hoje)
+  const historico = await sbGet(
+    DMS_URL, DMS_KEY, "dmstack_diagnosticos",
+    `?produto=eq.dmstack&data=neq.${hoje()}&order=data.desc&limit=7&select=data,resumo,problemas,acertos,recomendacoes`
+  )
+
+  // Score de execução semanal (0–100)
+  // Componentes:
+  // 1. Saúde de bugs (40pts): menos críticos abertos = melhor
+  // 2. Cadência de deploy (30pts): cada deploy nos últimos 7 dias vale 10pts
+  // 3. Entregas de demanda (30pts): cada demanda concluída na semana vale 15pts
+  const criticos = dadosHoje.bugs.criticos
+  const deploys7d = dadosHoje.deploys.ultimos_7_dias
+
+  // Buscar demandas concluídas nos últimos 7 dias
+  const set7 = new Date(Date.now() - 7 * 864e5).toISOString()
+  const demConcluidas = await sbGet(
+    DMS_URL, DMS_KEY, "demandas",
+    `?status=eq.concluido&updated_at=gte.${set7}&select=id`
+  )
+  const demConcluidasN = (demConcluidas || []).length
+
+  const ptsBugs   = Math.max(0, 40 - criticos * 8)
+  const ptsDeploy = Math.min(30, deploys7d * 10)
+  const ptsDem    = Math.min(30, demConcluidasN * 15)
+  const score     = Math.round(ptsBugs + ptsDeploy + ptsDem)
+
+  // Resumo compacto do histórico para o prompt
+  const historicoResumido = (historico || []).map((d: any) => ({
+    data: d.data,
+    resumo: d.resumo || "",
+    problemas: (d.problemas || []).slice(0, 3),
+    acertos: (d.acertos || []).slice(0, 2),
+    recomendacoes: (d.recomendacoes || []).slice(0, 3),
+  }))
+
+  return { historico: historicoResumido, score, componentes: { ptsBugs, ptsDeploy, ptsDem } }
+}
+
 // ═══ CHAMAR CLAUDE API ═══
-async function analisarComClaude(dados: any) {
+async function analisarComClaude(dados: any, historico: any[], score: number) {
+  const historicoTxt = historico.length
+    ? `\nHISTÓRICO DOS ÚLTIMOS ${historico.length} DIAGNÓSTICOS:\n${JSON.stringify(historico, null, 2)}\n\nSCORE DE EXECUÇÃO SEMANAL ATUAL: ${score}/100\n`
+    : ""
+
   const prompt = `Voce e o agente de produto do Duam — ele tem 2 SaaS no ar: EDR System (gestao de obras) e RPM Pro (gestao de oficinas mecanicas).
 
 O DM.Stack e o painel de gestao dos PRODUTOS, nao dos clientes. Quando um cliente reporta bug, o bug pertence ao produto, nao ao cliente.
-
+${historicoTxt}
 DADOS DO PRODUTO HOJE (${dados.data}):
 ${JSON.stringify(dados, null, 2)}
 
 GERE UM JSON com esta estrutura exata (sem markdown, so JSON puro):
 {
-  "briefing": "2-4 frases como socio falando com o Duam de manha sobre o estado dos produtos. Comece pelo mais urgente. Ex: 'Duam, tem 2 bugs criticos no EDR System esperando voce ha 3 dias — da uma olhada antes de qualquer feature nova. RPM Pro esta ok, 1 demanda em andamento.' Use numeros reais.",
-  "resumo": "1 frase do estado geral dos produtos",
-  "problemas": ["max 5 — foque em bugs criticos parados, demandas travadas, produtos sem deploy recente"],
-  "acertos": ["max 3 coisas boas — bugs resolvidos, features entregues, tenants ativos"],
-  "recomendacoes": ["max 5 acoes concretas para hoje — 'Resolver bug critico X no EDR', 'Revisar demanda Y no RPM', etc"]
+  "briefing": "2-4 frases como socio falando com o Duam de manha. Se tiver historico, mencione tendencia: melhorou, piorou ou estagnado vs dias anteriores. Ex: 'Duam, score de execucao caiu de 60 para 45 — 3 bugs criticos parados ha mais de 5 dias sem deploy. Ontem o RPM estava ok mas hoje apareceu mais um bug bloqueado.' Use numeros reais.",
+  "resumo": "1 frase do estado geral",
+  "problemas": ["max 5 — priorize o que nao mudou entre os diagnosticos (bugs parados, demandas sem progresso)"],
+  "acertos": ["max 3 — mencione se algo que estava como problema anterior foi resolvido"],
+  "recomendacoes": ["max 5 acoes concretas para hoje baseadas no historico — evite repetir recomendacoes identicas de dias anteriores se nao foram seguidas"],
+  "score_execucao": ${score},
+  "score_label": "${score >= 80 ? "Excelente" : score >= 60 ? "Bom" : score >= 40 ? "Regular" : "Critico"}"
 }
 
 REGRAS:
@@ -140,6 +187,7 @@ REGRAS:
 - Bug critico parado ha mais de 2 dias e urgente.
 - Se nao tem deploy ha mais de 7 dias num sistema que tem bugs abertos, e sinal de atraso.
 - Demanda aguardando_duam = precisa de decisao do Duam.
+- Se o mesmo problema aparece em multiplos diagnosticos historicos sem resolucao, ele e critico.
 - Portugues brasileiro sem acento (pra evitar encoding)`
 
   const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -151,7 +199,7 @@ REGRAS:
     },
     body: JSON.stringify({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
+      max_tokens: 1200,
       messages: [{ role: "user", content: prompt }],
     }),
   })
@@ -163,7 +211,7 @@ REGRAS:
     const clean = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
     return JSON.parse(clean)
   } catch {
-    return { resumo: text, problemas: [], acertos: [], recomendacoes: [] }
+    return { resumo: text, problemas: [], acertos: [], recomendacoes: [], score_execucao: score, score_label: "Regular" }
   }
 }
 
@@ -189,7 +237,7 @@ async function salvarDiagnostico(analise: any, dadosBrutos: any) {
       problemas: analise.problemas || [],
       acertos: analise.acertos || [],
       fluxos_quebrados: [],
-      modulos_uso: {},
+      modulos_uso: { score_execucao: analise.score_execucao ?? null, score_label: analise.score_label ?? null },
       recomendacoes: analise.recomendacoes || [],
       briefing: analise.briefing || "",
       raw_analysis: JSON.stringify({ analise, dados: dadosBrutos }),
@@ -211,7 +259,8 @@ serve(async (req: Request) => {
 
   try {
     const dados = await coletarDadosProdutos()
-    const analise = await analisarComClaude(dados)
+    const { historico, score } = await buscarHistoricoEScore(dados)
+    const analise = await analisarComClaude(dados, historico, score)
     await salvarDiagnostico(analise, dados)
 
     return new Response(JSON.stringify({ ok: true, data: hoje() }), {

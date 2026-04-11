@@ -259,6 +259,21 @@ button{font-family:'Outfit',sans-serif;}
 .proxima-empty{font-size:12px;color:var(--t4);padding:14px 0;}
 @media(max-width:700px){.proximas-grid{grid-template-columns:1fr;}}
 
+/* ─── SCORE EXECUÇÃO ────────────────────────────── */
+.score-wrap{display:flex;align-items:center;gap:20px;padding:20px 24px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);margin-bottom:24px;}
+.score-num{font-size:48px;font-weight:800;line-height:1;color:var(--t1);}
+.score-num.critico{color:rgba(255,100,80,0.9);}
+.score-num.regular{color:rgba(255,200,80,0.9);}
+.score-num.bom{color:rgba(80,200,140,0.9);}
+.score-num.excelente{color:rgba(80,220,160,0.9);}
+.score-info{flex:1;}
+.score-label{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--t4);margin-bottom:4px;}
+.score-desc{font-size:12px;color:var(--t3);}
+.score-historico{display:flex;align-items:flex-end;gap:4px;height:40px;}
+.score-bar{width:14px;border-radius:3px 3px 0 0;background:rgba(255,255,255,0.12);transition:background .2s;position:relative;cursor:default;}
+.score-bar:hover{background:rgba(255,255,255,0.25);}
+.score-bar-label{font-size:9px;color:var(--t4);text-align:center;margin-top:4px;}
+
 /* ─── BRIEFING ────────────────────────────────── */
 .briefing-card{padding:20px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);line-height:1.7;font-size:14px;color:var(--t2);margin-bottom:24px;}
 .briefing-card p{margin-bottom:10px;}
@@ -818,7 +833,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110338';
+const _DMS_VER = 'dmstack-04110341';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1688,14 +1703,67 @@ async function carregarMelhorias() {
   if (!el) return;
   el.innerHTML = '<div class="briefing-empty">Carregando diagnósticos...</div>';
 
-  const diags = await dmsGet('dmstack_diagnosticos', '?produto=eq.dmstack&order=created_at.desc&limit=5');
+  const diags = await dmsGet('dmstack_diagnosticos', '?produto=eq.dmstack&order=created_at.desc&limit=7');
   if (!Array.isArray(diags) || !diags.length) {
     el.innerHTML = '<div class="briefing-empty">Nenhum diagnóstico ainda.<br><br><button class="btn-primary" onclick="gerarBriefingMelhorias()">Gerar agora</button></div>';
     return;
   }
 
+  // Score do diagnóstico mais recente
+  const ultimo = diags[0];
+  let scoreAtual = null, scoreLabel = null;
+  try {
+    const mod = ultimo.modulos_uso;
+    if (mod && mod.score_execucao != null) { scoreAtual = mod.score_execucao; scoreLabel = mod.score_label; }
+    else { const raw = typeof ultimo.raw_analysis === 'string' ? JSON.parse(ultimo.raw_analysis) : ultimo.raw_analysis; scoreAtual = raw?.analise?.score_execucao ?? null; scoreLabel = raw?.analise?.score_label ?? null; }
+  } catch(e){}
+
+  // Histórico de scores dos últimos 7 (mais antigo → mais recente)
+  const scores7 = [...diags].reverse().map(d => {
+    try {
+      const mod = d.modulos_uso;
+      if (mod && mod.score_execucao != null) return { score: mod.score_execucao, data: d.data || d.created_at?.split('T')[0] };
+      const raw = typeof d.raw_analysis === 'string' ? JSON.parse(d.raw_analysis) : d.raw_analysis;
+      return { score: raw?.analise?.score_execucao ?? null, data: d.data || d.created_at?.split('T')[0] };
+    } catch(e){ return { score: null, data: d.data || '' }; }
+  }).filter(s => s.score != null);
+
+  // Tendência (compara último com penúltimo)
+  let tendencia = '';
+  if (scores7.length >= 2) {
+    const diff = scores7[scores7.length-1].score - scores7[scores7.length-2].score;
+    tendencia = diff > 0 ? `↑ +${diff} vs ontem` : diff < 0 ? `↓ ${diff} vs ontem` : '→ igual a ontem';
+  }
+
+  const cls = scoreAtual >= 80 ? 'excelente' : scoreAtual >= 60 ? 'bom' : scoreAtual >= 40 ? 'regular' : 'critico';
+
+  let scoreHtml = '';
+  if (scoreAtual != null) {
+    const barsHtml = scores7.map(s => {
+      const h = Math.round((s.score / 100) * 36);
+      const c = s.score >= 80 ? 'rgba(80,220,160,0.5)' : s.score >= 60 ? 'rgba(80,200,140,0.35)' : s.score >= 40 ? 'rgba(255,200,80,0.4)' : 'rgba(255,100,80,0.45)';
+      const dia = s.data ? new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <div class="score-bar" style="height:${h}px;background:${c};" title="${s.score}/100 — ${dia}"></div>
+        <div class="score-bar-label">${dia}</div>
+      </div>`;
+    }).join('');
+
+    scoreHtml = `<div class="score-wrap">
+      <div>
+        <div class="score-num ${cls}">${scoreAtual}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px;">/100</div>
+      </div>
+      <div class="score-info">
+        <div class="score-label">SCORE DE EXECUÇÃO SEMANAL · ${scoreLabel || cls.toUpperCase()}</div>
+        <div class="score-desc">${tendencia || 'Baseado em bugs críticos, deploys e demandas concluídas'}</div>
+      </div>
+      ${scores7.length > 1 ? `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;"><div style="font-size:9px;color:var(--t4);letter-spacing:1px;margin-bottom:6px;">7 DIAS</div><div class="score-historico">${barsHtml}</div></div>` : ''}
+    </div>`;
+  }
+
   _insightRecs = [];
-  el.innerHTML = diags.map(d => {
+  const diagsHtml = diags.map(d => {
     const date = new Date(d.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
     let txt = d.briefing || d.resumo || '';
     if (!txt) { try { const raw = typeof d.raw_analysis === 'string' ? JSON.parse(d.raw_analysis) : d.raw_analysis; txt = raw?.analise?.briefing || ''; } catch(e){} }
@@ -1715,6 +1783,8 @@ async function carregarMelhorias() {
       ${recs.length ? `<p style="margin-top:12px;margin-bottom:6px;"><strong>Recomendações:</strong></p>${recsHtml}` : ''}
     </div>`;
   }).join('');
+
+  el.innerHTML = scoreHtml + diagsHtml;
 }
 
 async function gerarBriefingMelhorias() {
