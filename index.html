@@ -434,6 +434,23 @@ button{font-family:'Outfit',sans-serif;}
 .btn-danger{padding:9px 18px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s;}
 .btn-danger:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);}
 
+/* ─── CTO SCORE ─────────────────────────────────── */
+.cto-score-card{border:1px solid var(--borda2);border-radius:10px;padding:20px 24px;background:var(--t5);margin-bottom:0;}
+.cto-score-main{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.cto-score-info{flex:1;min-width:160px;}
+.cto-score-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--t4);margin-bottom:4px;}
+.cto-score-trend{font-size:12px;color:var(--t3);margin-bottom:14px;}
+.cto-factors{display:flex;gap:8px;flex-wrap:wrap;}
+.cto-factor{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:7px;border:1px solid var(--borda);background:rgba(255,255,255,0.02);min-width:68px;}
+.cto-factor.neg{border-color:rgba(255,100,80,0.2);background:rgba(255,100,80,0.04);}
+.cto-factor.pos{border-color:rgba(80,220,160,0.2);background:rgba(80,220,160,0.04);}
+.cto-factor-val{font-size:22px;font-weight:800;line-height:1;color:var(--t1);}
+.cto-factor-lbl{font-size:9px;font-weight:600;letter-spacing:.6px;color:var(--t4);margin:3px 0 2px;text-align:center;white-space:nowrap;}
+.cto-factor-pts{font-size:10px;font-weight:700;color:var(--t3);}
+.cto-factor.neg .cto-factor-pts{color:rgba(255,130,110,0.85);}
+.cto-factor.pos .cto-factor-pts{color:rgba(80,210,150,0.85);}
+.cto-spark{display:flex;flex-direction:column;align-items:flex-end;}
+
 /* ─── DIÁRIO DE SESSÃO ───────────────────────────── */
 .sessao-banner{padding:10px 32px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .sessao-banner-label{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--t4);white-space:nowrap;}
@@ -626,6 +643,12 @@ button{font-family:'Outfit',sans-serif;}
       </div>
 
       <div style="padding:24px 32px;">
+
+        <!-- CTO Score -->
+        <div style="margin-bottom:28px;">
+          <div class="section-label" style="margin-bottom:12px;">CTO Score semanal</div>
+          <div id="cto-score-section"><div style="font-size:12px;color:var(--t4);">Calculando...</div></div>
+        </div>
 
         <!-- Receita -->
         <div class="receita-section">
@@ -1088,7 +1111,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110446';
+const _DMS_VER = 'dmstack-04110451';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -2524,6 +2547,7 @@ async function carregarSaude() {
   _saudeData.EDR = edr;
   _saudeData.RPM = rpm;
   _saudeData.NAREGUA = { status:'ok', metricas:'usenaregua.com.br', ultimaAtividade:'Sem Supabase conectado', checado:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) };
+  renderCTOScore();
   renderSaudeGrid();
   renderSaudeCriticos();
   renderProximas3Acoes();
@@ -3132,6 +3156,7 @@ async function iniciarApp() {
     carregarDeploys()
   ]);
   carregarDadosDash();
+  renderCTOScore();
   atualizarBadgeAlertas();
   verificarConexoes();
   carregarUltimaSessao();
@@ -3143,6 +3168,124 @@ async function iniciarApp() {
     carregarDadosDash();
     atualizarBadgeAlertas();
   }, 5 * 60 * 1000);
+}
+
+// ── CTO Score Semanal ─────────────────────────────────────
+function getWeekMonday() {
+  const d = new Date();
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return d.toISOString().split('T')[0];
+}
+
+function calcCTOScore() {
+  const agora = Date.now();
+  const semana = 7 * 24 * 3600 * 1000;
+
+  const criticos = _bugs.filter(b =>
+    b.status !== 'resolvido' && b.status !== 'descartado' && b.severidade === 'critico'
+  ).length;
+
+  const medios = _bugs.filter(b =>
+    b.status !== 'resolvido' && b.status !== 'descartado' && b.severidade !== 'critico'
+  ).length;
+
+  const deploys7d = _deploys.filter(d =>
+    agora - new Date(d.created_at).getTime() < semana
+  ).length;
+
+  const concluidos7d = [
+    ..._bugs.filter(b => b.status === 'resolvido' && agora - new Date(b.updated_at || b.created_at).getTime() < semana),
+    ..._features.filter(f => f.status === 'concluido' && agora - new Date(f.updated_at || f.created_at).getTime() < semana)
+  ].length;
+
+  const penCriticos = Math.min(criticos * 15, 45);
+  const penMedios   = Math.min(medios   *  2, 20);
+  const bonDeploys  = Math.min(deploys7d * 5, 15);
+  const bonConc     = Math.min(concluidos7d * 4, 20);
+
+  const score = Math.max(0, Math.min(100, 100 - penCriticos - penMedios + bonDeploys + bonConc));
+  return { score, criticos, medios, deploys7d, concluidos7d, penCriticos, penMedios, bonDeploys, bonConc };
+}
+
+async function renderCTOScore() {
+  const el = document.getElementById('cto-score-section');
+  if (!el) return;
+
+  const s = calcCTOScore();
+  const semana = getWeekMonday();
+  const cls = s.score >= 80 ? 'excelente' : s.score >= 60 ? 'bom' : s.score >= 40 ? 'regular' : 'critico';
+  const label = cls === 'excelente' ? 'EXCELENTE' : cls === 'bom' ? 'BOM' : cls === 'regular' ? 'REGULAR' : 'CRÍTICO';
+
+  // Salva semana atual (upsert)
+  fetch(`${DMS_URL}/rest/v1/cto_scores`, {
+    method: 'POST',
+    headers: { 'apikey': DMS_KEY, 'Authorization': 'Bearer ' + (_token || DMS_KEY), 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ score: s.score, criticos: s.criticos, medios: s.medios, deploys_7d: s.deploys7d, concluidos_7d: s.concluidos7d, semana })
+  }).catch(() => {});
+
+  // Histórico
+  const hist = await dmsGet('cto_scores?order=semana.asc&limit=12') || [];
+  // Garante semana atual no histórico
+  const inHist = hist.find(h => h.semana === semana);
+  const all = inHist ? hist : [...hist, { score: s.score, semana }];
+
+  // Tendência
+  let tendencia = '';
+  if (all.length >= 2) {
+    const prev = all[all.length - 2].score;
+    const diff = s.score - prev;
+    tendencia = diff > 2 ? `↑ +${diff} vs semana passada` : diff < -2 ? `↓ ${diff} vs semana passada` : '→ estável vs semana passada';
+  }
+
+  const sparkHtml = all.length > 1 ? all.slice(-10).map(h => {
+    const ht = Math.max(4, Math.round((h.score / 100) * 36));
+    const c  = h.score >= 80 ? 'rgba(80,220,160,0.55)' : h.score >= 60 ? 'rgba(140,210,160,0.4)' : h.score >= 40 ? 'rgba(255,200,80,0.45)' : 'rgba(255,100,80,0.5)';
+    const wk = h.semana ? new Date(h.semana + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+      <div class="score-bar" style="height:${ht}px;background:${c};" title="${h.score}/100 — ${wk}"></div>
+      <div class="score-bar-label">${wk}</div>
+    </div>`;
+  }).join('') : '';
+
+  const wkStr = new Date(semana + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+
+  el.innerHTML = `
+    <div class="cto-score-card">
+      <div class="cto-score-main">
+        <div>
+          <div class="score-num ${cls}" style="font-size:56px;">${s.score}</div>
+          <div style="font-size:10px;color:var(--t4);margin-top:2px;">/100</div>
+        </div>
+        <div class="cto-score-info">
+          <div class="cto-score-label">SEMANA DE ${wkStr.toUpperCase()} · ${label}</div>
+          <div class="cto-score-trend">${tendencia || 'Primeira medição desta semana'}</div>
+          <div class="cto-factors">
+            <div class="cto-factor neg">
+              <span class="cto-factor-val">${s.criticos}</span>
+              <span class="cto-factor-lbl">Críticos</span>
+              <span class="cto-factor-pts">−${s.penCriticos}pts</span>
+            </div>
+            <div class="cto-factor ${s.medios > 8 ? 'neg' : ''}">
+              <span class="cto-factor-val">${s.medios}</span>
+              <span class="cto-factor-lbl">Médios/Baixos</span>
+              <span class="cto-factor-pts">−${s.penMedios}pts</span>
+            </div>
+            <div class="cto-factor pos">
+              <span class="cto-factor-val">${s.deploys7d}</span>
+              <span class="cto-factor-lbl">Deploys/7d</span>
+              <span class="cto-factor-pts">+${s.bonDeploys}pts</span>
+            </div>
+            <div class="cto-factor pos">
+              <span class="cto-factor-val">${s.concluidos7d}</span>
+              <span class="cto-factor-lbl">Entregas/7d</span>
+              <span class="cto-factor-pts">+${s.bonConc}pts</span>
+            </div>
+          </div>
+        </div>
+        ${sparkHtml ? `<div class="cto-spark"><div style="font-size:9px;color:var(--t4);letter-spacing:1px;margin-bottom:6px;">HISTÓRICO</div><div class="score-historico">${sparkHtml}</div></div>` : ''}
+      </div>
+    </div>`;
 }
 
 // ── Diário de Sessão ──────────────────────────────────────
