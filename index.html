@@ -106,6 +106,12 @@ button{font-family:'Outfit',sans-serif;}
 .lista-item:hover{background:var(--hover);}
 .lista-item.aging-warn .item-titulo{color:rgba(255,220,100,0.85);}
 .lista-item.aging-crit .item-titulo{color:rgba(255,140,100,0.9);}
+.lista-item.sla-aviso{border-left:2px solid rgba(255,210,80,0.4);}
+.lista-item.sla-aviso .item-titulo{color:rgba(255,220,100,0.85);}
+.lista-item.sla-alerta{border-left:2px solid rgba(255,140,40,0.6);}
+.lista-item.sla-alerta .item-titulo{color:rgba(255,170,80,0.9);}
+.lista-item.sla-violado{border-left:2px solid rgba(255,60,40,0.7);background:rgba(255,40,20,0.04);}
+.lista-item.sla-violado .item-titulo{color:rgba(255,130,110,0.95);}
 .item-titulo{font-size:13px;font-weight:500;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-meta{font-size:11px;color:var(--t4);margin-top:1px;}
 .item-col{font-size:11px;color:var(--t3);}
@@ -833,7 +839,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110341';
+const _DMS_VER = 'dmstack-04110344';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -883,6 +889,44 @@ function novoBadge(dateStr) {
 
 function agingDays(dateStr) {
   return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+}
+
+// SLA por severidade: crítico=24h, alto/médio=72h, baixo=7d
+const SLA_HORAS = { critico: 24, alto: 72, media: 72, medio: 72, baixo: 168 };
+
+function slaHoras(severidade) {
+  return SLA_HORAS[severidade] || 72;
+}
+
+function slaViolado(dateStr, severidade) {
+  const horasAberto = (Date.now() - new Date(dateStr)) / 3600000;
+  return horasAberto > slaHoras(severidade);
+}
+
+function slaPerc(dateStr, severidade) {
+  const horasAberto = (Date.now() - new Date(dateStr)) / 3600000;
+  return Math.min(horasAberto / slaHoras(severidade), 1);
+}
+
+// Retorna classe CSS baseada em SLA + severidade
+function slaClass(dateStr, severidade) {
+  const perc = slaPerc(dateStr, severidade);
+  if (perc >= 1)   return 'sla-violado';
+  if (perc >= 0.7) return 'sla-alerta';
+  if (perc >= 0.4) return 'sla-aviso';
+  return '';
+}
+
+// Texto colorido de aging com indicador SLA
+function agingComSla(dateStr, severidade) {
+  const days = agingDays(dateStr);
+  const hrs = Math.floor((Date.now() - new Date(dateStr)) / 3600000);
+  const txt = days === 0 ? (hrs < 1 ? 'agora' : hrs + 'h') : days === 1 ? '1 dia' : days + ' dias';
+  const cls = slaClass(dateStr, severidade);
+  if (!cls) return `<span style="font-size:10px;color:var(--t4);">${txt}</span>`;
+  const colors = { 'sla-violado': 'rgba(255,80,60,0.9)', 'sla-alerta': 'rgba(255,160,40,0.9)', 'sla-aviso': 'rgba(255,210,80,0.85)' };
+  const icons  = { 'sla-violado': ' ⚠', 'sla-alerta': ' !', 'sla-aviso': '' };
+  return `<span style="font-size:10px;font-weight:600;color:${colors[cls]};">${txt}${icons[cls]}</span>`;
 }
 
 function agingClass(dateStr) {
@@ -1020,6 +1064,23 @@ function gerarAlertas() {
       tipoRef: null
     });
   });
+
+  // SLA violado por severidade
+  _bugs.filter(b => b.status !== 'resolvido' && b.status !== 'descartado' && slaViolado(b.created_at, b.severidade))
+    .forEach(b => {
+      const hrs = Math.round((Date.now() - new Date(b.created_at)) / 3600000);
+      const limite = slaHoras(b.severidade);
+      alertas.push({
+        key: 'sla-' + b.id,
+        tipo: 'sla_violado',
+        sistema: b.sistema,
+        descricao: `SLA violado (${b.severidade}): ${b.titulo} — ${hrs}h aberto, limite ${limite}h`,
+        severidade: b.severidade === 'critico' ? 'critico' : 'aviso',
+        ts: b.created_at,
+        id: b.id,
+        tipoRef: 'bug'
+      });
+    });
 
   return alertas;
 }
@@ -1477,8 +1538,11 @@ function renderBugs() {
 
   if (!items.length) { lista.innerHTML = '<div class="lista-empty">Nenhum bug encontrado.</div>'; return; }
 
-  lista.innerHTML = items.map(b => `
-    <div class="lista-item ${agingClass(b.created_at)}" onclick="abrirDetail('bug', '${b.id}')">
+  lista.innerHTML = items.map(b => {
+    const aberto = b.status !== 'resolvido' && b.status !== 'descartado';
+    const rowCls = aberto ? slaClass(b.created_at, b.severidade) : '';
+    return `
+    <div class="lista-item ${rowCls}" onclick="abrirDetail('bug', '${b.id}')">
       <div><span class="badge-sev ${b.severidade}">${b.severidade}</span></div>
       <div>
         <div class="item-titulo">${esc(b.titulo)}${novoBadge(b.created_at)}</div>
@@ -1487,10 +1551,10 @@ function renderBugs() {
       <div><span class="badge-status ${b.status}">${statusLabel(b.status)}</span></div>
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="badge-ag ${b.aguardando}" title="Aguardando ${b.aguardando}">${agLabel(b.aguardando)}</span>
-        <span style="font-size:10px;color:var(--t4);">${aging(b.created_at)}</span>
+        ${aberto ? agingComSla(b.created_at, b.severidade) : `<span style="font-size:10px;color:var(--t4);">${aging(b.created_at)}</span>`}
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── Features ───────────────────────────────────────
