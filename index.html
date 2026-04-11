@@ -434,6 +434,24 @@ button{font-family:'Outfit',sans-serif;}
 .btn-danger{padding:9px 18px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s;}
 .btn-danger:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);}
 
+/* ─── DIÁRIO DE SESSÃO ───────────────────────────── */
+.sessao-banner{padding:10px 32px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.sessao-banner-label{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--t4);white-space:nowrap;}
+.sessao-banner-txt{font-size:13px;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sessao-banner-time{font-size:11px;color:var(--t4);white-space:nowrap;}
+.sessao-banner-close{background:none;border:none;color:var(--t4);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color .15s;}
+.sessao-banner-close:hover{color:var(--t2);}
+.sessao-banner-tag{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--t3);white-space:nowrap;}
+.diario-entry{background:rgba(255,255,255,0.03);border:1px solid var(--borda);border-radius:8px;padding:14px 16px;margin-bottom:8px;}
+.diario-entry:hover{background:rgba(255,255,255,0.05);border-color:var(--borda2);}
+.diario-entry-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.diario-tag{font-size:9px;font-weight:700;letter-spacing:1.5px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--t3);}
+.diario-time{font-size:11px;color:var(--t4);margin-left:auto;}
+.diario-nota{font-size:13px;color:var(--t2);line-height:1.5;}
+.diario-add{background:rgba(255,255,255,0.02);border:1px solid var(--borda);border-radius:10px;padding:16px;margin-bottom:20px;}
+.diario-add textarea{width:100%;background:none;border:none;outline:none;color:var(--t2);font-family:'Outfit',sans-serif;font-size:13px;resize:none;line-height:1.5;}
+.diario-add-row{display:flex;align-items:center;gap:8px;margin-top:10px;border-top:1px solid var(--borda);padding-top:10px;}
+
 /* ─── SCROLL ──────────────────────────────────── */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
@@ -476,6 +494,7 @@ button{font-family:'Outfit',sans-serif;}
       <div class="nav-item" data-view="bugs" onclick="irPara('bugs')"><span>Bugs</span><span class="badge" id="badge-bugs"></span></div>
       <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
       <div class="nav-item" data-view="sprint" onclick="irPara('sprint')"><span>Sprint</span><span class="badge" id="badge-sprint"></span></div>
+      <div class="nav-item" data-view="diario" onclick="irPara('diario')"><span>Diário</span></div>
       <div class="nav-item" data-view="melhorias" onclick="irPara('melhorias')">Insights IA</div>
       <div class="nav-item" data-view="alertas" onclick="irPara('alertas')"><span>Alertas</span><span class="badge" id="badge-alertas"></span></div>
       <div class="nav-item" data-view="agentes" onclick="irPara('agentes')">Agentes IA</div>
@@ -484,6 +503,7 @@ button{font-family:'Outfit',sans-serif;}
     <div class="sb-bottom">
       <div class="sb-dot"></div>
       <span class="sb-status" id="sb-status">LIVE</span>
+      <button class="sb-sair" onclick="abrirModalDiario()" title="Registrar sessão (Ctrl+J)" style="font-size:13px;opacity:.5;">📝</button>
       <button class="sb-sair" onclick="abrirCmd()" title="Comandos (Ctrl+K)" style="font-size:11px;letter-spacing:1px;opacity:.5;margin-right:4px;">⌘K</button>
       <button class="sb-sair" onclick="fazerLogout()" title="Sair">↩</button>
     </div>
@@ -494,6 +514,15 @@ button{font-family:'Outfit',sans-serif;}
 
   <!-- MAIN -->
   <div class="main">
+
+    <!-- ── BANNER ÚLTIMA SESSÃO ── -->
+    <div id="sessao-banner" class="sessao-banner" style="display:none;">
+      <span class="sessao-banner-label">ÚLTIMA SESSÃO</span>
+      <span id="sessao-banner-tag" class="sessao-banner-tag">GERAL</span>
+      <span id="sessao-banner-txt" class="sessao-banner-txt"></span>
+      <span id="sessao-banner-time" class="sessao-banner-time"></span>
+      <button class="sessao-banner-close" onclick="fecharBannerSessao()" title="Fechar">×</button>
+    </div>
 
     <!-- ── VIEW: BUGS ── -->
     <div id="view-bugs" class="view">
@@ -741,6 +770,22 @@ button{font-family:'Outfit',sans-serif;}
     </div>
 
     <!-- ── VIEW: SPRINT ── -->
+    <!-- ── VIEW: DIÁRIO ── -->
+    <div id="view-diario" class="view">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Diário</div>
+          <div class="page-sub" id="diario-sub">Contexto das sessões de trabalho</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" onclick="abrirModalDiario()">+ Registrar</button>
+        </div>
+      </div>
+      <div style="padding:24px 32px;" id="diario-content">
+        <div class="lista-empty">Carregando...</div>
+      </div>
+    </div>
+
     <div id="view-sprint" class="view">
       <div class="page-header">
         <div>
@@ -781,6 +826,32 @@ button{font-family:'Outfit',sans-serif;}
     <div class="modal-actions">
       <button class="btn-primary" onclick="criarSprint()" id="msprint-btn">Iniciar sprint</button>
       <button class="btn-ghost" onclick="fecharModal('modal-sprint')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DIÁRIO ══ -->
+<div class="modal-bg" id="modal-diario" onclick="if(event.target===this)fecharModal('modal-diario')">
+  <div class="modal">
+    <div class="modal-title">Registrar sessão</div>
+    <div class="modal-field">
+      <div class="modal-label">O que você está trabalhando?</div>
+      <textarea class="modal-textarea" id="mdiario-nota" placeholder="Ex: Corrigindo bug de duplicata de diárias no EDR..." style="min-height:90px;" onkeydown="if((e.metaKey||e.ctrlKey)&&e.key==='Enter')salvarSessao()"></textarea>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Sistema</div>
+      <select class="modal-select" id="mdiario-sistema">
+        <option value="GERAL">Geral</option>
+        <option value="EDR">EDR System</option>
+        <option value="RPM">RPM Pro</option>
+        <option value="NAREGUA">NaRegua</option>
+        <option value="DMSTACK">DM Stack</option>
+        <option value="LOADPRO">LoadPro</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="salvarSessao()" id="mdiario-btn">Registrar</button>
+      <button class="btn-ghost" onclick="fecharModal('modal-diario')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1017,7 +1088,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04110441';
+const _DMS_VER = 'dmstack-04110446';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1759,6 +1830,7 @@ function irPara(view) {
   if (view === 'agentes') carregarAgentes();
   if (view === 'deploys') carregarDeploys();
   if (view === 'sprint') carregarSprint();
+  if (view === 'diario') carregarDiario();
 }
 
 // ── Restaurar estado sidebar ───────────────────────
@@ -3062,6 +3134,7 @@ async function iniciarApp() {
   carregarDadosDash();
   atualizarBadgeAlertas();
   verificarConexoes();
+  carregarUltimaSessao();
 
   // Refresh a cada 5 min
   setInterval(async () => {
@@ -3070,6 +3143,73 @@ async function iniciarApp() {
     carregarDadosDash();
     atualizarBadgeAlertas();
   }, 5 * 60 * 1000);
+}
+
+// ── Diário de Sessão ──────────────────────────────────────
+async function carregarDiario() {
+  const el = document.getElementById('diario-content');
+  if (el) el.innerHTML = '<div class="lista-empty">Carregando...</div>';
+  const { data } = await dmsGet('sessoes?order=created_at.desc&limit=60');
+  const entries = data || [];
+  const sub = document.getElementById('diario-sub');
+  if (sub) sub.textContent = entries.length + ' registros';
+  if (!el) return;
+  if (!entries.length) {
+    el.innerHTML = '<div class="lista-empty">Nenhum registro ainda. Use + Registrar ou ⌘J para documentar o contexto da sessão.</div>';
+    return;
+  }
+  el.innerHTML = entries.map(e => `
+    <div class="diario-entry">
+      <div class="diario-entry-head">
+        <span class="diario-tag">${esc(e.sistema || 'GERAL')}</span>
+        <span class="diario-time">${aging(e.created_at)} atrás</span>
+      </div>
+      <div class="diario-nota">${esc(e.nota)}</div>
+    </div>
+  `).join('');
+}
+
+async function salvarSessao() {
+  const nota = document.getElementById('mdiario-nota').value.trim();
+  const sistema = document.getElementById('mdiario-sistema').value;
+  if (!nota) return;
+  const btn = document.getElementById('mdiario-btn');
+  btn.textContent = 'Salvando...'; btn.disabled = true;
+  await dmsPost('sessoes', { nota, sistema });
+  fecharModal('modal-diario');
+  document.getElementById('mdiario-nota').value = '';
+  btn.textContent = 'Registrar'; btn.disabled = false;
+  // Atualiza banner e lista se estiver na view
+  mostrarBannerSessao(nota, sistema);
+  if (document.querySelector('[data-view="diario"].active')) carregarDiario();
+}
+
+function abrirModalDiario(sistemaDefault) {
+  if (sistemaDefault) document.getElementById('mdiario-sistema').value = sistemaDefault;
+  document.getElementById('modal-diario').classList.add('open');
+  setTimeout(() => document.getElementById('mdiario-nota').focus(), 60);
+}
+
+async function carregarUltimaSessao() {
+  if (sessionStorage.getItem('dms-banner-dismissed')) return;
+  const { data } = await dmsGet('sessoes?order=created_at.desc&limit=1');
+  if (!data || !data.length) return;
+  const entry = data[0];
+  const ageMs = Date.now() - new Date(entry.created_at).getTime();
+  if (ageMs < 10 * 60 * 1000) return; // Muito recente, não mostrar
+  mostrarBannerSessao(entry.nota, entry.sistema || 'GERAL', entry.created_at);
+}
+
+function mostrarBannerSessao(nota, sistema, created_at) {
+  document.getElementById('sessao-banner-txt').textContent = nota;
+  document.getElementById('sessao-banner-tag').textContent = sistema || 'GERAL';
+  document.getElementById('sessao-banner-time').textContent = created_at ? aging(created_at) + ' atrás' : 'agora';
+  document.getElementById('sessao-banner').style.display = 'flex';
+}
+
+function fecharBannerSessao() {
+  document.getElementById('sessao-banner').style.display = 'none';
+  sessionStorage.setItem('dms-banner-dismissed', '1');
 }
 
 // Service Worker
@@ -3097,6 +3237,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
   // Command palette — Cmd+K ou Ctrl+K
   document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); abrirCmd(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'j') { e.preventDefault(); abrirModalDiario(); }
     if (e.key === 'Escape') fecharCmd();
   });
 })();
@@ -3113,6 +3254,8 @@ const _CMDS = [
   { id:'agentes',   icon:'🧠', label:'/agentes',   desc:'Painel de agentes IA',               acao:() => irPara('agentes') },
   { id:'alertas',   icon:'🔔', label:'/alertas',   desc:'Feed de alertas',                    acao:() => irPara('alertas') },
   { id:'triagem',   icon:'✨', label:'/triagem',   desc:'Importar análise com IA',            acao:() => { fecharCmd(); abrirTriagem(); } },
+  { id:'diario',    icon:'📓', label:'/diario',    desc:'Diário de sessões',                   acao:() => irPara('diario') },
+  { id:'anotar',    icon:'📝', label:'/anotar',    desc:'Registrar contexto da sessão atual',  acao:() => { fecharCmd(); abrirModalDiario(); } },
 ];
 
 let _cmdIdx = 0;
