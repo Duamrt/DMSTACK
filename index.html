@@ -784,21 +784,32 @@ button{font-family:'Outfit',sans-serif;}
         </div>
       </div>
 
-      <div style="padding:24px 32px;">
+      <div style="padding:24px 32px 0;">
+        <div class="sprint-tabs" id="saude-tabs">
+          <div class="sprint-tab active" onclick="setSaudeTab('score')">CTO Score</div>
+          <div class="sprint-tab" onclick="setSaudeTab('financeiro')">Financeiro</div>
+          <div class="sprint-tab" onclick="setSaudeTab('tecnico')">Técnico</div>
+        </div>
+      </div>
 
-        <!-- CTO Score -->
+      <!-- TAB: CTO Score -->
+      <div id="saude-tab-score" style="padding:20px 32px 32px;">
         <div style="margin-bottom:28px;">
           <div class="section-label" style="margin-bottom:12px;">CTO Score semanal</div>
           <div id="cto-score-section"><div style="font-size:12px;color:var(--t4);">Calculando...</div></div>
         </div>
+        <div class="proximas-wrap">
+          <div class="section-label" style="margin-bottom:12px;">Próximas 3 ações</div>
+          <div class="proximas-grid" id="proximas-acoes"></div>
+        </div>
+      </div>
 
-        <!-- Receita -->
+      <!-- TAB: Financeiro -->
+      <div id="saude-tab-financeiro" style="display:none;padding:20px 32px 32px;">
         <div class="receita-section">
           <div class="section-label" style="margin-bottom:12px;">Receita recorrente (MRR)</div>
           <div class="receita-grid" id="receita-grid"><div class="receita-loading">Carregando...</div></div>
         </div>
-
-        <!-- Custo de Infraestrutura -->
         <div style="margin-bottom:28px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
             <div class="section-label" style="margin-bottom:0;">Custo de infraestrutura</div>
@@ -816,19 +827,16 @@ button{font-family:'Outfit',sans-serif;}
           </div>
           <div id="custo-grid"></div>
         </div>
+        <div class="section-label" style="margin-top:8px;">Resumo geral</div>
+        <div id="app-numeros" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;"></div>
+      </div>
 
-        <!-- Próximas 3 ações -->
-        <div class="proximas-wrap">
-          <div class="section-label" style="margin-bottom:12px;">Próximas 3 ações</div>
-          <div class="proximas-grid" id="proximas-acoes"></div>
-        </div>
-
-        <!-- Edge Functions -->
+      <!-- TAB: Técnico -->
+      <div id="saude-tab-tecnico" style="display:none;padding:20px 32px 32px;">
         <div class="edge-wrap">
           <div class="section-label" style="margin-bottom:12px;">Edge Functions</div>
           <div id="edge-logs-wrap"><div style="font-size:12px;color:var(--t4);">Carregando...</div></div>
         </div>
-
         <div class="saude-grid" id="saude-grid">
           <div class="saude-card">
             <div class="saude-card-header">
@@ -863,12 +871,6 @@ button{font-family:'Outfit',sans-serif;}
             <div class="saude-link" style="color:var(--t4);">—</div>
           </div>
         </div>
-
-        <!-- Números do dashboard -->
-        <div class="section-label" style="margin-top:8px;">Resumo geral</div>
-        <div id="app-numeros" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;"></div>
-
-        <!-- Bugs críticos por sistema -->
         <div class="section-label" style="margin-top:8px;">Bugs críticos ativos</div>
         <div id="saude-criticos"><div class="lista-empty" style="border:1px solid var(--borda);border-radius:8px;">Carregando...</div></div>
       </div>
@@ -1292,7 +1294,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04120536';
+const _DMS_VER = 'dmstack-04120542';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1674,6 +1676,17 @@ function renderAlertas() {
 // ── Agentes ────────────────────────────────────────
 let _agentes = [];
 let _fAgenteCamada = '';
+let _saudeTab = 'score';
+
+function setSaudeTab(tab) {
+  _saudeTab = tab;
+  ['score','financeiro','tecnico'].forEach(t => {
+    document.getElementById('saude-tab-' + t).style.display = t === tab ? '' : 'none';
+  });
+  document.querySelectorAll('#saude-tabs .sprint-tab').forEach((el, i) => {
+    el.classList.toggle('active', ['score','financeiro','tecnico'][i] === tab);
+  });
+}
 let _agEditId = null;
 
 const _AGENTES_STATIC = [
