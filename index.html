@@ -439,6 +439,15 @@ button{font-family:'Outfit',sans-serif;}
 .agente-sug-badge{font-size:9px;font-weight:700;letter-spacing:.8px;padding:2px 7px;border-radius:4px;background:rgba(140,100,255,0.1);color:rgba(170,140,255,0.85);border:1px solid rgba(140,100,255,0.18);white-space:nowrap;}
 .agente-sug-badge.principal{background:rgba(100,180,255,0.1);color:rgba(130,200,255,0.9);border-color:rgba(100,180,255,0.2);}
 .mag-ctx-line{font-size:11px;color:var(--t4);padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:6px;margin-bottom:12px;border-left:2px solid rgba(255,255,255,0.12);}
+/* ─── HISTÓRICO DE USO ──────────────────────────── */
+.mag-hist-wrap{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--borda);}
+.mag-hist-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--t4);text-transform:uppercase;margin-bottom:8px;}
+.mag-hist-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;}
+.mag-hist-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:6px;background:rgba(255,255,255,0.025);}
+.mag-hist-ts{font-size:10px;color:var(--t4);white-space:nowrap;min-width:70px;padding-top:1px;}
+.mag-hist-acao{font-size:11px;color:var(--t2);flex:1;line-height:1.4;}
+.mag-hist-badges{display:flex;gap:4px;align-items:center;flex-shrink:0;}
+.mag-hist-empty{font-size:11px;color:var(--t4);padding:6px 0;}
 
 /* ─── SCORE EXECUÇÃO ────────────────────────────── */
 .score-wrap{display:flex;align-items:center;gap:20px;padding:20px 24px;border:1px solid var(--borda);border-radius:10px;background:var(--t5);margin-bottom:24px;}
@@ -1213,6 +1222,10 @@ button{font-family:'Outfit',sans-serif;}
   <div class="modal">
     <div class="modal-title" id="mag-title">Registrar uso</div>
     <div id="mag-ctx-display" class="mag-ctx-line" style="display:none;"></div>
+    <div class="mag-hist-wrap" id="mag-hist-wrap" style="display:none;">
+      <div class="mag-hist-label">Histórico de uso</div>
+      <div class="mag-hist-list" id="mag-hist-list"></div>
+    </div>
     <div class="modal-field">
       <div class="modal-label">O que foi feito</div>
       <textarea class="modal-textarea" id="mag-acao" placeholder="Ex: Mapeou codebase do RPM antes de refatorar financeiro"></textarea>
@@ -1279,7 +1292,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04120525';
+const _DMS_VER = 'dmstack-04120536';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1838,8 +1851,30 @@ function abrirAgenteComContexto(agenteId, itemTipo, itemId) {
     ctxEl.style.display = 'none';
   }
 
+  document.getElementById('mag-hist-wrap').style.display = 'none';
   document.getElementById('modal-agente').classList.add('open');
+  _carregarHistoricoAgente(agenteId);
   setTimeout(() => document.getElementById('mag-acao').focus(), 100);
+}
+
+async function _carregarHistoricoAgente(id) {
+  const wrap = document.getElementById('mag-hist-wrap');
+  const list = document.getElementById('mag-hist-list');
+  if (!wrap || !list) return;
+  const rows = await dmsGet('agentes_uso', `?agente_id=eq.${id}&order=created_at.desc&limit=8`);
+  if (!Array.isArray(rows) || !rows.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  list.innerHTML = rows.map(r => {
+    const badgeStatus = r.status === 'ativo' ? `<span class="badge-agente ativo" style="font-size:8px;">OK</span>` :
+      r.status === 'em_execucao' ? `<span class="badge-agente em_execucao" style="font-size:8px;">RODANDO</span>` :
+      `<span class="badge-agente inativo" style="font-size:8px;">PAUSADO</span>`;
+    const badgeSistema = r.sistema ? `<span class="badge-sistema" style="font-size:8px;">${esc(r.sistema)}</span>` : '';
+    return `<div class="mag-hist-item">
+      <div class="mag-hist-ts">${aging(r.created_at)}</div>
+      <div class="mag-hist-acao">${esc(r.acao || '')}</div>
+      <div class="mag-hist-badges">${badgeSistema}${badgeStatus}</div>
+    </div>`;
+  }).join('');
 }
 
 function abrirRegistrarAgente(id) {
@@ -1851,7 +1886,9 @@ function abrirRegistrarAgente(id) {
   document.getElementById('mag-acao').value = '';
   document.getElementById('mag-status').value = 'ativo';
   document.getElementById('mag-ctx-display').style.display = 'none';
+  document.getElementById('mag-hist-wrap').style.display = 'none';
   document.getElementById('modal-agente').classList.add('open');
+  _carregarHistoricoAgente(id);
   setTimeout(() => document.getElementById('mag-acao').focus(), 100);
 }
 
