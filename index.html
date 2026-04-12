@@ -1294,7 +1294,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04120542';
+const _DMS_VER = 'dmstack-04120559';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -2297,6 +2297,7 @@ function renderBugs() {
       <div><span class="badge-sev ${b.severidade}">${b.severidade}</span></div>
       <div>
         <div class="item-titulo">${esc(b.titulo)}${novoBadge(b.created_at)}</div>
+        <div style="font-size:9px;color:var(--t4);margin-top:2px;font-family:monospace;">${b.codigo ? `BG-${String(b.codigo).padStart(3,'0')}` : `BG-${b.id.slice(0,8)}`}</div>
       </div>
       <div class="item-col">${b.sistema}</div>
       <div><span class="badge-status ${b.status}">${statusLabel(b.status)}</span></div>
@@ -2344,6 +2345,7 @@ function renderFeatures() {
       <div><span class="badge-sev ${f.prioridade === 'alta' ? 'critico' : f.prioridade === 'media' ? 'medio' : 'baixo'}">${f.prioridade}</span></div>
       <div>
         <div class="item-titulo">${esc(f.titulo)}${novoBadge(f.created_at)}</div>
+        <div style="font-size:9px;color:var(--t4);margin-top:2px;font-family:monospace;">${f.codigo ? `DMD-${String(f.codigo).padStart(3,'0')}` : `DMD-${f.id.slice(0,8)}`}</div>
       </div>
       <div class="item-col">${f.sistema}</div>
       <div><span class="badge-status ${f.status}">${statusLabel(f.status)}</span></div>

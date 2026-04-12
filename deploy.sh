@@ -20,13 +20,18 @@ git commit -m "$MSG"
 git push origin main
 echo "no ar — $VER"
 
-# Fechar itens no DM Stack — keyword sempre do commit, NUNCA $2 (seria o sistema inteiro)
-DMS_KW=$(echo "$MSG" | tr '[:upper:]' '[:lower:]' | \
-  grep -oE '[a-z]{5,}' | \
-  grep -vE '^(cache|busting|deploy|versao|fixes|update|remove|corrige|corrigir|adiciona|adicionar|atualiza|atualizar|insere|inserir|agora|gravam|bloquear|duplicata|lancamento|lancamentos|codigo|sistema|diaria|diarias|modal|valor|campo|botao|registro|registros)$' | \
-  head -1)
-if [ -n "$DMS_KW" ]; then
-  bash "$HOME/dms-resolve.sh" "$DMS_KW" "DMSTACK"
+# Fechar itens no DM Stack — extrai #shortid + todas as keywords com acentos normalizados
+DMS_SHORTID=$(echo "$MSG" | grep -oE '#[0-9a-fA-F]{8}' | head -1)
+DMS_KWS=$(echo "$MSG" | \
+  sed 's/[áàâã]/a/g; s/[éêè]/e/g; s/[íî]/i/g; s/[óôõ]/o/g; s/[úû]/u/g; s/ç/c/g' | \
+  tr '[:upper:]' '[:lower:]' | \
+  grep -oE '[a-z]{4,}' | \
+  grep -vE '^(cache|busting|deploy|versao|fixes|update|remove|corrige|corrigir|adiciona|adicionar|atualiza|atualizar|insere|inserir|agora|gravam|bloquear|duplicata|lancamento|lancamentos|codigo|sistema|diaria|diarias|modal|valor|campo|botao|registro|registros|dividida|melhoria|melhorias|historico|feature|features|titulo|status|dados|texto|abrir|fechar|criar|salvar|editar|deletar|listar|exibir|mostrar|usando|agente|agentes|deploy|commit|versao|antes|depois|quando|entre|sobre|todos|todas|telas|tela|lista|novo|nova|item|itens)$' | \
+  tr '\n' ' ' | sed 's/[[:space:]]*$//')
+DMS_ARGS="${DMS_SHORTID} ${DMS_KWS}"
+DMS_ARGS="${DMS_ARGS## }"
+if [ -n "$DMS_ARGS" ]; then
+  bash "$HOME/dms-resolve.sh" "$DMS_ARGS" "DMSTACK"
 fi
 
 # Registrar deploy no DM Stack
