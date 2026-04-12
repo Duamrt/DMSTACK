@@ -12,8 +12,7 @@ const RPM_KEY = Deno.env.get("RPM_SERVICE_KEY") || ""
 const DMS_URL = "https://bkfkzauhnlulrtttgcii.supabase.co"
 const DMS_KEY = Deno.env.get("DMS_SERVICE_KEY") || ""
 
-const EDR_CO = "3d040713-320f-4639-8a0e-35f62ef10ba7"
-const CARBON_ID = "183424eb-f8f2-4502-875c-881182449143"
+const DMS_MASTER_OFICINA = "aaaa0001-0000-0000-0000-000000000001"
 
 const hoje = () => new Date().toISOString().split("T")[0]
 const mesAtual = () => hoje().substring(0, 7)
@@ -50,28 +49,40 @@ async function coletarContexto() {
   const ma = mesAtual()
   const hj = hoje()
 
+  // Busca IDs dinamicamente
+  const [edrCompanies, rpmOficinas] = await Promise.all([
+    sbGet(EDR_URL, EDR_KEY, "companies", `?select=id,name`),
+    sbGet(RPM_URL, RPM_KEY, "oficinas", `?id=neq.${DMS_MASTER_OFICINA}&select=id,nome`),
+  ])
+
+  const edrIds = edrCompanies.map((c: any) => c.id)
+  const rpmIds = rpmOficinas.map((o: any) => o.id)
+
+  const edrFilter = edrIds.length ? `?company_id=in.(${edrIds.join(",")})` : `?company_id=eq.nenhum`
+  const rpmFilter = rpmIds.length ? `?oficina_id=in.(${rpmIds.join(",")})` : `?oficina_id=eq.nenhum`
+
   // EDR: obras, financeiro, estoque, diarias, cronograma, contas
   // RPM: OS, clientes, pecas, equipe
   const [obras, lanc, rep, apg, oadd, materiais, nfs, diarias, diariasFuncs, cronograma, contasPagar, projecoesCaixa,
          os, cli, pecas, prof] = await Promise.all([
     // EDR
-    sbGet(EDR_URL, EDR_KEY, "obras", `?company_id=eq.${EDR_CO}&arquivada=eq.false&select=id,nome,valor_venda`),
-    sbGet(EDR_URL, EDR_KEY, "lancamentos", `?company_id=eq.${EDR_CO}&select=obra_id,total,data,etapa,descricao&order=data.desc&limit=3000`),
-    sbGet(EDR_URL, EDR_KEY, "repasses_cef", `?company_id=eq.${EDR_CO}&select=valor,data_credito,obra_id&order=data_credito.desc`),
+    sbGet(EDR_URL, EDR_KEY, "obras", `${edrFilter}&arquivada=eq.false&select=id,nome,valor_venda`),
+    sbGet(EDR_URL, EDR_KEY, "lancamentos", `${edrFilter}&select=obra_id,total,data,etapa,descricao&order=data.desc&limit=3000`),
+    sbGet(EDR_URL, EDR_KEY, "repasses_cef", `${edrFilter}&select=valor,data_credito,obra_id&order=data_credito.desc`),
     sbGet(EDR_URL, EDR_KEY, "adicional_pagamentos", `?order=data.desc`),
-    sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `?company_id=eq.${EDR_CO}`),
-    sbGet(EDR_URL, EDR_KEY, "materiais", `?company_id=eq.${EDR_CO}&select=id,nome,obra_id,quantidade,valor_unitario,unidade&order=nome&limit=500`),
-    sbGet(EDR_URL, EDR_KEY, "notas_fiscais", `?company_id=eq.${EDR_CO}&select=id,fornecedor,valor,data,obra_id&order=data.desc&limit=100`),
+    sbGet(EDR_URL, EDR_KEY, "obra_adicionais", `${edrFilter}`),
+    sbGet(EDR_URL, EDR_KEY, "materiais", `${edrFilter}&select=id,nome,obra_id,quantidade,valor_unitario,unidade&order=nome&limit=500`),
+    sbGet(EDR_URL, EDR_KEY, "notas_fiscais", `${edrFilter}&select=id,fornecedor,valor,data,obra_id&order=data.desc&limit=100`),
     sbGet(EDR_URL, EDR_KEY, "diarias", `?select=id,quinzena_id,data,funcionario,cargo,valor,periodos&order=data.desc&limit=500`),
     sbGet(EDR_URL, EDR_KEY, "diarias_funcionarios", `?select=id,nome,cargo,diaria,ativo&ativo=eq.true`),
-    sbGet(EDR_URL, EDR_KEY, "cronograma_tarefas", `?company_id=eq.${EDR_CO}&select=id,obra_id,titulo,progresso,data_inicio,data_fim&order=data_inicio&limit=200`),
-    sbGet(EDR_URL, EDR_KEY, "contas_pagar", `?company_id=eq.${EDR_CO}&select=id,descricao,valor,vencimento,pago,obra_id&order=vencimento&limit=100`),
+    sbGet(EDR_URL, EDR_KEY, "cronograma_tarefas", `${edrFilter}&select=id,obra_id,titulo,progresso,data_inicio,data_fim&order=data_inicio&limit=200`),
+    sbGet(EDR_URL, EDR_KEY, "contas_pagar", `${edrFilter}&select=id,descricao,valor,vencimento,pago,obra_id&order=vencimento&limit=100`),
     sbGet(EDR_URL, EDR_KEY, "projecoes_caixa", `?select=id,descricao,tipo,valor,data_prevista,realizado&order=data_prevista&limit=100`),
     // RPM
-    sbGet(RPM_URL, RPM_KEY, "ordens_servico", `?oficina_id=eq.${CARBON_ID}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,forma_pagamento,pago,created_at,clientes(nome),veiculos(placa)&order=created_at.desc&limit=200`),
-    sbGet(RPM_URL, RPM_KEY, "clientes", `?oficina_id=eq.${CARBON_ID}&select=id,nome,whatsapp`),
-    sbGet(RPM_URL, RPM_KEY, "pecas", `?oficina_id=eq.${CARBON_ID}&select=id,nome,quantidade,custo,preco_venda&limit=100`),
-    sbGet(RPM_URL, RPM_KEY, "profiles", `?oficina_id=eq.${CARBON_ID}&select=id,nome,role`),
+    sbGet(RPM_URL, RPM_KEY, "ordens_servico", `${rpmFilter}&select=id,numero,status,valor_total,data_entrada,data_entrega,mecanico_id,forma_pagamento,pago,created_at,clientes(nome),veiculos(placa)&order=created_at.desc&limit=200`),
+    sbGet(RPM_URL, RPM_KEY, "clientes", `${rpmFilter}&select=id,nome,whatsapp`),
+    sbGet(RPM_URL, RPM_KEY, "pecas", `${rpmFilter}&select=id,nome,quantidade,custo,preco_venda&limit=100`),
+    sbGet(RPM_URL, RPM_KEY, "profiles", `${rpmFilter}&select=id,nome,role`),
   ])
 
   // EDR resumo
