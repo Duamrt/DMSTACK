@@ -1294,7 +1294,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04120559';
+const _DMS_VER = 'dmstack-04130916';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -2413,7 +2413,8 @@ function renderSaudeGrid() {
     { id:'EDR', nome:'EDR System', sub:'sistema.edreng.com.br', url:'https://sistema.edreng.com.br' },
     { id:'RPM', nome:'RPM Pro', sub:'rpmpro.com.br', url:'https://rpmpro.com.br/v2/kanban-v2.html' },
     { id:'NAREGUA', nome:'NaRegua', sub:'usenaregua.com.br', url:'https://usenaregua.com.br' },
-    { id:'LOADPRO', nome:'LoadPro', sub:'sem dados recentes', url:null }
+    { id:'LOADPRO', nome:'LoadPro', sub:'sem dados recentes', url:null },
+    { id:'DMSMART', nome:'DM Smart', sub:'localhost:5555 (local)', url:null }
   ];
   const labelStatus = { ok:'OPERACIONAL', warn:'DEGRADADO', off:'INATIVO', checking:'VERIFICANDO' };
   document.getElementById('saude-grid').innerHTML = sistemasConf.map(s => {
@@ -2588,6 +2589,11 @@ async function checarLoadPro() {
   } catch(e) {
     return { status:'off', metricas:'loadpro.com.br', ultimaAtividade:'Site inacessível', checado:t };
   }
+}
+
+async function checarDmSmart() {
+  const t = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  return { status:'warn', metricas:'local — sem deploy público', ultimaAtividade:'Fase 5 em andamento (37% roadmap)', checado:t };
 }
 
 async function checarRPM() {
@@ -2968,15 +2974,17 @@ async function carregarSaude() {
     EDR: { status:'checking' },
     RPM: { status:'checking' },
     NAREGUA: { status:'checking' },
-    LOADPRO: { status:'checking' }
+    LOADPRO: { status:'checking' },
+    DMSMART: { status:'checking' }
   };
   renderSaudeGrid();
 
-  const [edr, rpm, naregua, loadpro] = await Promise.all([checarEDR(), checarRPM(), checarNaRegua(), checarLoadPro()]);
+  const [edr, rpm, naregua, loadpro, dmsmart] = await Promise.all([checarEDR(), checarRPM(), checarNaRegua(), checarLoadPro(), checarDmSmart()]);
   _saudeData.EDR = edr;
   _saudeData.RPM = rpm;
   _saudeData.NAREGUA = naregua;
   _saudeData.LOADPRO = loadpro;
+  _saudeData.DMSMART = dmsmart;
   renderCTOScore();
   renderSaudeGrid();
   renderSaudeCriticos();
