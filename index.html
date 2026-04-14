@@ -665,7 +665,8 @@ button{font-family:'Outfit',sans-serif;}
           <button class="filtro" data-f="sistema" data-v="DMSTACK">DM Stack</button>
           <button class="filtro" data-f="sistema" data-v="DMSMART">DM Smart</button>
           <div class="filtro-sep"></div>
-          <button class="filtro on" data-f="status" data-v="">Todos</button>
+          <button class="filtro" data-f="status" data-v="">Todos</button>
+          <button class="filtro on" data-f="status" data-v="pendente">Pendentes</button>
           <button class="filtro" data-f="status" data-v="aberto">Aberto</button>
           <button class="filtro" data-f="status" data-v="em_andamento">Em andamento</button>
           <button class="filtro" data-f="status" data-v="bloqueado">Bloqueado</button>
@@ -757,7 +758,8 @@ button{font-family:'Outfit',sans-serif;}
           <button class="filtro" data-f="sistema" data-v="DMSTACK">DM Stack</button>
           <button class="filtro" data-f="sistema" data-v="DMSMART">DM Smart</button>
           <div class="filtro-sep"></div>
-          <button class="filtro on" data-f="status" data-v="">Todos</button>
+          <button class="filtro" data-f="status" data-v="">Todos</button>
+          <button class="filtro on" data-f="status" data-v="pendente">Pendentes</button>
           <button class="filtro" data-f="status" data-v="backlog">Backlog</button>
           <button class="filtro" data-f="status" data-v="em_andamento">Em andamento</button>
           <button class="filtro" data-f="status" data-v="concluido">Concluído</button>
@@ -1298,7 +1300,7 @@ button{font-family:'Outfit',sans-serif;}
 // ══════════════════════════════════════════════════
 // DM STACK V2 — CTO OS PESSOAL
 // ══════════════════════════════════════════════════
-const _DMS_VER = 'dmstack-04130923';
+const _DMS_VER = 'dmstack-04140704';
 console.log('%c DM Stack %c '+_DMS_VER+' ','background:#0a0a0f;color:#00ddc0;font-weight:700;padding:3px 7px;border-radius:3px 0 0 3px;border:1px solid #00ddc0','background:#00ddc0;color:#0a0a0f;font-weight:700;padding:3px 7px;border-radius:0 3px 3px 0');
 const DMS_URL = 'https://bkfkzauhnlulrtttgcii.supabase.co';
 const DMS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZmt6YXVobmx1bHJ0dHRnY2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDkwODAsImV4cCI6MjA5MDUyNTA4MH0.VPgVt22TDQ_n17CUS9KSdCnbX4GtQgiEOHio2wK9mhI';
@@ -1316,9 +1318,9 @@ let _editId = null;
 let _editTipo = null;
 let _saudeData = {};
 
-// Filtros ativos
-let _fBugSistema = '', _fBugStatus = '';
-let _fFeatSistema = '', _fFeatStatus = '';
+// Filtros ativos — padrão: pendentes (excluí resolvido/concluído)
+let _fBugSistema = '', _fBugStatus = 'pendente';
+let _fFeatSistema = '', _fFeatStatus = 'pendente';
 
 // Alertas vistos (persistido em localStorage)
 const _vistos = new Set(JSON.parse(localStorage.getItem('dms-alertas-vistos') || '[]'));
@@ -2280,7 +2282,8 @@ function renderBugs() {
 
   let items = _bugs;
   if (_fBugSistema) items = items.filter(b => b.sistema === _fBugSistema);
-  if (_fBugStatus) items = items.filter(b => b.status === _fBugStatus);
+  if (_fBugStatus === 'pendente') items = items.filter(b => b.status !== 'resolvido' && b.status !== 'descartado');
+  else if (_fBugStatus) items = items.filter(b => b.status === _fBugStatus);
 
   const abertos = items.filter(b => b.status !== 'resolvido' && b.status !== 'descartado').length;
   if (sub) sub.textContent = `${abertos} aberto${abertos !== 1 ? 's' : ''} · ${items.length} total`;
@@ -2331,7 +2334,8 @@ function renderFeatures() {
 
   let items = _features;
   if (_fFeatSistema) items = items.filter(f => f.sistema === _fFeatSistema);
-  if (_fFeatStatus) items = items.filter(f => f.status === _fFeatStatus);
+  if (_fFeatStatus === 'pendente') items = items.filter(f => f.status !== 'concluido' && f.status !== 'descartado');
+  else if (_fFeatStatus) items = items.filter(f => f.status === _fFeatStatus);
 
   const ativos = items.filter(f => f.status !== 'concluido' && f.status !== 'descartado').length;
   if (sub) sub.textContent = `${ativos} ativo${ativos !== 1 ? 's' : ''} · ${items.length} total`;
