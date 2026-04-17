@@ -164,6 +164,25 @@ button{font-family:'Outfit',sans-serif;}
 .kanban-card-title{font-size:12px;font-weight:500;color:var(--t2);line-height:1.45;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 .kanban-card-footer{display:flex;align-items:center;justify-content:space-between;}
 .kanban-card-sistema{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:.5px;background:var(--t5);padding:2px 6px;border-radius:3px;}
+/* Canteiro v2 */
+.canteiro-saas{border:1px solid var(--borda);border-radius:10px;padding:18px 20px;margin-bottom:14px;background:rgba(255,255,255,0.015);transition:border-color .15s;}
+.canteiro-saas:hover{border-color:var(--borda2);}
+.canteiro-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px;flex-wrap:wrap;}
+.canteiro-nome{font-size:17px;font-weight:600;color:var(--t1);margin-bottom:3px;letter-spacing:-0.01em;}
+.canteiro-url{font-size:11px;color:var(--t4);}
+.canteiro-fase{font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:var(--t3);padding:3px 9px;border:1px solid var(--borda);border-radius:4px;white-space:nowrap;}
+.canteiro-barra{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-bottom:14px;}
+.fase-step{height:6px;background:rgba(255,255,255,0.04);border-radius:2px;position:relative;cursor:help;}
+.fase-step.done{background:rgba(255,255,255,0.35);}
+.fase-step.atual{background:#fff;box-shadow:0 0 8px rgba(255,255,255,0.35);}
+.canteiro-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px;}
+.stat{font-size:11px;color:var(--t3);}
+.stat b{display:block;font-size:15px;color:var(--t1);font-weight:600;margin-bottom:2px;}
+.stat.warn b{color:#ffb84d;}
+.stat.ok b{color:#5fd38a;}
+.canteiro-foot{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid var(--borda);font-size:11px;color:var(--t4);flex-wrap:wrap;}
+.canteiro-pros{color:var(--t3);}
+.canteiro-pros b{color:var(--t2);font-weight:500;}
 .view-toggle{display:flex;gap:4px;}
 .view-toggle button{padding:4px 12px;border:1px solid var(--borda);background:transparent;color:var(--t4);border-radius:6px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;}
 .view-toggle button.active{background:rgba(255,255,255,0.08);color:var(--t2);border-color:var(--borda2);}
@@ -599,7 +618,8 @@ button{font-family:'Outfit',sans-serif;}
       <p>CTO OS</p>
     </div>
     <nav class="sb-nav">
-      <div class="nav-item active" data-view="saude" onclick="irPara('saude')">Saude</div>
+      <div class="nav-item active" data-view="canteiro" onclick="irPara('canteiro')">Canteiro</div>
+      <div class="nav-item" data-view="saude" onclick="irPara('saude')">Saude</div>
       <div class="nav-item" data-view="bugs" onclick="irPara('bugs')"><span>Bugs</span><span class="badge" id="badge-bugs"></span></div>
       <div class="nav-item" data-view="features" onclick="irPara('features')"><span>Demandas</span><span class="badge" id="badge-features"></span></div>
       <div class="nav-item" data-view="sprint" onclick="irPara('sprint')"><span>Sprint</span><span class="badge" id="badge-sprint"></span></div>
@@ -781,7 +801,22 @@ button{font-family:'Outfit',sans-serif;}
     </div>
 
     <!-- ── VIEW: SAUDE ── -->
-    <div id="view-saude" class="view active">
+    <div id="view-canteiro" class="view active">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Canteiro EDR</div>
+          <div class="page-sub" id="canteiro-sub">Carregando...</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-ghost" onclick="carregarCanteiro()">↻ Atualizar</button>
+        </div>
+      </div>
+      <div style="padding:24px 32px 40px;">
+        <div id="canteiro-lista"><div style="font-size:12px;color:var(--t4);">Puxando dados dos SaaS...</div></div>
+      </div>
+    </div>
+
+    <div id="view-saude" class="view">
       <div class="page-header">
         <div>
           <div class="page-title">Saúde dos Sistemas</div>
@@ -2983,6 +3018,131 @@ async function renderEdgeLogs() {
   </table>`;
 }
 
+// ── Canteiro EDR v2 ───────────────────────────────────
+const FASES_OBRA = [
+  { n:'00', nome:'Cronograma' },
+  { n:'01', nome:'Terraplanagem' },
+  { n:'02', nome:'Fundação' },
+  { n:'03', nome:'Estrutura' },
+  { n:'04', nome:'Instalações' },
+  { n:'05', nome:'Acabamento' },
+  { n:'06', nome:'Vistoria' },
+  { n:'07', nome:'Entrega' },
+  { n:'08', nome:'Pós-entrega' },
+  { n:'09', nome:'Medição Final' }
+];
+const EQUIPE_POR_FASE = {
+  0:['Thiago'],
+  1:['Josimar','Binladem'],
+  2:['Elyda','Lindinaldo'],
+  3:['Rosinaldo','Anderson','Audalio'],
+  4:['Nego','Cecilia','Heleno','Ligeirinho'],
+  5:['Vagner','Duam (visual)','Renato','Adeilton'],
+  6:['Flávio','Fábio'],
+  7:['Duam (growth)','Sophia','Josué','Dona Bibi'],
+  8:['Elyda (campo)','Livia','Seu Nego','Tana'],
+  9:['Duam (financeiro)','O Mentor']
+};
+const SAAS_CANTEIRO = [
+  { id:'edr',    nome:'EDR System',  url:'sistema.edreng.com.br',         link:'https://sistema.edreng.com.br',                   fase:8 },
+  { id:'rpm',    nome:'RPM Pro',     url:'rpmpro.com.br',                  link:'https://rpmpro.com.br/v2/kanban-v2.html',         fase:8 },
+  { id:'dmtech', nome:'DMTech',      url:'dmtechapp.com.br',               link:'https://dmtechapp.com.br',                        fase:7 },
+  { id:'naregua',nome:'NaRegua',     url:'usenaregua.com.br',              link:'https://usenaregua.com.br',                       fase:7 },
+  { id:'dmstack',nome:'DM Stack',    url:'dmstack.com.br',                 link:'https://dmstack.com.br',                          fase:4 },
+  { id:'loadpro',nome:'LoadPro',     url:'em desenvolvimento',             link:null,                                              fase:2 }
+];
+
+async function carregarCanteiro() {
+  document.getElementById('canteiro-sub').textContent = 'Puxando uso de ontem...';
+  let resumo = null;
+  try {
+    const r = await fetch(DMS_URL + '/functions/v1/resumo-uso-diario', {
+      method:'POST',
+      headers:{ 'apikey':DMS_KEY, 'Authorization':'Bearer '+(_token||DMS_KEY), 'Content-Type':'application/json' },
+      body: JSON.stringify({ dry_run:true })
+    });
+    resumo = await r.json();
+  } catch(e) {}
+
+  const dados = parseResumo(resumo?.texto || '');
+  const hoje = new Date().toLocaleDateString('pt-BR',{ weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  document.getElementById('canteiro-sub').textContent = hoje;
+
+  const html = SAAS_CANTEIRO.map(s => {
+    const fase = s.fase;
+    const faseInfo = FASES_OBRA[fase];
+    const equipe = (EQUIPE_POR_FASE[fase]||[]).join(' · ');
+    const d = dados[s.id] || {};
+    const barra = FASES_OBRA.map((_,i) => {
+      const cls = i < fase ? 'done' : (i === fase ? 'atual' : '');
+      return `<div class="fase-step ${cls}" title="Fase ${FASES_OBRA[i].n} · ${FASES_OBRA[i].nome}"></div>`;
+    }).join('');
+
+    const stats = [];
+    if (d.qtd !== undefined) {
+      const statClass = d.alerta ? 'warn' : (d.qtd > 0 ? 'ok' : '');
+      stats.push(`<div class="stat ${statClass}"><b>${d.qtd}</b>${d.unidade||'ações'} ontem</div>`);
+    }
+    if (d.clientes) stats.push(`<div class="stat"><b>${d.clientes}</b>clientes ativos</div>`);
+    if (d.alerta)    stats.push(`<div class="stat warn"><b>⚠</b>${esc(d.alerta)}</div>`);
+    if (!stats.length) stats.push(`<div class="stat"><b>—</b>sem dados</div>`);
+
+    const linkHTML = s.link
+      ? `<a href="${s.link}" target="_blank" style="color:var(--t3);text-decoration:none;">Acessar →</a>`
+      : `<span style="color:var(--t4);">—</span>`;
+
+    return `
+      <div class="canteiro-saas">
+        <div class="canteiro-head">
+          <div>
+            <div class="canteiro-nome">${s.nome}</div>
+            <div class="canteiro-url">${s.url}</div>
+          </div>
+          <span class="canteiro-fase">Fase ${faseInfo.n} · ${faseInfo.nome}</span>
+        </div>
+        <div class="canteiro-barra">${barra}</div>
+        <div class="canteiro-stats">${stats.join('')}</div>
+        <div class="canteiro-foot">
+          <div class="canteiro-pros">Equipe ativa: <b>${equipe}</b></div>
+          ${linkHTML}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('canteiro-lista').innerHTML = html;
+}
+
+function parseResumo(texto) {
+  const d = {};
+  if (!texto) return d;
+  // RPM Carbon
+  const mRpm = texto.match(/RPM Pro[^]*?(?=EDR System|$)/);
+  if (mRpm) {
+    const t = mRpm[0];
+    const qtd = (t.match(/•\s*(\d+)\s*OS/) || [0,0])[1];
+    const alerta = (t.match(/⚠️\s*([^\n]+)/) || [0,null])[1];
+    d.rpm = { qtd: Number(qtd), unidade:'OS', alerta: alerta?alerta.trim():null, clientes: qtd>0||!alerta?1:0 };
+  }
+  // EDR (soma)
+  const mEdr = texto.match(/EDR System[^]*?(?=DMTech|$)/);
+  if (mEdr) {
+    const t = mEdr[0];
+    const lancs = [...t.matchAll(/(\d+)\s*lancamentos/g)].map(x=>Number(x[1]));
+    const qtd = lancs.reduce((a,b)=>a+b,0);
+    const ativos = (t.match(/\bEDR Engenharia\b[^]*?lancamentos/g)||[]).length;
+    const inativos = (t.match(/nunca usou|sem uso/g)||[]).length;
+    d.edr = { qtd, unidade:'lançamentos', clientes: ativos, alerta: inativos?inativos+' clientes inativos':null };
+  }
+  // DMTech
+  const mDm = texto.match(/DMTech[^]*$/);
+  if (mDm) {
+    const t = mDm[0];
+    const qtd = (t.match(/(\d+)\s*OS/) || [0,0])[1];
+    d.dmtech = { qtd: Number(qtd), unidade:'OS', clientes: qtd>0?1:0, alerta: qtd==0?'sem OS ontem':null };
+  }
+  return d;
+}
+
 async function carregarSaude() {
   document.getElementById('saude-update').textContent = 'Verificando...';
   _saudeData = {
@@ -3609,7 +3769,8 @@ async function iniciarApp() {
     carregarFeatures(),
     carregarBriefing(),
     carregarSaude(),
-    carregarDeploys()
+    carregarDeploys(),
+    carregarCanteiro()
   ]);
   carregarDadosDash();
   renderCTOScore();
@@ -3620,7 +3781,7 @@ async function iniciarApp() {
 
   // Restaura última view visitada
   const _lastView = localStorage.getItem('dms-last-view');
-  if (_lastView && _lastView !== 'saude') irPara(_lastView);
+  if (_lastView && _lastView !== 'canteiro') irPara(_lastView);
 
   // Refresh a cada 5 min
   setInterval(async () => {
